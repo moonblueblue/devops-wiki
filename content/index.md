@@ -1,7 +1,9 @@
 ---
 title: DevOps Wiki
-hide:
-  - toc
+sidebar_position: 0
+displayed_sidebar: wikiSidebar
+slug: /
+hide_table_of_contents: true
 ---
 
 # DevOps Wiki
