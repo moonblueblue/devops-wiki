@@ -16,7 +16,7 @@ DevOps 엔지니어를 위한 로드맵 기반 위키.
 | 3 | [[container/index\|Container]] | Docker, 이미지 빌드, 런타임 |
 | 4 | [[kubernetes/index\|Kubernetes]] | API 리소스, 클러스터 관리, 트러블슈팅 |
 | 5 | [[iac/index\|IaC]] | Terraform, Ansible, Pulumi |
-| 6 | [[cicd/index\|CI/CD]] | Jenkins, GitHub Actions, 파이프라인 |
+| 6 | [[cicd/index\|CICD]] | Jenkins, GitHub Actions, 파이프라인 |
 | 7 | [[gitops/index\|GitOps]] | ArgoCD, Flux, Helm |
 | 8 | [[observability/index\|Observability]] | Prometheus, Grafana, ELK |
 | 9 | [[security/index\|Security]] | DevSecOps, 시크릿, 공급망 보안 |
