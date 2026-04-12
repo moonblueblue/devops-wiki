@@ -1,0 +1,102 @@
+site_name: DevOps Wiki
+site_url: https://moonblueblue.github.io/devops-wiki/
+site_description: DevOps 엔지니어를 위한 로드맵 기반 위키
+docs_dir: content
+
+theme:
+  name: material
+  language: ko
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 다크 모드로 전환
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 라이트 모드로 전환
+  font:
+    text: Noto Sans KR
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+repo_url: https://github.com/moonblueblue/devops-wiki
+repo_name: moonblueblue/devops-wiki
+
+nav:
+  - Home: index.md
+  - 1. Linux:
+    - linux/index.md
+    - 배포판 비교: linux/linux-distro-comparison.md
+    - 파일시스템 구조: linux/filesystem-hierarchy.md
+    - 사용자·그룹·퍼미션: linux/user-group-permission.md
+    - 패키지 관리: linux/package-management.md
+  - 2. Network:
+    - network/index.md
+  - 3. Container:
+    - container/index.md
+  - 4. Kubernetes:
+    - kubernetes/index.md
+    - v1.33~v1.36 릴리즈 총정리: kubernetes/kubernetes-2025-2026-release-overview.md
+  - 5. IaC:
+    - iac/index.md
+  - 6. CICD:
+    - cicd/index.md
+  - 7. GitOps:
+    - gitops/index.md
+  - 8. Observability:
+    - observability/index.md
+  - 9. Security:
+    - security/index.md
+  - 10. SRE:
+    - sre/index.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search:
+      lang: ko
+  - tags
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/moonblueblue/devops-wiki
