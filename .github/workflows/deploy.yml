@@ -1,4 +1,4 @@
-name: Deploy MkDocs site to GitHub Pages
+name: Deploy Docusaurus site to GitHub Pages
 
 on:
   push:
@@ -21,17 +21,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
+          node-version: 22
       - name: Install dependencies
-        run: pip install mkdocs-material mkdocs-git-latest-changes-plugin mkdocs-git-revision-date-localized-plugin
-      - name: Build MkDocs
-        run: mkdocs build --site-dir public
+        run: npm ci
+      - name: Build Docusaurus
+        run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: build
 
   deploy:
     needs: build
