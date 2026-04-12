@@ -1,3 +1,9 @@
+/* ===================================================
+   DevOps Wiki - Custom Theme
+   Docusaurus Classic 테마 기반 디자인 개선
+   =================================================== */
+
+/* ----- 1. Color Tokens & Global Variables ----- */
 :root {
   --ifm-color-primary: #4f46e5;
   --ifm-color-primary-dark: #4338ca;
@@ -6,8 +12,27 @@
   --ifm-color-primary-light: #6366f1;
   --ifm-color-primary-lighter: #818cf8;
   --ifm-color-primary-lightest: #a5b4fc;
+
   --ifm-code-font-size: 85%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(79, 70, 229, 0.08);
+
+  /* Custom tokens */
+  --dw-surface: #ffffff;
+  --dw-surface-alt: #f8f9fb;
+  --dw-border: #e5e7eb;
+  --dw-border-light: #f0f1f3;
+  --dw-text-secondary: #6b7280;
+  --dw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dw-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --dw-radius: 8px;
+  --dw-radius-lg: 12px;
+
+  /* Typography */
+  --ifm-heading-font-weight: 700;
+  --ifm-font-weight-semibold: 600;
+  --ifm-line-height-base: 1.75;
+  --ifm-leading-desktop: 1.75;
+  --ifm-paragraph-margin-bottom: 1.25rem;
 }
 
 [data-theme='dark'] {
@@ -18,5 +43,319 @@
   --ifm-color-primary-light: #a5b4fc;
   --ifm-color-primary-lighter: #c7d2fe;
   --ifm-color-primary-lightest: #e0e7ff;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --docusaurus-highlighted-code-line-bg: rgba(129, 140, 248, 0.15);
+
+  --dw-surface: #1e1e2e;
+  --dw-surface-alt: #252536;
+  --dw-border: #313244;
+  --dw-border-light: #3b3b50;
+  --dw-text-secondary: #9ca3af;
+  --dw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --dw-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ----- 2. Navbar ----- */
+.navbar {
+  background: var(--dw-surface);
+  border-bottom: 1px solid var(--dw-border);
+  box-shadow: var(--dw-shadow-sm);
+  padding: 0.6rem 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.navbar__title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.navbar__link {
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.navbar__link:hover {
+  opacity: 0.8;
+}
+
+.navbar__link--active {
+  font-weight: 600;
+}
+
+/* Search bar rounding */
+.navbar .DocSearch-Button {
+  border-radius: 20px;
+}
+
+/* ----- 3. Sidebar ----- */
+.menu {
+  padding: 0.75rem 0.5rem;
+}
+
+.menu__link {
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 450;
+  transition: background 0.15s ease, color 0.15s ease, padding-left 0.15s ease;
+}
+
+.menu__link:hover:not(.menu__link--active) {
+  background: var(--dw-surface-alt);
+  padding-left: 0.9rem;
+}
+
+.menu__link--active,
+.menu__link--active:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  border-left: 3px solid var(--ifm-color-primary);
+  padding-left: calc(0.75rem - 3px);
+}
+
+[data-theme='dark'] .menu__link--active,
+[data-theme='dark'] .menu__link--active:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 12%, transparent);
+}
+
+/* Category label (collapsible headings) */
+.menu__list-item-collapsible > .menu__link {
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dw-text-secondary);
+  padding: 0.35rem 0.75rem;
+}
+
+.menu__list-item-collapsible > .menu__link:hover {
+  background: transparent;
+  color: var(--ifm-color-primary);
+}
+
+/* Nested list indentation */
+.menu__list .menu__list {
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--dw-border-light);
+  margin-left: 0.75rem;
+}
+
+/* ----- 4. Main Content Typography ----- */
+.markdown {
+  line-height: 1.8;
+}
+
+.markdown > p {
+  margin-bottom: 1.25rem;
+}
+
+.markdown > h1 {
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.markdown > h2 {
+  font-size: 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--dw-border-light);
+  letter-spacing: -0.01em;
+}
+
+.markdown > h3 {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown > ul,
+.markdown > ol {
+  margin-bottom: 1.25rem;
+}
+
+.markdown li {
+  margin-bottom: 0.35rem;
+}
+
+.markdown li > p {
+  margin-bottom: 0.5rem;
+}
+
+/* Blockquote */
+.markdown blockquote {
+  border-left: 3px solid var(--ifm-color-primary-lighter);
+  background: var(--dw-surface-alt);
+  border-radius: 0 var(--dw-radius) var(--dw-radius) 0;
+  padding: 0.85rem 1.2rem;
+  margin: 1.25rem 0;
+  color: var(--dw-text-secondary);
+}
+
+/* ----- 5. Tables ----- */
+table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-radius);
+  overflow: hidden;
+  margin: 1.5rem 0;
+  font-size: 0.92rem;
+}
+
+table thead tr {
+  background: var(--dw-surface-alt);
+}
+
+table thead th {
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--dw-border);
+  color: var(--ifm-font-color-base);
+}
+
+table tbody td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--dw-border-light);
+}
+
+table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 4%, transparent);
+}
+
+[data-theme='dark'] table tbody tr:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 6%, transparent);
+}
+
+/* ----- 6. Code Blocks ----- */
+.prism-code {
+  border-radius: var(--dw-radius-lg) !important;
+  border: 1px solid var(--dw-border);
+  box-shadow: var(--dw-shadow-sm);
+}
+
+div[class*='codeBlockContainer'] {
+  border-radius: var(--dw-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--dw-shadow-sm);
+  margin: 1.25rem 0;
+}
+
+div[class*='codeBlockTitle'] {
+  border-bottom: 1px solid var(--dw-border);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.5rem 1rem;
+}
+
+/* Inline code */
+code {
+  border: 1px solid var(--dw-border-light);
+  border-radius: 4px;
+  padding: 0.15em 0.35em;
+  font-size: var(--ifm-code-font-size);
+  background: var(--dw-surface-alt);
+}
+
+/* Reset for code inside code blocks */
+pre code {
+  border: none;
+  padding: 0;
+  background: none;
+}
+
+/* ----- 7. Admonitions (alerts) ----- */
+.alert {
+  border-radius: var(--dw-radius);
+  border-width: 1px;
+  border-left-width: 4px;
+  box-shadow: var(--dw-shadow-sm);
+}
+
+/* ----- 8. TOC (Table of Contents) ----- */
+.table-of-contents__link {
+  font-size: 0.85rem;
+  transition: color 0.15s ease;
+}
+
+.table-of-contents__link:hover {
+  color: var(--ifm-color-primary);
+}
+
+.table-of-contents__link--active {
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
+
+/* ----- 9. Footer ----- */
+.footer {
+  border-top: 1px solid var(--dw-border);
+}
+
+.footer--dark {
+  background: var(--dw-surface);
+}
+
+/* ----- 10. Pagination (Prev/Next navigation) ----- */
+.pagination-nav__link {
+  border: 1px solid var(--dw-border);
+  border-radius: var(--dw-radius);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pagination-nav__link:hover {
+  border-color: var(--ifm-color-primary-lighter);
+  box-shadow: var(--dw-shadow-md);
+}
+
+/* ----- 11. Breadcrumbs ----- */
+.breadcrumbs__link {
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  transition: background 0.15s ease;
+}
+
+.breadcrumbs__link:hover {
+  background: var(--dw-surface-alt);
+}
+
+/* ----- 12. Scrollbar (subtle) ----- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dw-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dw-text-secondary);
+}
+
+/* ----- 13. Selection highlight ----- */
+::selection {
+  background: color-mix(in srgb, var(--ifm-color-primary) 25%, transparent);
+}
+
+/* ----- 14. Smooth transitions for theme toggle ----- */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

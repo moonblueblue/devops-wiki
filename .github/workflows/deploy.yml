@@ -26,6 +26,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm ci
+      - name: Generate recent updates
+        run: node scripts/generate-recent-updates.js
       - name: Build Docusaurus
         run: npm run build
       - name: Upload artifact

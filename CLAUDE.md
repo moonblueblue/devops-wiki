@@ -1,4 +1,4 @@
-# DevOps Wiki - Claude 운영 규칙
+# Moon Blue's DevOps - Wiki - Claude 운영 규칙
 
 ## 최우선 규칙
 
