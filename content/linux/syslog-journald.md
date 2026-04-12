@@ -27,7 +27,7 @@ rsyslog가 파일 저장과 원격 전송을 담당한다.
 
 ### 로깅 아키텍처 흐름
 
-```
+```text
 커널/서비스/앱
     │
     ▼
@@ -104,14 +104,14 @@ RHEL, Ubuntu 등 주요 배포판에서
 
 ### 설정 파일 구조
 
-```
+```text
 /etc/rsyslog.conf          # 메인 설정
 /etc/rsyslog.d/*.conf      # 드롭인 설정
 ```
 
 ### 기본 규칙 (selector + action)
 
-```bash
+```bash title="/etc/rsyslog.conf"
 # facility.priority    action(대상)
 *.info;mail.none       /var/log/messages
 authpriv.*             /var/log/secure
@@ -207,7 +207,7 @@ systemd 259(2025년 12월)부터 기본 Storage가
 
 ### /etc/systemd/journald.conf
 
-```ini
+```ini title="/etc/systemd/journald.conf"
 [Journal]
 # 저장 모드
 Storage=persistent
@@ -420,7 +420,7 @@ journalctl --vacuum-files=5
 
 ### 공존 모델 (권장 구성)
 
-```
+```text
 [journald]
   Storage=persistent
   ForwardToSyslog=yes

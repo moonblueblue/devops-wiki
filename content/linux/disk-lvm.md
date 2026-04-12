@@ -118,7 +118,7 @@ umount -l /mnt/data   # lazy unmount
 
 ### /etc/fstab 설정
 
-```
+```text title="/etc/fstab"
 # <device>       <mount>   <type> <options>       <dump> <pass>
 UUID=abc-123     /data     ext4   defaults,noatime  0      2
 UUID=def-456     /app      xfs    defaults,nofail   0      2
@@ -159,7 +159,7 @@ mount -a
 
 ### 아키텍처 다이어그램
 
-```
+```text
 ┌─────────────────────────────────────┐
 │        Logical Volumes (LV)         │
 │ ┌────────┐ ┌────────┐ ┌────────┐   │
@@ -306,7 +306,7 @@ lvremove /dev/data_vg/snap_app
 
 ### 시나리오 A: 클라우드 EBS/PD 확장 (LVM 미사용)
 
-```
+```text
 [클라우드 콘솔]     [Linux 인스턴스]
 볼륨 크기 수정  →  growpart  →  resize2fs/xfs_growfs
 ```
@@ -330,7 +330,7 @@ xfs_growfs /               # xfs
 
 ### 시나리오 B: 새 디스크 추가 + LVM
 
-```
+```text
 신규 디스크 → pvcreate → vgextend → lvextend → resize
 ```
 
@@ -457,7 +457,7 @@ done
 | 6 | 이중 패리티 | 4 | (N-2)/N | 2개 장애 | 쓰기 느림 |
 | 10 | 미러+스트라이프 | 4 | 50% | 미러당 1개 | 읽기/쓰기 우수|
 
-```
+```text
 RAID 0 (스트라이핑)     RAID 1 (미러링)
 ┌───┬───┐              ┌───┐ ┌───┐
 │A1 │A2 │              │ A │ │ A │ (동일)

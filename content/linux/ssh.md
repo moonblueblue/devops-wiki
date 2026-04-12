@@ -33,7 +33,7 @@ SSH 연결은 다음 단계로 이루어진다.
 각 단계에서 암호화 협상과 인증이 수행되며
 중간자 공격을 방지하는 구조를 갖는다.
 
-```
+```text
 1. TCP 3-way 핸드셰이크 (포트 22)
 2. 프로토콜 버전 교환
 3. 키 교환 (DH/ECDH) → 세션 키 생성
@@ -172,7 +172,7 @@ ssh-add -D
 매번 긴 명령어를 입력할 필요 없이
 `ssh myserver`처럼 간단히 접속할 수 있다.
 
-```ssh-config
+```ssh-config title="~/.ssh/config"
 # 전역 설정
 Host *
     ServerAliveInterval 60
@@ -231,7 +231,7 @@ Host bastion
 반드시 설정한다. 이것만으로 대부분의 자동화 공격을
 차단할 수 있다.
 
-```bash
+```bash title="/etc/ssh/sshd_config"
 # 1. 비밀번호 인증 비활성화
 PasswordAuthentication no
 PubkeyAuthentication yes
@@ -257,7 +257,7 @@ curve25519-sha256,curve25519-sha256@libssh.org
 
 ### 추가 보안 설정
 
-```bash
+```bash title="/etc/ssh/sshd_config"
 # 포트 변경
 Port 2222
 
@@ -301,8 +301,9 @@ Banner /etc/ssh/banner
 # fail2ban 설치
 sudo apt install fail2ban    # Debian/Ubuntu
 sudo dnf install fail2ban    # RHEL/Fedora
+```
 
-# /etc/fail2ban/jail.local
+```ini title="/etc/fail2ban/jail.local"
 [sshd]
 enabled  = true
 port     = 2222
@@ -348,7 +349,7 @@ ssh user@server -p 2222
 방화벽 뒤의 내부 서비스에 접근할 때 유용하며
 가장 많이 사용되는 터널링 방식이다.
 
-```
+```text
 [로컬] :8080 → SSH 터널 → [bastion] → [db]:3306
 ```
 
@@ -372,7 +373,7 @@ ssh -fNL 8080:db.internal:3306 user@bastion
 NAT 뒤의 로컬 서비스를 외부에 노출할 때 사용하며
 웹훅 테스트 등에 활용된다.
 
-```
+```text
 [public-server] :9090 → SSH 터널 → [로컬] :3000
 ```
 
@@ -415,7 +416,7 @@ ssh -J user@bastion user@internal
 ssh -J user@jump1,user@jump2 user@target
 ```
 
-```ssh-config
+```ssh-config title="~/.ssh/config"
 # ~/.ssh/config 설정
 Host internal-*
     ProxyJump bastion.example.com
@@ -442,7 +443,7 @@ OpenSSH 3.9부터 지원한다.
 
 ### 설정
 
-```ssh-config
+```ssh-config title="~/.ssh/config"
 # ~/.ssh/config
 Host *
     ControlMaster auto
@@ -646,7 +647,7 @@ ssh-keygen -s ssh_ca \
 
 ### 보안 체크리스트
 
-```
+```text
 [ ] Ed25519 키 사용 중인가
 [ ] 모든 키에 패스프레이즈가 설정되어 있는가
 [ ] 개인키 파일 권한이 600인가

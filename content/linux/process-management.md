@@ -252,8 +252,7 @@ nice -n 19 ionice -c 3 /usr/local/bin/backup.sh
 
 ### systemd에서 우선순위 설정
 
-```ini
-# /etc/systemd/system/backup.service
+```ini title="/etc/systemd/system/backup.service"
 [Service]
 Nice=19
 IOSchedulingClass=idle
@@ -403,7 +402,7 @@ ulimit -c unlimited
 
 ### /etc/security/limits.conf (영구 설정)
 
-```bash
+```text title="/etc/security/limits.conf"
 # <domain>  <type>  <item>  <value>
 nginx     soft    nofile    65535
 nginx     hard    nofile    65535
@@ -415,8 +414,7 @@ nginx     hard    nofile    65535
 > **주의**: systemd 서비스는 limits.conf가 적용되지 않는다.
 > 유닛 파일에서 직접 설정해야 한다.
 
-```ini
-# /etc/systemd/system/myapp.service
+```ini title="/etc/systemd/system/myapp.service"
 [Service]
 LimitNOFILE=65535
 LimitNPROC=4096

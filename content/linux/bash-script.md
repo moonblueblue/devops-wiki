@@ -339,7 +339,7 @@ printf "%-10s %5d\n" "redis" 6379
 
 출력 결과:
 
-```
+```text
 nginx         80
 ssh           22
 redis       6379

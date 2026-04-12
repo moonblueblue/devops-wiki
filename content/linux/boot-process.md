@@ -15,7 +15,7 @@ DevOps 실무 관점에서 정리한다.
 
 ## 1. 부팅 시퀀스 전체 흐름
 
-```
+```text
 전원 ON
   │
   ▼
@@ -89,7 +89,7 @@ mokutil --sb-state
 
 ### /etc/default/grub 주요 설정
 
-```bash
+```bash title="/etc/default/grub"
 GRUB_DEFAULT=0                    # 기본 부트 엔트리
 GRUB_TIMEOUT=5                    # 메뉴 타임아웃 (초)
 
@@ -197,7 +197,7 @@ cat /proc/cmdline
 
 ### rescue.target vs emergency.target
 
-```
+```text
 rescue.target
 ├── sysinit.target (마운트, 스왑, udev 등)
 ├── 기본 서비스 로드
@@ -411,7 +411,7 @@ systemd-analyze plot > boot.svg
 
 ### 크리티컬 패스 체인 예시
 
-```
+```text
 multi-user.target @8.1s
 └─ NetworkManager.service @3.2s +1.8s
    └─ network-pre.target @3.1s

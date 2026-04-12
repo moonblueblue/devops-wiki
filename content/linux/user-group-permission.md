@@ -62,7 +62,7 @@ userdel -r deploy            # -r: 홈 디렉토리도 삭제
 
 ### 기본 퍼미션 구조
 
-```
+```text
 -rwxr-xr-- 1 deploy devteam 4096 Apr 12 10:00 deploy.sh
 │└┬┘└┬┘└┬┘
 │ │  │  └── Others: r-- (읽기만)
@@ -201,7 +201,7 @@ chmod 1777 /opt/shared/uploads
 
 ### 실무 설정 예시
 
-```bash
+```bash title="/etc/sudoers.d/deploy-team"
 # /etc/sudoers.d/deploy-team (visudo -f로 편집)
 
 # deploy 그룹에 특정 명령만 허용
@@ -218,7 +218,7 @@ chmod 1777 /opt/shared/uploads
 
 ### 보안 강화 옵션
 
-```bash
+```bash title="/etc/sudoers"
 # /etc/sudoers에 추가 (visudo로)
 
 # sudo 세션 타임아웃 (5분)
@@ -256,7 +256,7 @@ useradd --system --no-create-home --shell /usr/sbin/nologin -g appgroup appuser
 
 ### systemd 서비스에서 활용
 
-```ini
+```ini title="/etc/systemd/system/myapp.service"
 # /etc/systemd/system/myapp.service
 [Service]
 User=appuser

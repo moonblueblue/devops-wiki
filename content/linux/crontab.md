@@ -33,7 +33,7 @@ crond 데몬이 매분 crontab을 스캔하여
 
 ### 5-field 구조
 
-```
+```text
 ┌──────────── 분 (0-59)
 │ ┌────────── 시 (0-23)
 │ │ ┌──────── 일 (1-31)
@@ -140,7 +140,7 @@ crontab -l && echo "---삭제합니다---" && crontab -r
 
 ### 시스템 crontab 형식
 
-```bash
+```bash title="/etc/crontab"
 # /etc/crontab - 사용자 필드 포함
 # 분 시 일 월 요일 사용자 명령
 0  3  *  *  *  root  /usr/local/bin/backup.sh
@@ -161,7 +161,7 @@ crontab -l && echo "---삭제합니다---" && crontab -r
 나머지 디렉토리는 `run-parts`로 실행되는
 일반 쉘 스크립트를 넣는 곳이다.
 
-```bash
+```bash title="/etc/cron.d/certbot"
 # /etc/cron.d/certbot - 패키지가 설치한 예시
 0 */12 * * * root certbot renew --quiet
 
@@ -277,7 +277,7 @@ journalctl -u cron --since "1 hour ago"
 
 ### systemd timer 예시
 
-```ini
+```ini title="/etc/systemd/system/backup.timer"
 # /etc/systemd/system/backup.timer
 [Unit]
 Description=Daily backup timer
@@ -290,7 +290,7 @@ Persistent=true
 WantedBy=timers.target
 ```
 
-```ini
+```ini title="/etc/systemd/system/backup.service"
 # /etc/systemd/system/backup.service
 [Unit]
 Description=Daily backup
@@ -314,7 +314,7 @@ systemctl list-timers --all | grep backup
 항상 켜져 있지 않은 시스템(노트북, 개발 VM)에서는
 anacron이 놓친 daily/weekly/monthly 작업을 보완한다.
 
-```bash
+```bash title="/etc/anacrontab"
 # /etc/anacrontab 형식
 # 주기(일)  지연(분)  식별자  명령
 1    5    daily-backup   /opt/backup.sh

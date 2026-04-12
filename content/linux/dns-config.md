@@ -24,7 +24,7 @@ DNS 구성을 다룬다.
 
 ### 해석 흐름
 
-```
+```text
 애플리케이션
   → glibc (getaddrinfo)
     → /etc/nsswitch.conf (해석 순서 결정)
@@ -50,7 +50,7 @@ DNS 리졸버 라이브러리(glibc)가 참조하는
 
 ### 주요 지시어
 
-```bash
+```bash title="/etc/resolv.conf"
 # DNS 서버 지정 (최대 3개, 나열 순서대로 질의)
 nameserver 8.8.8.8
 nameserver 8.8.4.4
@@ -110,7 +110,7 @@ ls -la /etc/resolv.conf
 
 ### 동작 원리
 
-```
+```text
 애플리케이션
   → 127.0.0.53:53 (스텁 리스너)
     → systemd-resolved (캐시 확인)
@@ -134,7 +134,7 @@ systemd-resolved는 127.0.0.53에서
 
 ### 설정 예시
 
-```ini
+```ini title="/etc/systemd/resolved.conf"
 # /etc/systemd/resolved.conf
 [Resolve]
 DNS=8.8.8.8 1.1.1.1
@@ -183,7 +183,7 @@ sudo systemctl restart systemd-resolved
 DNS 서버 질의 없이 호스트명을 해석하는
 정적 매핑 파일이다.
 
-```bash
+```bash title="/etc/hosts"
 # /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
@@ -198,7 +198,7 @@ DNS 장애 시에도 동작하므로
 
 이름 해석 순서를 결정하는 설정 파일이다.
 
-```bash
+```bash title="/etc/nsswitch.conf"
 # 기본 설정 (대부분의 배포판)
 hosts: files dns myhostname
 
@@ -342,7 +342,9 @@ docker run --dns=8.8.8.8 \
   --dns-search=example.com nginx
 
 # Docker 데몬 기본 DNS 설정
-# /etc/docker/daemon.json
+```
+
+```json title="/etc/docker/daemon.json"
 {
   "dns": ["8.8.8.8", "8.8.4.4"],
   "dns-search": ["example.com"]
@@ -390,7 +392,7 @@ data:
 Pod는 기본적으로 다음과 같은
 `/etc/resolv.conf`를 갖는다.
 
-```
+```text title="/etc/resolv.conf"
 nameserver 10.96.0.10
 search default.svc.cluster.local svc.cluster.local cluster.local
 options ndots:5
@@ -401,7 +403,7 @@ options ndots:5
 `ndots:5`는 도트가 5개 미만인 도메인에 대해
 검색 도메인을 먼저 시도한다.
 
-```
+```text
 # api.example.com 질의 시 실제 DNS 질의 순서:
 1. api.example.com.default.svc.cluster.local
 2. api.example.com.svc.cluster.local
@@ -488,7 +490,7 @@ CoreDNS ConfigMap 변경 후
 VPC 내 인스턴스는 기본적으로
 VPC CIDR의 +2 주소를 DNS 서버로 사용한다.
 
-```
+```text
 # 예: VPC CIDR 10.0.0.0/16
 # DNS 서버: 10.0.0.2
 ```
@@ -537,7 +539,7 @@ gcloud dns managed-zones create internal-zone \
 AWS와 GCP 간 하이브리드 DNS 구성 시
 양쪽 모두 DNS 포워딩 설정이 필요하다.
 
-```
+```text
 AWS VPC                        GCP VPC
   Route 53                       Cloud DNS
   아웃바운드 엔드포인트  ←VPN→  서버 정책

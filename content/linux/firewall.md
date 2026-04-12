@@ -28,7 +28,7 @@ netfilter는 5개의 훅 포인트를 제공한다.
 패킷이 커널 네트워크 스택을 통과할 때
 각 훅에서 등록된 규칙이 평가된다.
 
-```
+```text
 [네트워크] → PREROUTING → 라우팅 결정
                             ├→ INPUT → [로컬 프로세스]
                             └→ FORWARD → POSTROUTING → [네트워크]
@@ -216,8 +216,7 @@ nft add rule inet myfilter input \
 
 ### 설정 파일
 
-```bash
-# /etc/nftables.conf
+```bash title="/etc/nftables.conf"
 #!/usr/sbin/nft -f
 
 flush ruleset
@@ -623,7 +622,7 @@ AWS Security Group, Azure NSG, GCP VPC Firewall 등은
 설정 오류가 발생할 수 있다.
 호스트 방화벽을 추가 방어층으로 운영하는 것이 권장된다.
 
-```
+```text
 [인터넷]
   └→ 클라우드 보안 그룹 (1차 필터)
        └→ 호스트 방화벽 (2차 필터)

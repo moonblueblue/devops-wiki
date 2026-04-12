@@ -89,7 +89,7 @@ PID 1로 실행되며 부팅부터 종료까지 모든 프로세스를
 
 ### 파일 위치
 
-```
+```text
 /usr/lib/systemd/system/   ← 패키지 기본 (수정 금지)
 /etc/systemd/system/       ← 커스텀 unit (여기에 작성)
 /etc/systemd/system/<svc>.d/ ← drop-in override
@@ -124,7 +124,7 @@ WantedBy=multi-user.target
 
 ### 주요 섹션 요약
 
-```
+```text
 ┌──────────────────────────────────────┐
 │ [Unit]    - 설명, 문서, 의존성, 순서 │
 │ [Service] - 타입, 실행, 재시작       │
@@ -138,8 +138,7 @@ WantedBy=multi-user.target
 
 ### 예제: Node.js 웹 앱
 
-```ini
-# /etc/systemd/system/mywebapp.service
+```ini title="/etc/systemd/system/mywebapp.service"
 [Unit]
 Description=My Node.js Web Application
 Documentation=https://github.com/myorg/mywebapp
@@ -178,8 +177,7 @@ WantedBy=multi-user.target
 
 ### 예제: Go API 서버 (notify 타입)
 
-```ini
-# /etc/systemd/system/myapi.service
+```ini title="/etc/systemd/system/myapi.service"
 [Unit]
 Description=My Go API Server
 After=network-online.target postgresql.service
@@ -292,7 +290,7 @@ ExecStart=/usr/local/bin/myserver
 
 ### 순서 vs 의존성
 
-```
+```text
 순서 (After/Before) : "언제" 시작할지
 의존성 (Requires/Wants) : "무엇이" 필요한지
 
@@ -433,8 +431,7 @@ myapp.service/cpu.stat
 
 **서비스 파일** (`backup.service`):
 
-```ini
-# /etc/systemd/system/backup.service
+```ini title="/etc/systemd/system/backup.service"
 [Unit]
 Description=Daily Backup Job
 
@@ -451,8 +448,7 @@ CPUQuota=50%
 
 **타이머 파일** (`backup.timer`):
 
-```ini
-# /etc/systemd/system/backup.timer
+```ini title="/etc/systemd/system/backup.timer"
 [Unit]
 Description=Daily Backup Timer
 
@@ -614,8 +610,7 @@ journalctl --verify
 systemd 259부터 기본값이 `persistent`다.
 이전 버전에서는 수동 설정이 필요하다.
 
-```ini
-# /etc/systemd/journald.conf
+```ini title="/etc/systemd/journald.conf"
 [Journal]
 Storage=persistent
 SystemMaxUse=2G
@@ -634,7 +629,7 @@ MaxRetentionSec=1month
 
 ### 체계적 진단 워크플로우
 
-```
+```text
 1. systemctl status myapp.service
    └→ 현재 상태, 최근 로그 요약
 

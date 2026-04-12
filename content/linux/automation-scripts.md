@@ -599,6 +599,7 @@ rsync -avz --delete \
     /backup/html_mirror/
 ```
 
+
 > 참고:
 > [DEV Community - Automating Backups with Rsync](https://dev.to/sourav3366/automate-your-backups-with-a-bash-script-17jl)
 
@@ -816,8 +817,7 @@ main "$@"
 서비스 자동 재시작을 구성할 수 있다.
 `Restart=on-failure`가 가장 일반적인 설정이다.
 
-```ini
-# /etc/systemd/system/myapp.service
+```ini title="/etc/systemd/system/myapp.service"
 [Unit]
 Description=My Application
 After=network.target
@@ -1032,8 +1032,7 @@ esac
 
 ### 설정 파일
 
-```bash
-# /etc/scripts/notify.conf
+```bash title="/etc/scripts/notify.conf"
 SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."
 SLACK_CHANNEL="#ops-alerts"
 ALERT_EMAIL="ops-team@example.com"
@@ -1042,9 +1041,8 @@ HOSTNAME=$(hostname)
 
 ### Slack 알림 함수
 
-```bash
+```bash title="/opt/scripts/lib/notify.sh"
 #!/usr/bin/env bash
-# /opt/scripts/lib/notify.sh
 
 source /etc/scripts/notify.conf
 

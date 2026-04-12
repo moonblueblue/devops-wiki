@@ -46,7 +46,7 @@ logrotate는 두 계층의 설정 파일을 사용한다.
 - `/etc/logrotate.conf` : 전역 기본값 정의
 - `/etc/logrotate.d/` : 애플리케이션별 개별 설정
 
-```bash
+```bash title="/etc/logrotate.conf"
 # /etc/logrotate.conf 기본 구조
 weekly
 rotate 4
@@ -118,7 +118,7 @@ cat /etc/cron.daily/logrotate
 nginx는 `kill -USR1`로 로그 파일 핸들을 갱신한다.
 `sharedscripts`로 시그널을 1회만 전송한다.
 
-```bash
+```bash title="/etc/logrotate.d/nginx"
 # /etc/logrotate.d/nginx
 /var/log/nginx/*.log {
     daily
@@ -141,7 +141,7 @@ nginx는 `kill -USR1`로 로그 파일 핸들을 갱신한다.
 PID 파일이 없거나 시그널을 지원하지 않는 앱은
 `copytruncate`로 파일 핸들을 유지한 채 순환한다.
 
-```bash
+```bash title="/etc/logrotate.d/myapp"
 # /etc/logrotate.d/myapp
 /var/log/myapp/*.log {
     daily
@@ -162,7 +162,7 @@ PID 파일이 없거나 시그널을 지원하지 않는 앱은
 Docker 자체 로그 드라이버 외에
 logrotate로 직접 관리할 수도 있다.
 
-```bash
+```bash title="/etc/logrotate.d/docker-containers"
 # /etc/logrotate.d/docker-containers
 /var/lib/docker/containers/*/*.log {
     rotate 7
@@ -221,7 +221,7 @@ logrotate와 별도로 자체 로테이션 메커니즘을 제공한다.
 
 ### 설정 파일
 
-```ini
+```ini title="/etc/systemd/journald.conf"
 # /etc/systemd/journald.conf
 [Journal]
 Storage=persistent
@@ -284,7 +284,7 @@ Docker의 기본 `json-file` 드라이버는
 
 #### daemon.json 전역 설정
 
-```json
+```json title="/etc/docker/daemon.json"
 {
   "log-driver": "json-file",
   "log-opts": {
@@ -334,7 +334,7 @@ kubelet 설정 파일에서 다음 파라미터를 조정한다.
 | `containerLogMaxWorkers` | 1 | 동시 순환 워커 수 |
 | `containerLogMonitorInterval` | 10s | 로그 모니터링 주기 |
 
-```yaml
+```yaml title="kubelet-config.yaml"
 # kubelet-config.yaml
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
@@ -388,7 +388,7 @@ Docker `daemon.json`에 `max-size`/`max-file`을 반드시 설정한다.
 
 ### 권장 설정 템플릿
 
-```bash
+```bash title="/etc/logrotate.d/app-template"
 # /etc/logrotate.d/app-template
 /var/log/APP/*.log {
     daily

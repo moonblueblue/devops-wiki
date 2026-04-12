@@ -73,7 +73,7 @@ apt-mark unhold kubelet kubeadm kubectl
 
 특정 저장소의 우선순위를 조정하여 패키지 소스를 제어한다.
 
-```bash
+```bash title="/etc/apt/preferences.d/kubernetes"
 # /etc/apt/preferences.d/kubernetes
 Package: kubelet kubeadm kubectl
 Pin: version 1.30.*
