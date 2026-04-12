@@ -243,6 +243,9 @@ table tbody tr:hover {
   border-radius: var(--dw-radius-lg) !important;
   border: 1px solid var(--dw-border);
   box-shadow: var(--dw-shadow-sm);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  padding: 1.25rem 1.5rem !important;
 }
 
 div[class*='codeBlockContainer'] {
@@ -254,10 +257,10 @@ div[class*='codeBlockContainer'] {
 
 div[class*='codeBlockTitle'] {
   border-bottom: 1px solid var(--dw-border);
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 0.5rem 1rem;
+  padding: 0.65rem 1.25rem;
 }
 
 /* Inline code */
@@ -274,6 +277,7 @@ pre code {
   border: none;
   padding: 0;
   background: none;
+  font-size: inherit;
 }
 
 /* ----- 7. Admonitions (alerts) ----- */
