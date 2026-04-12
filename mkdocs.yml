@@ -96,6 +96,18 @@ plugins:
   - search:
       lang: ko
   - tags
+  - git-latest-changes:
+      limit_to_docs_dir: true
+      history_limit: 10
+      timestamp_format: "%Y-%m-%d"
+      table_features:
+        - "page_path_link"
+        - "timestamp"
+        - "message"
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      locale: ko
 
 extra:
   social:

@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: pip install mkdocs-material
+        run: pip install mkdocs-material mkdocs-git-latest-changes-plugin mkdocs-git-revision-date-localized-plugin
       - name: Build MkDocs
         run: mkdocs build --site-dir public
       - name: Upload artifact
