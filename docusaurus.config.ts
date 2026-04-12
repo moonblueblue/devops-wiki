@@ -3,7 +3,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'DevOps Wiki',
+  title: 'DevOps - Wiki',
   tagline: 'DevOps 엔지니어를 위한 로드맵 기반 위키',
   favicon: 'img/favicon.ico',
 
@@ -55,7 +55,7 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'DevOps Wiki',
+      title: 'DevOps - Wiki',
       items: [
         {
           href: 'https://github.com/moonblueblue/devops-wiki',
@@ -66,7 +66,7 @@ const config: Config = {
     },
     footer: {
       style: 'light',
-      copyright: `© ${new Date().getFullYear()} DevOps Wiki`,
+      copyright: `© ${new Date().getFullYear()} DevOps - Wiki`,
     },
     prism: {
       theme: prismThemes.github,

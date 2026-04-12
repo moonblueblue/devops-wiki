@@ -1,12 +1,12 @@
 ---
-title: DevOps Wiki
+title: DevOps - Wiki
 sidebar_position: 0
 displayed_sidebar: wikiSidebar
 slug: /
 hide_table_of_contents: true
 ---
 
-# DevOps Wiki
+# DevOps - Wiki
 
 DevOps 엔지니어를 위한 로드맵 기반 위키.
 입문자부터 실무자까지, 순서대로 학습할 수 있다.
