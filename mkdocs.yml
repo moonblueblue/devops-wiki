@@ -23,7 +23,6 @@ theme:
     text: Noto Sans KR
     code: JetBrains Mono
   features:
-    - navigation.sections
     - navigation.top
     - navigation.indexes
     - search.suggest
@@ -97,6 +96,9 @@ plugins:
       enable_creation_date: true
       type: date
       locale: ko
+
+extra_css:
+  - stylesheets/extra.css
 
 extra:
   social:
