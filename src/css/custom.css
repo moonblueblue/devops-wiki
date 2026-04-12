@@ -245,7 +245,7 @@ table tbody tr:hover {
   box-shadow: var(--dw-shadow-sm);
   font-size: 0.95rem;
   line-height: 1.7;
-  padding: 1.25rem 1.5rem !important;
+  padding: 1rem 1.25rem !important;
 }
 
 div[class*='codeBlockContainer'] {
