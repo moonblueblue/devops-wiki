@@ -7,10 +7,10 @@ const sidebars: SidebarsConfig = {
       label: '1. Linux',
       link: {type: 'doc', id: 'linux/index'},
       items: [
-        'linux/linux-distro-comparison',
-        'linux/filesystem-hierarchy',
-        'linux/user-group-permission',
-        'linux/package-management',
+        {type: 'doc', id: 'linux/linux-distro-comparison', label: '배포판 비교'},
+        {type: 'doc', id: 'linux/filesystem-hierarchy', label: '파일시스템 구조'},
+        {type: 'doc', id: 'linux/user-group-permission', label: '사용자·그룹·퍼미션'},
+        {type: 'doc', id: 'linux/package-management', label: '패키지 관리'},
       ],
     },
     {
@@ -30,7 +30,7 @@ const sidebars: SidebarsConfig = {
       label: '4. Kubernetes',
       link: {type: 'doc', id: 'kubernetes/index'},
       items: [
-        'kubernetes/kubernetes-2025-2026-release-overview',
+        {type: 'doc', id: 'kubernetes/kubernetes-2025-2026-release-overview', label: 'v1.33~v1.36 릴리즈'},
       ],
     },
     {
