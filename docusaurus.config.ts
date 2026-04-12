@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: "Moon Blue's DevOps - Wiki",
   tagline: 'DevOps 엔지니어를 위한 로드맵 기반 위키',
-  favicon: 'img/favicon.png',
+  favicon: 'img/favicon.svg',
 
   future: {
     v4: true,
@@ -66,7 +66,7 @@ const config: Config = {
       title: "Moon Blue's DevOps - Wiki",
       logo: {
         alt: 'Moon Blue Logo',
-        src: 'img/logo.png',
+        src: 'img/logo.svg',
       },
       items: [
         {
