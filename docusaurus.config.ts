@@ -47,7 +47,15 @@ const config: Config = {
     mermaid: true,
   },
 
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    ['@easyops-cn/docusaurus-search-local', {
+      hashed: true,
+      language: ['ko', 'en'],
+      highlightSearchTermsOnTargetPage: true,
+      searchBarPosition: 'right',
+    }],
+  ],
 
   themeConfig: {
     colorMode: {
