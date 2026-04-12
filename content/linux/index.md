@@ -5,6 +5,7 @@ tags:
   - linux
   - roadmap
 ---
+format: md
 
 # Linux
 
@@ -14,37 +15,37 @@ tags:
 
 ### 기초
 
-- [x] [리눅스 배포판 비교 (Ubuntu, RHEL, Alpine)](linux-distro-comparison.md)
-- [x] [파일시스템 구조와 디렉토리 역할](filesystem-hierarchy.md)
+- [x] [리눅스 배포판 비교](linux-distro-comparison.md)
+- [x] [파일시스템 구조 (FHS)](filesystem-hierarchy.md)
 - [x] [사용자·그룹·퍼미션 관리](user-group-permission.md)
 - [x] [패키지 관리 (apt, dnf, apk)](package-management.md)
 
 ### 시스템 관리
 
-- [ ] systemd 서비스 관리
-- [ ] 부팅 프로세스 이해
-- [ ] 프로세스 관리 (ps, top, kill, nice)
-- [ ] crontab과 주기적 작업
-- [ ] 디스크·파티션·LVM 관리
+- [x] [systemd 서비스 관리](systemd.md)
+- [x] [부팅 프로세스 이해](boot-process.md)
+- [x] [프로세스 관리](process-management.md)
+- [x] [crontab과 주기적 작업](crontab.md)
+- [x] [디스크·파티션·LVM 관리](disk-lvm.md)
 
 ### 네트워크 기초 (리눅스 관점)
 
-- [ ] iproute2 명령어 (ip, ss)
-- [ ] DNS 설정과 resolv.conf
-- [ ] 방화벽 (iptables, nftables, firewalld)
-- [ ] SSH 설정과 키 관리
+- [x] [iproute2 명령어 (ip, ss)](iproute2.md)
+- [x] [DNS 설정과 resolv.conf](dns-config.md)
+- [x] [방화벽 (iptables, nftables, firewalld)](firewall.md)
+- [x] [SSH 설정과 키 관리](ssh.md)
 
 ### 셸 스크립트
 
-- [ ] Bash 스크립트 기본 문법
-- [ ] 실무 자동화 스크립트 예제
-- [ ] 파이썬으로 리눅스 커맨드 구현
+- [x] [Bash 스크립트 기본 문법](bash-script.md)
+- [x] [실무 자동화 스크립트 예제](automation-scripts.md)
+- [x] [파이썬으로 리눅스 커맨드 구현](python-linux.md)
 
 ### 로깅
 
-- [ ] syslog과 journald
-- [ ] 로그 로테이션
-- [ ] 대규모 로그 관리 전략
+- [x] [syslog과 journald](syslog-journald.md)
+- [x] [로그 로테이션](log-rotation.md)
+- [x] [대규모 로그 관리 전략](log-management.md)
 
 ### 성능 분석
 

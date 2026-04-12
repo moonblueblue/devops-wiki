@@ -9,6 +9,7 @@ tags:
   - apk
   - devops
 ---
+format: md
 
 # 리눅스 패키지 관리
 

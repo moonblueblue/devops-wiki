@@ -7,6 +7,7 @@ tags:
   - fhs
   - devops
 ---
+format: md
 
 # 리눅스 파일시스템 구조 (FHS)
 

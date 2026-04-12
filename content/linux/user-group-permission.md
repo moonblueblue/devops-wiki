@@ -8,6 +8,7 @@ tags:
   - sudo
   - devops
 ---
+format: md
 
 # 사용자, 그룹, 퍼미션 관리
 

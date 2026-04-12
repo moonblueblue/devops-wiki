@@ -7,6 +7,7 @@ tags:
   - container
   - devops
 ---
+format: md
 
 # 리눅스 배포판 비교 - DevOps/서버 환경 (2026)
 
