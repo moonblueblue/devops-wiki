@@ -24,16 +24,13 @@ theme:
     code: JetBrains Mono
   features:
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.indexes
-    - navigation.path
     - search.suggest
     - search.highlight
     - content.code.copy
     - content.code.annotate
     - toc.follow
-    - toc.integrate
   icon:
     repo: fontawesome/brands/github
 
