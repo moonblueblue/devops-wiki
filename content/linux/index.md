@@ -14,10 +14,10 @@ tags:
 
 ### 기초
 
-- [ ] 리눅스 배포판 비교 (Ubuntu, RHEL, Alpine)
-- [ ] 파일시스템 구조와 디렉토리 역할
-- [ ] 사용자·그룹·퍼미션 관리
-- [ ] 패키지 관리 (apt, yum, dnf)
+- [x] [리눅스 배포판 비교 (Ubuntu, RHEL, Alpine)](linux-distro-comparison.md)
+- [x] [파일시스템 구조와 디렉토리 역할](filesystem-hierarchy.md)
+- [x] [사용자·그룹·퍼미션 관리](user-group-permission.md)
+- [x] [패키지 관리 (apt, dnf, apk)](package-management.md)
 
 ### 시스템 관리
 
