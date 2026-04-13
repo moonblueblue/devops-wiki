@@ -22,10 +22,10 @@ tags:
 
 ### 이미지
 
-- [ ] Dockerfile 작성과 베스트 프랙티스
-- [ ] 멀티스테이지 빌드
-- [ ] 이미지 경량화 전략
-- [ ] 컨테이너 레지스트리 (Docker Hub, Harbor, 클라우드 레지스트리)
+- [x] [Dockerfile 작성과 베스트 프랙티스](dockerfile-best-practices.md)
+- [x] [멀티스테이지 빌드](multistage-build.md)
+- [x] [이미지 경량화 전략](image-optimization.md)
+- [x] [컨테이너 레지스트리 (Docker Hub, Harbor, 클라우드)](container-registry.md)
 
 ### 네트워크·스토리지
 

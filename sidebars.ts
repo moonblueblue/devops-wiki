@@ -66,6 +66,10 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'container/container-linux-internals', label: '컨테이너 내부 구조'},
         {type: 'doc', id: 'container/docker-basics', label: 'Docker 기본'},
         {type: 'doc', id: 'container/container-lifecycle', label: '컨테이너 라이프사이클'},
+        {type: 'doc', id: 'container/dockerfile-best-practices', label: 'Dockerfile'},
+        {type: 'doc', id: 'container/multistage-build', label: '멀티스테이지 빌드'},
+        {type: 'doc', id: 'container/image-optimization', label: '이미지 경량화'},
+        {type: 'doc', id: 'container/container-registry', label: '컨테이너 레지스트리'},
       ],
     },
     {
