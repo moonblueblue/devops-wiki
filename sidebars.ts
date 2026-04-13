@@ -42,6 +42,11 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'network/dns-how-it-works', label: 'DNS 동작 원리'},
         {type: 'doc', id: 'network/http-https-tls', label: 'HTTP·TLS'},
         {type: 'doc', id: 'network/tcp-vs-udp', label: 'TCP vs UDP'},
+        {type: 'doc', id: 'network/subnet-cidr', label: '서브넷·CIDR'},
+        {type: 'doc', id: 'network/vpc-design', label: 'VPC 설계'},
+        {type: 'doc', id: 'network/load-balancer', label: '로드밸런서'},
+        {type: 'doc', id: 'network/reverse-proxy', label: '리버스 프록시'},
+        {type: 'doc', id: 'network/nat-portforward', label: 'NAT·포트포워딩'},
       ],
     },
     {
