@@ -49,8 +49,8 @@ format: md
 
 ### 성능 분석
 
-- [ ] CPU 성능 분석 도구와 튜닝
-- [ ] 메모리 관리와 OOM
+- [x] [CPU 성능 분석 도구와 튜닝](cpu-performance.md)
+- [x] [메모리 관리와 OOM](memory-oom.md)
 - [ ] 디스크 I/O 성능 분석
 - [ ] 네트워크 성능 분석
 - [ ] eBPF 기반 성능 분석 입문
