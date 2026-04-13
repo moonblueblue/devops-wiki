@@ -47,6 +47,10 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'network/load-balancer', label: '로드밸런서'},
         {type: 'doc', id: 'network/reverse-proxy', label: '리버스 프록시'},
         {type: 'doc', id: 'network/nat-portforward', label: 'NAT·포트포워딩'},
+        {type: 'doc', id: 'network/docker-network', label: 'Docker 네트워크'},
+        {type: 'doc', id: 'network/cni-comparison', label: 'CNI 비교'},
+        {type: 'doc', id: 'network/k8s-service-ingress', label: 'Service·Ingress'},
+        {type: 'doc', id: 'network/coredns', label: 'CoreDNS'},
       ],
     },
     {
