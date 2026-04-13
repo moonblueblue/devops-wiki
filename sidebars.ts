@@ -70,6 +70,9 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'container/multistage-build', label: '멀티스테이지 빌드'},
         {type: 'doc', id: 'container/image-optimization', label: '이미지 경량화'},
         {type: 'doc', id: 'container/container-registry', label: '컨테이너 레지스트리'},
+        {type: 'doc', id: 'container/docker-network', label: 'Docker 네트워크'},
+        {type: 'doc', id: 'container/docker-volume', label: 'Volume·Bind Mount'},
+        {type: 'doc', id: 'container/data-persistence', label: '데이터 지속성'},
       ],
     },
     {

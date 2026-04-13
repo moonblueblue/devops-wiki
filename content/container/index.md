@@ -29,9 +29,9 @@ tags:
 
 ### 네트워크·스토리지
 
-- [ ] Docker 네트워크 모드
-- [ ] Docker Volume과 Bind Mount
-- [ ] 데이터 지속성 전략
+- [x] [Docker 네트워크 모드](docker-network.md)
+- [x] [Docker Volume과 Bind Mount](docker-volume.md)
+- [x] [컨테이너 데이터 지속성 전략](data-persistence.md)
 
 ### 운영
 
