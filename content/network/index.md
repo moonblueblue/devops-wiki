@@ -36,7 +36,7 @@ tags:
 
 ### 고급
 
-- [ ] 서비스 메시 개념 (Istio, Linkerd)
-- [ ] eBPF 기반 네트워킹 (Cilium)
-- [ ] 네트워크 트러블슈팅 도구와 기법
-- [ ] 네트워크 성능 튜닝 파라미터
+- [x] [서비스 메시 개념 (Istio, Linkerd)](service-mesh.md)
+- [x] [eBPF 기반 네트워킹 (Cilium)](ebpf-networking.md)
+- [x] [네트워크 트러블슈팅 도구와 기법](network-troubleshooting.md)
+- [x] [네트워크 성능 튜닝 파라미터](network-tuning.md)

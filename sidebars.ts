@@ -51,6 +51,10 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'network/cni-comparison', label: 'CNI 비교'},
         {type: 'doc', id: 'network/k8s-service-ingress', label: 'Service·Ingress'},
         {type: 'doc', id: 'network/coredns', label: 'CoreDNS'},
+        {type: 'doc', id: 'network/service-mesh', label: '서비스 메시'},
+        {type: 'doc', id: 'network/ebpf-networking', label: 'eBPF 네트워킹'},
+        {type: 'doc', id: 'network/network-troubleshooting', label: '네트워크 트러블슈팅'},
+        {type: 'doc', id: 'network/network-tuning', label: '네트워크 튜닝'},
       ],
     },
     {
