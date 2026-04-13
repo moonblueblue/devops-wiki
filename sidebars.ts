@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'linux/cpu-performance', label: 'CPU 성능'},
         {type: 'doc', id: 'linux/memory-oom', label: '메모리·OOM'},
         {type: 'doc', id: 'linux/disk-io-performance', label: '디스크 I/O'},
+        {type: 'doc', id: 'linux/network-performance', label: '네트워크 성능'},
       ],
     },
     {

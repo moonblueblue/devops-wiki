@@ -52,5 +52,5 @@ format: md
 - [x] [CPU 성능 분석 도구와 튜닝](cpu-performance.md)
 - [x] [메모리 관리와 OOM](memory-oom.md)
 - [x] [디스크 I/O 성능 분석](disk-io-performance.md)
-- [ ] 네트워크 성능 분석
+- [x] [네트워크 성능 분석](network-performance.md)
 - [ ] eBPF 기반 성능 분석 입문
