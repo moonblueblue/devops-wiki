@@ -26,6 +26,9 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'linux/syslog-journald', label: 'syslog·journald'},
         {type: 'doc', id: 'linux/log-rotation', label: '로그 로테이션'},
         {type: 'doc', id: 'linux/log-management', label: '로그 관리'},
+        {type: 'doc', id: 'linux/cpu-performance', label: 'CPU 성능'},
+        {type: 'doc', id: 'linux/memory-oom', label: '메모리·OOM'},
+        {type: 'doc', id: 'linux/disk-io-performance', label: '디스크 I/O'},
       ],
     },
     {
