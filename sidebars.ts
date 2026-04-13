@@ -61,7 +61,12 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '3. Container',
       link: {type: 'doc', id: 'container/index'},
-      items: [],
+      items: [
+        {type: 'doc', id: 'container/container-vs-vm', label: '컨테이너 vs VM'},
+        {type: 'doc', id: 'container/container-linux-internals', label: '컨테이너 내부 구조'},
+        {type: 'doc', id: 'container/docker-basics', label: 'Docker 기본'},
+        {type: 'doc', id: 'container/container-lifecycle', label: '컨테이너 라이프사이클'},
+      ],
     },
     {
       type: 'category',

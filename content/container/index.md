@@ -15,10 +15,10 @@ tags:
 
 ### 기초
 
-- [ ] 컨테이너 vs VM
-- [ ] 컨테이너를 구성하는 리눅스 기술 (cgroup, namespace, OverlayFS)
-- [ ] Docker 설치와 기본 명령어
-- [ ] 컨테이너 라이프사이클
+- [x] [컨테이너 vs VM](container-vs-vm.md)
+- [x] [컨테이너를 구성하는 리눅스 기술 (cgroup, namespace, OverlayFS)](container-linux-internals.md)
+- [x] [Docker 설치와 기본 명령어](docker-basics.md)
+- [x] [컨테이너 라이프사이클](container-lifecycle.md)
 
 ### 이미지
 
