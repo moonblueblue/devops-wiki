@@ -14,10 +14,10 @@ tags:
 
 ### 기초
 
-- [ ] OSI 7계층과 TCP/IP 모델
-- [ ] DNS 동작 원리
-- [ ] HTTP/HTTPS와 TLS
-- [ ] TCP vs UDP
+- [x] [OSI 7계층과 TCP/IP 모델](osi-tcpip.md)
+- [x] [DNS 동작 원리](dns-how-it-works.md)
+- [x] [HTTP/HTTPS와 TLS](http-https-tls.md)
+- [x] [TCP vs UDP](tcp-vs-udp.md)
 
 ### 인프라 네트워킹
 

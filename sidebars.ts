@@ -37,7 +37,12 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '2. Network',
       link: {type: 'doc', id: 'network/index'},
-      items: [],
+      items: [
+        {type: 'doc', id: 'network/osi-tcpip', label: 'OSI·TCP/IP'},
+        {type: 'doc', id: 'network/dns-how-it-works', label: 'DNS 동작 원리'},
+        {type: 'doc', id: 'network/http-https-tls', label: 'HTTP·TLS'},
+        {type: 'doc', id: 'network/tcp-vs-udp', label: 'TCP vs UDP'},
+      ],
     },
     {
       type: 'category',
