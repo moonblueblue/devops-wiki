@@ -55,6 +55,7 @@ const config: Config = {
       language: ['ko', 'en'],
       highlightSearchTermsOnTargetPage: true,
       searchBarPosition: 'right',
+      docsRouteBasePath: '/',
     }],
   ],
 
