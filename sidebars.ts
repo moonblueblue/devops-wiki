@@ -123,6 +123,8 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'iac/terraform-basics', label: 'Terraform 기초'},
         {type: 'doc', id: 'iac/terraform-core-components', label: 'Terraform 구성요소'},
         {type: 'doc', id: 'iac/terraform-module-state', label: 'Module·State 관리'},
+        {type: 'doc', id: 'iac/ansible-basics', label: 'Ansible 기초'},
+        {type: 'doc', id: 'iac/ansible-roles-galaxy', label: 'Role·Galaxy'},
       ],
     },
     {

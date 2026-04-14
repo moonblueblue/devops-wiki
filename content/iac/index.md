@@ -28,21 +28,5 @@ tags:
 
 ### Ansible
 
-- [ ] Ansible 기초 (Inventory, Playbook)
-- [ ] Module과 Handler
-- [ ] 변수, 반복문, 조건문
-- [ ] Role과 Galaxy
-- [ ] Ansible vs Terraform 역할 구분
-
-### 기타 도구
-
-- [ ] Pulumi 소개
-- [ ] Packer로 머신 이미지 관리
-- [ ] CloudFormation vs CDK (AWS)
-
-### 실전 패턴
-
-- [ ] IaC 디렉토리 구조 설계
-- [ ] 모듈 버전 관리
-- [ ] 시크릿 관리와 IaC
-- [ ] IaC 코드 리뷰 체크리스트
+- [x] [Ansible 기초 (Inventory, Playbook, 조건문, 반복문)](ansible-basics.md)
+- [x] [Role과 Galaxy (Collection, group_vars, Terraform 비교)](ansible-roles-galaxy.md)
