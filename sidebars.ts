@@ -142,7 +142,13 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '7. GitOps',
       link: {type: 'doc', id: 'gitops/index'},
-      items: [],
+      items: [
+        {type: 'doc', id: 'gitops/gitops-overview', label: 'GitOps 개요'},
+        {type: 'doc', id: 'gitops/argocd-basics', label: 'ArgoCD 기초'},
+        {type: 'doc', id: 'gitops/argocd-advanced', label: 'ArgoCD 고급'},
+        {type: 'doc', id: 'gitops/argo-rollouts', label: 'Argo Rollouts'},
+        {type: 'doc', id: 'gitops/flux-argocd-comparison', label: 'Flux vs ArgoCD'},
+      ],
     },
     {
       type: 'category',
