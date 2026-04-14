@@ -131,7 +131,12 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '6. CICD',
       link: {type: 'doc', id: 'cicd/index'},
-      items: [],
+      items: [
+        {type: 'doc', id: 'cicd/cicd-overview', label: 'CI/CD 개요'},
+        {type: 'doc', id: 'cicd/jenkins', label: 'Jenkins'},
+        {type: 'doc', id: 'cicd/github-actions-basics', label: 'GitHub Actions 기초'},
+        {type: 'doc', id: 'cicd/github-actions-advanced', label: 'GitHub Actions 실전'},
+      ],
     },
     {
       type: 'category',
