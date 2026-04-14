@@ -56,4 +56,4 @@ tags:
 
 ### 릴리즈 노트
 
-- [x] Kubernetes v1.33~v1.36 릴리즈 총정리
+- [x] [Kubernetes v1.33~v1.36 릴리즈 총정리](kubernetes-2025-2026-release-overview.md)
