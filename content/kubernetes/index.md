@@ -21,12 +21,12 @@ tags:
 
 ### 핵심 리소스
 
-- [ ] Pod, ReplicaSet, Deployment
-- [ ] Service, Ingress, Gateway API
-- [ ] ConfigMap, Secret
-- [ ] Namespace, ResourceQuota, LimitRange
-- [ ] Job, CronJob, DaemonSet, StatefulSet
-- [ ] PV, PVC, StorageClass
+- [x] [Pod, ReplicaSet, Deployment](pod-replicaset-deployment.md)
+- [x] [Service, Ingress, Gateway API](service-ingress-gateway.md)
+- [x] [ConfigMap, Secret](configmap-secret.md)
+- [x] [Namespace, ResourceQuota, LimitRange](namespace-quota.md)
+- [x] [Job, CronJob, DaemonSet, StatefulSet](job-daemonset-statefulset.md)
+- [x] [PV, PVC, StorageClass](pv-pvc-storageclass.md)
 
 ### 운영
 
