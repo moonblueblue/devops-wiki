@@ -77,6 +77,9 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'container/container-resources', label: '리소스 제한'},
         {type: 'doc', id: 'container/container-monitoring', label: '컨테이너 모니터링'},
         {type: 'doc', id: 'container/container-security', label: '컨테이너 보안'},
+        {type: 'doc', id: 'container/containerd-vs-docker', label: 'containerd vs Docker'},
+        {type: 'doc', id: 'container/oci-standards', label: 'OCI 표준'},
+        {type: 'doc', id: 'container/container-runtime-comparison', label: '런타임 비교'},
       ],
     },
     {

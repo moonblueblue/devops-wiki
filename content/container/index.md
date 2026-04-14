@@ -42,6 +42,6 @@ tags:
 
 ### 런타임
 
-- [ ] containerd vs Docker Engine
-- [ ] OCI 표준 (이미지, 런타임)
-- [ ] 컨테이너 런타임 비교
+- [x] [containerd vs Docker Engine](containerd-vs-docker.md)
+- [x] [OCI 표준 (이미지, 런타임, 배포)](oci-standards.md)
+- [x] [컨테이너 런타임 비교 (runc, gVisor, Kata)](container-runtime-comparison.md)
