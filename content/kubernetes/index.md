@@ -30,11 +30,11 @@ tags:
 
 ### 운영
 
-- [ ] kubectl 사용법과 팁
-- [ ] 파드 배치 전략 (NodeSelector, Affinity, Taint/Toleration)
-- [ ] 롤링 업데이트와 롤백
-- [ ] 클러스터 버전 업그레이드
-- [ ] 리소스 관리와 오토스케일링 (HPA, VPA, Karpenter)
+- [x] [kubectl 사용법과 팁](kubectl-tips.md)
+- [x] [파드 배치 전략 (NodeSelector, Affinity, Taint/Toleration)](pod-scheduling.md)
+- [x] [롤링 업데이트와 롤백](rolling-update.md)
+- [x] [클러스터 버전 업그레이드](cluster-upgrade.md)
+- [x] [리소스 관리와 오토스케일링 (HPA, VPA, Karpenter)](autoscaling.md)
 
 ### 네트워킹
 
