@@ -44,9 +44,9 @@ tags:
 
 ### 관리 도구
 
-- [ ] Kustomize
-- [ ] Helm
-- [ ] k9s, Lens, kubectx/kubens
+- [x] [Kustomize](kustomize.md)
+- [x] [Helm](helm.md)
+- [x] [k9s, Lens, kubectx/kubens](k9s-lens-tools.md)
 
 ### 트러블슈팅
 
