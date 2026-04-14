@@ -35,10 +35,10 @@ tags:
 
 ### 운영
 
-- [ ] Docker Compose로 멀티 컨테이너 관리
-- [ ] 컨테이너 리소스 제한 (CPU, 메모리, 디스크)
-- [ ] 컨테이너 모니터링 (cAdvisor)
-- [ ] 컨테이너 보안 기초
+- [x] [Docker Compose로 멀티 컨테이너 관리](docker-compose.md)
+- [x] [컨테이너 리소스 제한 (CPU, 메모리)](container-resources.md)
+- [x] [컨테이너 모니터링 (cAdvisor, Prometheus)](container-monitoring.md)
+- [x] [컨테이너 보안 기초](container-security.md)
 
 ### 런타임
 

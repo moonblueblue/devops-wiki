@@ -73,6 +73,10 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'container/docker-network', label: 'Docker 네트워크'},
         {type: 'doc', id: 'container/docker-volume', label: 'Volume·Bind Mount'},
         {type: 'doc', id: 'container/data-persistence', label: '데이터 지속성'},
+        {type: 'doc', id: 'container/docker-compose', label: 'Docker Compose'},
+        {type: 'doc', id: 'container/container-resources', label: '리소스 제한'},
+        {type: 'doc', id: 'container/container-monitoring', label: '컨테이너 모니터링'},
+        {type: 'doc', id: 'container/container-security', label: '컨테이너 보안'},
       ],
     },
     {
