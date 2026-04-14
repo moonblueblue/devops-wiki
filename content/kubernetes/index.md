@@ -14,10 +14,10 @@ tags:
 
 ### 아키텍처
 
-- [ ] 쿠버네티스 클러스터 구성요소
-- [ ] Control Plane (API Server, etcd, Scheduler, Controller Manager)
-- [ ] Worker Node (kubelet, kube-proxy, 컨테이너 런타임)
-- [ ] 클러스터 구축 방법 비교 (kubeadm, 매니지드, 수동)
+- [x] [쿠버네티스 클러스터 구성요소](k8s-architecture.md)
+- [x] [Control Plane (API Server, etcd, Scheduler, Controller Manager)](control-plane.md)
+- [x] [Worker Node (kubelet, kube-proxy, 컨테이너 런타임)](worker-node.md)
+- [x] [클러스터 구축 방법 비교 (kubeadm, 매니지드, k3s, kind)](cluster-setup.md)
 
 ### 핵심 리소스
 

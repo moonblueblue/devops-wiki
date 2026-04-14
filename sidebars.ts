@@ -87,6 +87,10 @@ const sidebars: SidebarsConfig = {
       label: '4. Kubernetes',
       link: {type: 'doc', id: 'kubernetes/index'},
       items: [
+        {type: 'doc', id: 'kubernetes/k8s-architecture', label: '클러스터 구성요소'},
+        {type: 'doc', id: 'kubernetes/control-plane', label: 'Control Plane'},
+        {type: 'doc', id: 'kubernetes/worker-node', label: 'Worker Node'},
+        {type: 'doc', id: 'kubernetes/cluster-setup', label: '클러스터 구축'},
         {type: 'doc', id: 'kubernetes/kubernetes-2025-2026-release-overview', label: 'v1.33~v1.36 릴리즈'},
       ],
     },
