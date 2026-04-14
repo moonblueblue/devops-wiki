@@ -38,9 +38,9 @@ tags:
 
 ### 네트워킹
 
-- [ ] 서비스 디스커버리와 CoreDNS
-- [ ] Ingress Controller 비교
-- [ ] 네트워크 폴리시
+- [x] [서비스 디스커버리와 CoreDNS](service-discovery-coredns.md)
+- [x] [Ingress Controller 비교](ingress-controller-comparison.md)
+- [x] [네트워크 폴리시](network-policy.md)
 
 ### 관리 도구
 
