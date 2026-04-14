@@ -118,7 +118,12 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '5. IaC',
       link: {type: 'doc', id: 'iac/index'},
-      items: [],
+      items: [
+        {type: 'doc', id: 'iac/iac-overview', label: 'IaC 개요'},
+        {type: 'doc', id: 'iac/terraform-basics', label: 'Terraform 기초'},
+        {type: 'doc', id: 'iac/terraform-core-components', label: 'Terraform 구성요소'},
+        {type: 'doc', id: 'iac/terraform-module-state', label: 'Module·State 관리'},
+      ],
     },
     {
       type: 'category',

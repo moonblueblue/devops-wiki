@@ -16,16 +16,13 @@ tags:
 
 ### 개념
 
-- [ ] IaC란 무엇인가
-- [ ] 선언형 vs 명령형
-- [ ] Configuration Management vs Provisioning
+- [x] [IaC란 무엇인가 (선언형 vs 명령형, 프로비저닝 vs 구성 관리)](iac-overview.md)
 
 ### Terraform
 
-- [ ] Terraform 기초 (HCL, 워크플로우)
-- [ ] Resource, Data, Variable, Output
-- [ ] Module 설계와 재사용
-- [ ] State 관리와 Backend
+- [x] [Terraform 기초 (HCL, 워크플로우)](terraform-basics.md)
+- [x] [Resource, Data, Variable, Output](terraform-core-components.md)
+- [x] [Module 설계와 State 관리](terraform-module-state.md)
 - [ ] Workspace와 디렉토리 전략
 - [ ] Terraform Cloud / Atlantis
 
