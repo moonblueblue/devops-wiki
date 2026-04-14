@@ -50,9 +50,9 @@ tags:
 
 ### 트러블슈팅
 
-- [ ] 파드가 안 뜰 때 디버깅 순서
-- [ ] 리소스 별 에러 메시지 유형과 해결
-- [ ] Finalizer와 Stuck 리소스 처리
+- [x] [파드가 안 뜰 때 디버깅 순서](pod-debugging.md)
+- [x] [리소스별 에러 메시지 유형과 해결](k8s-error-messages.md)
+- [x] [Finalizer와 Stuck 리소스 처리](finalizer-stuck-resources.md)
 
 ### 릴리즈 노트
 
