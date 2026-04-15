@@ -56,14 +56,14 @@ sudo apt install docker-ce docker-ce-cli \
 
 # 현재 사용자를 docker 그룹에 추가 (sudo 없이 사용)
 sudo usermod -aG docker $USER
-newgrp docker
+newgrp docker  # 현재 셸에 즉시 적용 (서브셸 생성). 완전한 적용은 로그아웃 후 재로그인 필요
 ```
 
 ### RHEL / Rocky / AlmaLinux
 
 ```bash
-sudo dnf install -y yum-utils
-sudo yum-config-manager --add-repo \
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo \
   https://download.docker.com/linux/rhel/docker-ce.repo
 sudo dnf install docker-ce docker-ce-cli \
   containerd.io docker-buildx-plugin docker-compose-plugin
@@ -205,10 +205,10 @@ docker pull myusername/myapp:1.0.0
 | 대상 | 개발자 로컬 환경 | 서버/CI 환경 |
 | OS | macOS, Windows, Linux | Linux |
 | UI | GUI 포함 | CLI만 |
-| 라이선스 | **유료** (250인+ 기업) | 오픈소스 무료 |
+| 라이선스 | **유료** (250인+ 또는 연매출 $10M+ 기업) | 오픈소스 무료 |
 | Kubernetes | 내장 | 별도 설치 필요 |
 
-> Docker Desktop은 2022년부터 대기업(250인 이상 또는 연매출 $10M 초과) 상업적 사용 시 유료.
+> Docker Desktop은 2022년부터 250인 이상 **또는** 연매출 $10M 초과 기업의 상업적 사용 시 유료.
 > 서버 환경에는 Docker Engine(오픈소스)을 사용한다.
 
 ---
