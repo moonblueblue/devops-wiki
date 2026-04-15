@@ -74,12 +74,14 @@ sidebar_label: "서비스 메시"
 
 **2025 벤치마크 (2000 RPS 기준):**
 
-| 솔루션 | p99 레이턴시 |
-|--------|-----------|
-| 베이스라인 (메시 없음) | 기준 |
-| Linkerd | +낮음 |
-| Istio Ambient | Linkerd +11.2ms |
-| Istio Sidecar | Linkerd +163ms |
+| 솔루션 | Linkerd 대비 p99 추가 레이턴시 |
+|--------|---------------------------|
+| Linkerd | 기준 (0ms) |
+| Istio Ambient | **+11.2ms** |
+| Istio Sidecar | **+163ms** |
+
+> 출처: Linkerd 공식 벤치마크 (2025-04-24, linkerd.io).
+> Linkerd가 주체인 벤치마크임을 감안할 것.
 
 ---
 
@@ -127,6 +129,7 @@ spec:
 
 ```bash
 # mTLS 상태 확인
+# x = experimental, 출력 형식이 버전마다 다를 수 있음
 istioctl x check-inject -n default
 kubectl exec <pod> -c istio-proxy -- \
   curl -s localhost:15000/clusters | grep "tls_context"
@@ -165,7 +168,7 @@ kubectl label namespace default istio.io/dataplane-mode=ambient
 ## 6. Linkerd 설치 및 사용
 
 ```bash
-# CLI 설치
+# CLI 설치 (프로덕션 환경에서는 스크립트를 먼저 내려받아 내용 확인 후 실행)
 curl --proto '=https' --tlsv1.2 -sSfL \
   https://run.linkerd.io/install | sh
 
@@ -175,6 +178,9 @@ linkerd check --pre
 # 설치
 linkerd install --crds | kubectl apply -f -
 linkerd install | kubectl apply -f -
+
+# viz 확장 설치 (stat, top 명령에 필요)
+linkerd viz install | kubectl apply -f -
 
 # 상태 확인
 linkerd check
@@ -208,4 +214,4 @@ linkerd viz top deploy/my-app
 - [Istio 공식 문서](https://istio.io/latest/docs/)
 - [Linkerd 공식 문서](https://linkerd.io/2-latest/overview/)
 - [Istio Ambient Mesh](https://istio.io/latest/docs/ambient/)
-- [CNCF Service Mesh 비교](https://www.cncf.io/blog/2021/03/10/service-mesh-comparison/)
+- [CNCF Service Mesh 비교](https://www.cncf.io/blog/2021/03/10/service-mesh-comparison/) (2021, 참고용)
