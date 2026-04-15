@@ -60,7 +60,7 @@ kubectl get rolebindings -n default
 ```
 etcd 3개 노드:
   Node A (Leader) → Node B, C에 데이터 복제
-  2/3 이상 동의 시 커밋
+  과반수(quorum = ⌊n/2⌋+1) 동의 시 커밋 (3노드: 2개 이상)
   Leader 장애 → 자동으로 새 Leader 선출
 ```
 
@@ -78,10 +78,15 @@ ETCDCTL_API=3 etcdctl \
 # 백업 검증
 ETCDCTL_API=3 etcdctl snapshot status /backup/etcd-20260414.db
 
-# 복구
+# 복구 (실제 운영 환경: 추가 옵션 필수)
+# --name, --initial-cluster 등은 /etc/kubernetes/manifests/etcd.yaml에서 확인
 ETCDCTL_API=3 etcdctl snapshot restore \
   /backup/etcd-20260414.db \
-  --data-dir=/var/lib/etcd-restored
+  --data-dir=/var/lib/etcd-restored \
+  --name=master \
+  --initial-cluster=master=https://127.0.0.1:2380 \
+  --initial-advertise-peer-urls=https://127.0.0.1:2380 \
+  --initial-cluster-token=etcd-cluster-1
 
 # 멤버 상태 확인
 ETCDCTL_API=3 etcdctl \
@@ -152,7 +157,7 @@ kubectl describe pod <pod-name>
 | StatefulSet | 순서가 있는 Pod 관리 |
 | DaemonSet | 모든 Node에 Pod 배치 |
 | Job / CronJob | 일회성 / 반복 작업 |
-| Endpoint | Service ↔ Pod 매핑 |
+| EndpointSlice | Service ↔ Pod 매핑 (K8s 1.21+. Endpoints API는 1.33에서 deprecated) |
 | Namespace | 리소스 격리 |
 | GarbageCollector | 고아 리소스 정리 |
 
@@ -177,8 +182,11 @@ CSP(클라우드 서비스 제공자)의 API를 호출한다.
 |---------|------|
 | Node | EC2/VM 상태 동기화 |
 | Service | LoadBalancer 프로비저닝 (ELB 등) |
-| PersistentVolume | EBS/GCP PD/Azure Disk 할당 |
 | Route | VPC 라우팅 설정 |
+
+> 볼륨 프로비저닝(EBS/GCP PD/Azure Disk)은 CSI driver +
+> external-provisioner 사이드카가 담당한다.
+> cloud-controller-manager 소관이 아니다.
 
 ```yaml
 # Service type: LoadBalancer → CSP가 자동으로 LB 생성
