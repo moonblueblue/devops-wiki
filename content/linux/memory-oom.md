@@ -85,7 +85,7 @@ vmstat 1 10
 
 | 컬럼 | 주의 기준 |
 |------|----------|
-| `swpd` | 0 이상이면 메모리 압박 신호 |
+| `swpd` | 0 이상 + si/so > 0이면 현재 메모리 압박 (swpd만으로는 과거 스왑 사용 여부만 알 수 있음) |
 | `si/so` | 0 이상이면 스왑 활성화, 성능 저하 |
 | `b` | D 상태 프로세스, I/O 병목 |
 
@@ -242,9 +242,9 @@ sysctl -p /etc/sysctl.d/99-memory.conf
 ### 페이지 폴트 모니터링
 
 ```bash
-# 시스템 전체 page fault 추이
-vmstat 1 | awk '{print $10, $11}'
-# pgfault(minor), pgmajfault(major)
+# 시스템 전체 page fault 추이 (/proc/vmstat 직접 확인 권장)
+# vmstat의 10, 11번 컬럼은 in(인터럽트)/cs(컨텍스트 스위치)임 — page fault가 아님
+grep -E "pgfault|pgmajfault" /proc/vmstat
 
 # 특정 프로세스
 ps -o min_flt,maj_flt -p <PID>
@@ -295,8 +295,12 @@ cat /sys/fs/cgroup/<group>/memory.events
 
 | K8s 설정 | cgroup 파라미터 | 동작 |
 |---------|----------------|------|
-| `requests.memory` | `memory.low` (v2) | 소프트 보호 |
+| `requests.memory` | `memory.low` (v2, MemoryQoS alpha 활성 시) | 소프트 보호 |
 | `limits.memory` | `memory.max` (v2) | 하드 한도 |
+
+> `memory.low` 매핑은 MemoryQoS feature gate 활성화 필요
+> (K8s 1.36 기준 alpha, 기본 비활성).
+> 기본 상태에서 `requests.memory`는 스케줄링 기준으로만 사용된다.
 
 ```yaml
 resources:
