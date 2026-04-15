@@ -58,6 +58,8 @@ Cilium eBPF:
 | 10,000개 | ~100μs | ~0.1μs |
 
 > eBPF는 규칙 수에 무관하게 O(1) 조회다.
+> 수치는 규칙 수 증가에 따른 상대적 경향을 나타내며,
+> 실제 환경에 따라 다를 수 있다. ([Cilium 공식 벤치마크](https://docs.cilium.io/en/stable/operations/performance/benchmark/) 참조)
 
 ---
 
@@ -94,7 +96,7 @@ helm upgrade cilium cilium/cilium \
 # CLI로 실시간 흐름 확인
 hubble observe --last 100
 hubble observe --namespace production --verdict DROPPED
-hubble observe --protocol http --http-status-code 5xx
+hubble observe --protocol http --http-status 500
 
 # UI 접근
 cilium hubble ui
@@ -190,7 +192,10 @@ metadata:
 |--------|---------|------------|---------|
 | kube-proxy (iptables) | O(n) | 느림 (규모 증가 시) | 없음 |
 | kube-proxy (IPVS) | O(1) | 빠름 | 없음 |
+| kube-proxy (nftables) | O(1) | 빠름 | 없음 |
 | Cilium (eBPF) | **O(1)** | **최고** | **있음** |
+
+> ⚠️ IPVS는 K8s 1.35 deprecated, 1.36 제거 예정. 대안: nftables 또는 Cilium
 
 ---
 
@@ -200,4 +205,4 @@ metadata:
 - [Hubble 문서](https://docs.cilium.io/en/stable/observability/hubble/)
 - [Tetragon 문서](https://tetragon.io/docs/)
 - [ebpf.io - XDP](https://ebpf.io/applications/#xdp)
-- [Cilium 1.19 릴리즈 노트](https://github.com/cilium/cilium/releases/tag/v1.19.0)
+- [Cilium 최신 릴리즈 노트](https://github.com/cilium/cilium/releases)
