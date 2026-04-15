@@ -9,7 +9,6 @@ tags:
   - devops
 sidebar_label: "DNS 설정"
 ---
-format: md
 
 # DNS 설정과 resolv.conf
 
@@ -63,13 +62,16 @@ search example.com dev.example.com
 options timeout:2 attempts:3 rotate ndots:1
 ```
 
-`nameserver`는 최대 3개까지 지정 가능하며,
-첫 번째 서버가 응답하지 않을 때
-순서대로 다음 서버에 질의한다.
+`nameserver`는 glibc의 `MAXNS=3` 상수로 최대 3개까지 지정 가능하며,
+첫 번째 서버가 응답하지 않을 때 순서대로 다음 서버에 질의한다.
+systemd-resolved나 dnsmasq 같은 로컬 캐싱 리졸버를 앞단에 두면
+이 제한을 우회할 수 있다.
 
 `search`는 도트가 `ndots` 값 미만인 호스트명에
 지정된 도메인을 순차 붙여서 질의한다.
-glibc 2.26+ 에서는 도메인 수 제한이 없다.
+glibc 2.26+ 에서는 search 도메인 수 제한이 없다.
+단, 검색 도메인이 많을수록 DNS 질의 횟수가 선형 증가하므로
+3개 이하를 권장한다.
 
 ### options 상세
 
@@ -214,9 +216,9 @@ hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns
 | `myhostname` | 로컬 호스트명 해석 |
 | `mymachines` | systemd-machined 컨테이너 |
 
-`[!UNAVAIL=return]`은 resolve 모듈이
-사용 불가가 아닌 한 결과를 반환하고
-다음 모듈로 넘어가지 않는다는 의미다.
+`[!UNAVAIL=return]`은 resolve 모듈이 서비스 불능(UNAVAIL) 상태가
+아닌 결과(성공 또는 미발견)를 반환하면 즉시 결과를 확정하고
+이후 모듈(files, dns)을 건너뛴다는 의미다.
 
 ### 해석 순서 확인
 
@@ -333,8 +335,9 @@ dig @10.0.0.2 example.com +timeout=2 +tries=1
 
 ### Docker DNS
 
-Docker 컨테이너는 기본적으로
-호스트의 `/etc/resolv.conf`를 복사한다.
+기본 브리지 네트워크에서는 호스트의 `/etc/resolv.conf`를 복사하고,
+사용자 정의 브리지 네트워크에서는 Docker 내장 DNS(127.0.0.11)를
+통해 컨테이너 이름 기반 서비스 디스커버리를 처리한다.
 
 ```bash
 # 커스텀 DNS 서버 지정
@@ -351,9 +354,6 @@ docker run --dns=8.8.8.8 \
 }
 ```
 
-사용자 정의 브리지 네트워크에서는
-Docker 내장 DNS(127.0.0.11)가
-컨테이너 이름으로 서비스 디스커버리를 제공한다.
 
 ### Kubernetes CoreDNS
 
@@ -404,11 +404,13 @@ options ndots:5
 검색 도메인을 먼저 시도한다.
 
 ```text
-# api.example.com 질의 시 실제 DNS 질의 순서:
-1. api.example.com.default.svc.cluster.local
-2. api.example.com.svc.cluster.local
-3. api.example.com.cluster.local
-4. api.example.com  ← 최종 성공
+# api.internal.example.com (도트 3개, ndots:5 미만) 질의 시 실제 DNS 질의 순서:
+1. api.internal.example.com.default.svc.cluster.local  ← 실패
+2. api.internal.example.com.svc.cluster.local          ← 실패
+3. api.internal.example.com.cluster.local              ← 실패
+4. api.internal.example.com                            ← 최종 성공
+# 도트가 ndots:5 미만이면 search 도메인을 모두 소진한 뒤 FQDN 시도
+# → 외부 도메인 질의마다 3~4회 불필요한 DNS 라운드트립 발생
 ```
 
 외부 도메인 질의마다 불필요한 DNS 질의가
@@ -511,7 +513,8 @@ aws route53resolver create-resolver-endpoint \
   --name "to-onprem" \
   --direction OUTBOUND \
   --security-group-ids sg-xxx \
-  --ip-addresses SubnetId=subnet-xxx
+  --ip-addresses SubnetId=subnet-xxx,Ip=10.0.1.100 \
+  --ip-addresses SubnetId=subnet-yyy,Ip=10.0.2.100
 ```
 
 ### GCP Cloud DNS
