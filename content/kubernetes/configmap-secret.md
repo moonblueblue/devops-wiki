@@ -98,7 +98,7 @@ data:
 | `Opaque` | 임의 데이터 (기본값) |
 | `kubernetes.io/tls` | TLS 인증서 |
 | `kubernetes.io/dockerconfigjson` | Private 레지스트리 인증 |
-| `kubernetes.io/service-account-token` | ServiceAccount 토큰 |
+| `kubernetes.io/service-account-token` | ServiceAccount 토큰 (K8s 1.24+ 수동 생성, TokenRequest API 권장) |
 
 ```yaml
 # TLS Secret
@@ -172,10 +172,11 @@ Secret은 Base64 인코딩일 뿐이다.
 ### External Secrets Operator
 
 AWS Secrets Manager, HashiCorp Vault 등과 연동한다.
+ESO v1.0+ (2025-11 GA)에서는 `external-secrets.io/v1` API를 사용한다.
 
 ```yaml
 # SecretStore: 시크릿 소스 정의
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: aws-secrets
@@ -184,9 +185,11 @@ spec:
     aws:
       service: SecretsManager
       region: ap-northeast-2
+      # ⚠️ 인증 설정 필수. 프로덕션에서는 IRSA(IAM Roles for Service Accounts) 권장
+      # auth: { jwt: { serviceAccountRef: { name: eso-sa } } }
 ---
 # ExternalSecret: 동기화 규칙
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: db-secret
@@ -208,8 +211,8 @@ spec:
 Git에 암호화된 Secret을 저장할 수 있다.
 
 ```bash
-# 설치
-kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/controller.yaml
+# 설치 (버전 명시 권장)
+kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.28.0/controller.yaml
 
 # Secret 암호화
 kubectl create secret generic mysecret \
