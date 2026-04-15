@@ -11,7 +11,6 @@ tags:
   - devops
 sidebar_label: "CPU 성능"
 ---
-format: md
 
 # CPU 성능 분석 도구와 튜닝
 
@@ -257,12 +256,15 @@ cat /sys/fs/cgroup/<group>/cpu.max
 
 ### Kubernetes CPU 매핑
 
-| K8s 설정 | cgroup 파라미터 | 동작 |
-|----------|----------------|------|
-| `requests.cpu: 500m` | `cpu.shares: 512` | 비례 배분 (소프트) |
-| `limits.cpu: 1` | `quota: 100000` | 하드 캡 |
-| `limits.cpu: 500m` | `quota: 50000` | period당 50ms |
-| `limits.cpu: 2` | `quota: 200000` | period당 200ms |
+| K8s 설정 | cgroup v1 파라미터 | cgroup v2 파라미터 | 동작 |
+|----------|--------------------|---------------------|------|
+| `requests.cpu: 500m` | `cpu.shares: 512` | `cpu.weight: 20` | 비례 배분 (소프트) |
+| `limits.cpu: 1` | `quota: 100000` | `cpu.max: 100000 100000` | 하드 캡 |
+| `limits.cpu: 500m` | `quota: 50000` | `cpu.max: 50000 100000` | period당 50ms |
+| `limits.cpu: 2` | `quota: 200000` | `cpu.max: 200000 100000` | period당 200ms |
+
+> K8s 1.25+에서 cgroup v2가 기본이다.
+> `cpu.shares`(v1)와 `cpu.weight`(v2)는 스케일이 다르다.
 
 ### 쓰로틀링 모니터링
 
@@ -271,10 +273,13 @@ quota가 소진되면 해당 그룹의 모든 스레드가
 
 ```bash
 # 쓰로틀링 통계 확인
-cat /sys/fs/cgroup/cpu/<group>/cpu.stat
-# nr_periods 12345       # 총 기간 수
-# nr_throttled 234       # 쓰로틀링 발생 횟수
-# throttled_time 5678000 # 총 쓰로틀링 시간 (ns)
+# cgroup v2 경로: /sys/fs/cgroup/<group>/cpu.stat
+# cgroup v1 경로: /sys/fs/cgroup/cpu/<group>/cpu.stat
+cat /sys/fs/cgroup/<group>/cpu.stat
+# nr_periods 12345        # 총 기간 수
+# nr_throttled 234        # 쓰로틀링 발생 횟수
+# throttled_usec 5678000  # 총 쓰로틀링 시간 (us, cgroup v2)
+# throttled_time 5678000  # 총 쓰로틀링 시간 (ns, cgroup v1)
 
 # 쓰로틀링 비율 계산
 # throttle_ratio = nr_throttled / nr_periods
@@ -416,8 +421,8 @@ echo performance | sudo tee \
 # IRQ 번호 확인
 cat /proc/interrupts | grep eth0
 
-# IRQ를 CPU 0,1에 고정 (비트마스크 0x3)
-echo 3 > /proc/irq/<irq>/smp_affinity
+# IRQ를 CPU 0,1에 고정 (비트마스크 0x3, root 권한 필요)
+echo 3 | sudo tee /proc/irq/<irq>/smp_affinity
 
 # CPU 리스트로 설정
 echo 0,1 > /proc/irq/<irq>/smp_affinity_list
@@ -436,7 +441,9 @@ systemctl stop irqbalance
 ```bash
 # GRUB 설정
 GRUB_CMDLINE_LINUX="isolcpus=2,3"
-# update-grub 후 재부팅
+# Debian/Ubuntu: update-grub 후 재부팅
+# RHEL/CentOS:   grub2-mkconfig -o /boot/grub2/grub.cfg
+# ※ isolcpus 대신 cpuset cgroup 방식이 더 유연함 (Linux 5.x+)
 
 # 격리된 CPU에 프로세스 고정
 taskset -c 2,3 ./latency_critical_app
