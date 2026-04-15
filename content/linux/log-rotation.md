@@ -11,7 +11,6 @@ tags:
   - logging
 sidebar_label: "로그 로테이션"
 ---
-format: md
 
 # 리눅스 로그 로테이션 완벽 가이드
 
@@ -77,11 +76,11 @@ cat /etc/cron.daily/logrotate
 |----------|------|------|
 | `daily` | 매일 순환 | - |
 | `weekly` | 매주 순환 | `weekly 0` (일요일) |
-| `monthly` | 매월 순환 | `monthly 1` (1일) |
+| `monthly` | 매월 순환 | - (해당 월 첫 실행 시, 인자 미지원) |
 | `yearly` | 매년 순환 | - |
 | `size` | 크기 초과 시 순환 | `size 100M` |
-| `minsize` | 주기+크기 모두 충족 | `minsize 50M` |
-| `maxsize` | 크기만으로 즉시 순환 | `maxsize 500M` |
+| `minsize` | 파일이 설정 크기 미만이면 주기가 되어도 순환 안 함 | `minsize 50M` |
+| `maxsize` | 크기 초과 시 주기와 무관하게 즉시 순환 | `maxsize 500M` |
 
 #### 파일 관리
 
@@ -130,8 +129,10 @@ nginx는 `kill -USR1`로 로그 파일 핸들을 갱신한다.
     sharedscripts
     create 0640 www-data adm
     postrotate
-        [ -f /var/run/nginx.pid ] && \
-          kill -USR1 $(cat /var/run/nginx.pid)
+        # PID 파일 존재 + 내용 유효 여부 확인 후 시그널 전송
+        [ -s /var/run/nginx.pid ] && \
+          kill -USR1 $(cat /var/run/nginx.pid) || true
+        # 또는: nginx -s reopen 2>/dev/null || true
     endscript
 }
 ```
@@ -159,8 +160,10 @@ PID 파일이 없거나 시그널을 지원하지 않는 앱은
 
 ### Docker 컨테이너 로그 (logrotate 방식)
 
-Docker 자체 로그 드라이버 외에
-logrotate로 직접 관리할 수도 있다.
+> **주의:** Docker json-file 로그 드라이버와 logrotate를 동시에 사용하면
+> 이중 로테이션 충돌이 발생한다.
+> 아래 설정은 `daemon.json`에서 `log-driver`를 `none`으로
+> 설정한 경우에만 적용할 것.
 
 ```bash title="/etc/logrotate.d/docker-containers"
 # /etc/logrotate.d/docker-containers
@@ -198,9 +201,11 @@ logrotate -d -v /etc/logrotate.d/nginx
 logrotate -f /etc/logrotate.d/nginx
 
 # 상태 파일 확인 (마지막 순환 시각)
-cat /var/lib/logrotate/status
-# 또는
-cat /var/lib/logrotate.status
+# 배포판마다 경로가 다름
+# Debian/Ubuntu: /var/lib/logrotate/status
+# RHEL/CentOS:   /var/lib/logrotate.status
+cat /var/lib/logrotate/status 2>/dev/null || \
+  cat /var/lib/logrotate.status
 ```
 
 ### 흔한 문제와 해결
