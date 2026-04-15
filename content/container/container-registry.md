@@ -53,13 +53,15 @@ docker tag myapp:1.0.0 myorg/myapp:1.0.0
 docker push myorg/myapp:1.0.0
 ```
 
-### Rate Limit (2026년 기준)
+### Rate Limit (2025-04-01 이후 정책)
 
 | 계정 유형 | Rate Limit |
 |---------|-----------|
-| 익명 | 100 pulls / 6시간 / IP |
-| 무료 인증 | 200 pulls / 6시간 |
+| 익명 | 10 pulls / 시간 / IP |
+| 무료 인증 | 100 pulls / 시간 |
 | Pro/Team | 무제한 |
+
+> 2025년 4월 1일부터 6시간 단위 → 시간 단위로 변경됨.
 
 > CI/CD에서 Docker Hub rate limit를 피하려면
 > 인증 후 pull하거나, 미러 레지스트리를 설정하라.
@@ -85,7 +87,7 @@ helm install harbor harbor/harbor \
 |------|------|
 | 취약점 스캔 | Trivy/Clair 내장 |
 | 이미지 복제 | 다른 레지스트리로 동기화 |
-| 콘텐츠 신뢰 | Notary 서명 |
+| 콘텐츠 신뢰 | Cosign / Notation(Notary v2) 서명 (Notary v1은 v2.9.0에서 제거됨) |
 | Robot 계정 | CI/CD 전용 계정 |
 | 웹훅 | 이벤트 기반 자동화 |
 | Proxy Cache | Docker Hub 미러 |
@@ -163,12 +165,15 @@ cosign sign --key cosign.key myregistry/myapp:1.0.0
 cosign verify --key cosign.pub myregistry/myapp:1.0.0
 
 # 키리스 서명 (OIDC 기반, CI/CD 권장)
-# GitHub Actions에서:
-cosign sign --identity-token=$(
-  curl -sLS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-  "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sigstore" \
-  | jq -r .value) \
-  myregistry/myapp:1.0.0
+# GitHub Actions workflow 예시:
+# permissions:
+#   id-token: write
+#   contents: read
+# steps:
+#   - uses: sigstore/cosign-installer@v3
+#   - run: cosign sign myregistry/myapp@${{ steps.build.outputs.digest }}
+# cosign v2+: COSIGN_EXPERIMENTAL 불필요, 환경 자동 감지
+# ⚠️ 태그 대신 digest(@sha256:...)로 서명 권장 (불변 참조)
 ```
 
 ---
