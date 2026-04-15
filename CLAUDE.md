@@ -117,26 +117,53 @@ DevOps 엔지니어를 위한 오픈 테크 블로그/위키.
 
 ## 카테고리 구조 (DevOps 로드맵 순서)
 
-content/ 하위 10개 카테고리를 학습 로드맵 순서로 운영한다.
-입문자가 1번부터 순서대로 학습할 수 있도록 배치한다.
+content/ 하위 12개 카테고리를 학습 로드맵 순서로 운영한다.
+기반→운영→성숙도→진화 순서로 배치한다.
+
+### 카테고리 그룹
+
+```
+[기반 지식]      01-03  Linux, Network, Container
+[핵심 운영 기술]  04-07  Kubernetes, IaC, CI/CD, GitOps
+[운영 성숙도]    08-10  Observability, Security, SRE
+[진화]          11-12  Platform Engineering, FinOps
+```
+
+### 상세 목록
 
 | 순서 | 카테고리 | 범위 | 왜 이 순서인가 |
 |:---:|---------|------|-------------|
-| 1 | `linux/` | 시스템 관리, 성능분석, 셸 스크립트, systemd | 모든 인프라의 기반 |
-| 2 | `network/` | DNS, HTTP, 로드밸런서, VPC, CNI | 트러블슈팅의 절반은 네트워크다 |
-| 3 | `container/` | Docker, 이미지 빌드/최적화, 런타임, 레지스트리 | 현대 배포의 기본 단위 |
-| 4 | `kubernetes/` | API 리소스, 클러스터 관리, 업그레이드, 트러블슈팅 | 컨테이너 오케스트레이션 |
-| 5 | `iac/` | Terraform, Ansible, Pulumi | 인프라를 코드로 관리 |
-| 6 | `cicd/` | Jenkins, GitHub Actions, 파이프라인, 테스트 자동화 | 코드 → 배포 자동화 |
-| 7 | `gitops/` | ArgoCD, Flux, Kustomize, Helm | 선언적 배포와 드리프트 방지 |
-| 8 | `observability/` | Prometheus, Grafana, ELK, OpenTelemetry | 배포 후 시스템을 보는 눈 |
-| 9 | `security/` | DevSecOps, IAM, 시크릿, SBOM, 공급망 보안 | 파이프라인 전체에 보안을 녹여넣기 |
-| 10 | `sre/` | 장애 대응, SLI/SLO, 카오스 엔지니어링 | 위 모든 것을 종합하는 운영 철학 |
+| 01 | `linux/` | 커널, cgroups, namespaces, 보안, 성능, eBPF | 모든 인프라의 기반 |
+| 02 | `network/` | TCP/IP, DNS, HTTP/2/3, TLS, BGP, VPN, CDN | 트러블슈팅의 절반은 네트워크 |
+| 03 | `container/` | Docker, OCI, BuildKit, Podman, 런타임 | 현대 배포의 기본 단위 |
+| 04 | `kubernetes/` | 아키텍처, 리소스, 스케줄링, Operator, 백업 | 컨테이너 오케스트레이션 |
+| 05 | `iac/` | Terraform, OpenTofu, Ansible, Crossplane | 인프라를 코드로 |
+| 06 | `cicd/` | Jenkins, GHA, GitLab CI, Tekton, DORA | 코드→배포 자동화 |
+| 07 | `gitops/` | ArgoCD, Flux, Argo Rollouts | 선언적 배포, 드리프트 방지 |
+| 08 | `observability/` | Prometheus, OTel, Profiling, eBPF | 시스템을 보는 눈 |
+| 09 | `security/` | DevSecOps, Zero Trust, 공급망, 정책 | 파이프라인 보안 |
+| 10 | `sre/` | SLO, Postmortem, Toil, 카오스, Runbook | 신뢰성 공학 |
+| 11 | `platform-engineering/` | IDP, Backstage, Golden Path, DevEx | DevOps의 프로덕트화 |
+| 12 | `finops/` | 비용 가시화, 최적화, Kubecost, 지속가능성 | 운영 성숙 단계 |
+
+### 카테고리 경계 원칙
+
+한 주제는 **반드시 한 카테고리가 주인공**이다. 중복 방지를 위해:
+
+- Kustomize/Helm 도구 자체 → `kubernetes/`
+  - GitOps 맥락의 활용 → `gitops/`
+- Network Policy K8s 리소스 → `kubernetes/`
+  - 네트워크 보안 전략 → `security/`
+- Docker 네트워크 → `container/`
+- CoreDNS → `kubernetes/` (K8s 필수 컴포넌트)
+- eBPF 기반 기술 → `linux/`
+  - 네트워킹 응용 → `network/`
+  - 관측 응용 → `observability/`
 
 ### 향후 확장 후보
 
-- `platform-engineering/` : IDP, 골든패스, 셀프서비스
 - `cloud/` : 멀티클라우드 아키텍처 비교
+- `data/` : 데이터베이스 운영과 데이터 엔지니어링
 
 ---
 
@@ -254,8 +281,9 @@ reviewer는 이 목록을 기준으로 "필수 개념"을 판정한다.
 
 ## 작성 우선순위
 
-로드맵 순서(1→10)를 기본으로 하되, 아래 기준으로 조정한다:
+로드맵 순서(01→12)를 기본으로 하되, 아래 기준으로 조정한다:
 
 1. **기반 지식 우선** — linux, network, container
 2. **핵심 운영 기술** — kubernetes, iac, cicd, gitops
 3. **운영 성숙도** — observability, security, sre
+4. **진화** — platform-engineering, finops
