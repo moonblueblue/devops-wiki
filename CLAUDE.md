@@ -49,8 +49,16 @@ DevOps 엔지니어를 위한 오픈 테크 블로그/위키.
 - raw/의 소스를 읽고 content/에 위키 글 작성
 - 기존 글과 새 정보를 비교해서 업데이트
 - 최신 여부 확인이 필요하면 글로벌 리서치로 보완
-- 기술적 깊이는 실무 DevOps 엔지니어 수준 유지
+- **기술적 깊이는 글로벌 스탠다드(Google, Netflix, Cloudflare 등
+  탑티어 엔지니어 수준)를 목표로 한다**
 - 한국어로 작성
+
+### review (검수)
+- `.claude/agents/reviewer.md`의 기준으로 검수한다
+- 검수 대상은 개별 글, 카테고리 index.md, 전체 뼈대 세 가지
+- **개별 글 작성/수정 시**: 해당 파일의 정확성·깊이 검수
+- **카테고리 추가/변경 시**: index.md의 개념 완결성 검수
+- **주기적(분기 1회 권장)**: 전체 뼈대 검수 (중복·범위·중립성)
 
 ### PR
 - 작업 완료 후 feature 브랜치 생성
@@ -134,29 +142,113 @@ content/ 하위 10개 카테고리를 학습 로드맵 순서로 운영한다.
 
 ## 레퍼런스 소스
 
-글 작성 시 아래 소스를 우선 참조한다.
+이 위키는 **글로벌 스탠다드** 수준의 DevOps/SRE 지식을 다룬다.
+글 작성·검수 시 아래 레퍼런스를 우선 참조한다.
+reviewer는 이 목록을 기준으로 "필수 개념"을 판정한다.
 
-### 1순위: 공식 문서
-- kubernetes.io/docs
-- docs.docker.com
-- developer.hashicorp.com/terraform
-- prometheus.io/docs
-- argo-cd.readthedocs.io
-- istio.io/latest/docs
-- docs.aws.amazon.com
-- cloud.google.com/docs
-- learn.microsoft.com/azure
+### 1순위: 재단·표준 기관
 
-### 2순위: CNCF 및 커뮤니티
-- CNCF Blog (cncf.io/blog)
-- KubeWeekly (CNCF 공식 주간 뉴스레터)
-- The New Stack (thenewstack.io)
-- DevOps Weekly (devopsweekly.com)
+클라우드 네이티브와 OSS 생태계의 최상위 권위체.
 
-### 3순위: GitHub & 로드맵
+| 기관 | 역할 | 주요 리소스 |
+|------|------|------------|
+| CNCF | 클라우드 네이티브 프로젝트 관장 | cncf.io, CNCF Landscape, TOC, Graduated/Incubating 분류 |
+| Linux Foundation | OSS 표준의 최상위 | linuxfoundation.org, OpenSSF |
+| Apache Software Foundation | 대규모 OSS (Kafka, Spark 등) | apache.org |
+| OpenInfra Foundation | 인프라 OSS (구 OpenStack) | openinfra.dev |
+| OCI (Open Container Initiative) | 컨테이너 표준 | opencontainers.org |
+
+### 2순위: 공식 문서
+
+| 영역 | 소스 |
+|------|------|
+| Kubernetes | kubernetes.io/docs, SIG 그룹, KEP |
+| 컨테이너 | docs.docker.com, containerd, podman.io |
+| HashiCorp | developer.hashicorp.com (Terraform, Vault, Consul, Nomad) |
+| 관측성 | prometheus.io, grafana.com/docs, opentelemetry.io, jaegertracing.io |
+| GitOps | argo-cd.readthedocs.io, fluxcd.io, argoproj.github.io |
+| 서비스 메시 | istio.io, linkerd.io, envoyproxy.io |
+| 보안 | openpolicyagent.org, falco.org, sigstore.dev, spiffe.io |
+| 클라우드 | docs.aws.amazon.com, cloud.google.com/docs, learn.microsoft.com/azure |
+
+### 3순위: 컨퍼런스 (최신 동향·실전 사례)
+
+| 컨퍼런스 | 주최 | 관점 |
+|---------|------|------|
+| KubeCon + CloudNativeCon | CNCF | 클라우드 네이티브 전반 (연 3회: NA/EU/APAC) |
+| SREcon | USENIX | SRE 실무와 운영 철학 |
+| Open Source Summit | Linux Foundation | OSS 생태계 전반 |
+| PromCon | Prometheus 커뮤니티 | 관측 성능·확장 |
+| ArgoCon | Argo 커뮤니티 | GitOps 심화 |
+| HashiConf | HashiCorp | IaC와 인프라 자동화 |
+| DockerCon | Docker | 컨테이너 |
+| FOSDEM | 유럽 OSS 커뮤니티 | 중립적·기술적 |
+| DevOpsDays | 지역별 | 현장 실무 사례 |
+| AWS re:Invent / Google Cloud Next / MS Ignite | CSP | 클라우드 서비스 |
+
+### 4순위: 정전(Canon) 도서
+
+| 도서 | 저자 | 위상 |
+|------|------|------|
+| Google SRE Book (3권 시리즈) | Google | sre.google 무료 공개. SRE의 성경 |
+| The DevOps Handbook | Gene Kim 외 | DevOps 기본 텍스트 |
+| Accelerate | Nicole Forsgren | DORA 메트릭의 근거 |
+| The Phoenix Project | Gene Kim | 조직 관점 고전 |
+| Kubernetes Patterns | Bilgin Ibryam | K8s 아키텍처 패턴 |
+| Production Kubernetes | Josh Rosso 외 | 프로덕션 운영 심화 |
+| Database Reliability Engineering | Laine Campbell | 데이터 SRE |
+
+### 5순위: 보안·컴플라이언스 표준
+
+| 표준 | 내용 |
+|------|------|
+| CIS Benchmarks | Kubernetes, Docker, Linux 하드닝 기준 |
+| NSA Kubernetes Hardening Guide | K8s 보안 국가 기관 표준 |
+| NIST Cybersecurity Framework | 보안 프레임워크 |
+| OWASP Top 10 / ASVS | 애플리케이션 보안 |
+| SLSA | 공급망 보안 레벨 |
+| OpenSSF Best Practices | OSS 보안 |
+
+### 6순위: 글로벌 탑티어 엔지니어링 블로그
+
+| 회사 | 특징 |
+|------|------|
+| Google Cloud Blog | 대규모 K8s, Borg 기반 철학 |
+| Netflix Tech Blog | 카오스, 마이크로서비스 |
+| Cloudflare Blog | 네트워크, eBPF, 보안 |
+| Stripe Engineering | API·결제 시스템 SRE |
+| Uber Engineering | 대규모 인프라, M3 메트릭 |
+| Airbnb Engineering | 데이터·플랫폼 |
+| Spotify Engineering | Backstage, 플랫폼 엔지니어링 |
+| GitHub Engineering | Git·Actions 내부 |
+| Datadog / Grafana Labs | 관측성 |
+| HashiCorp Blog | IaC·보안 |
+
+### 7순위: 연구·지표
+
+| 소스 | 내용 |
+|------|------|
+| DORA State of DevOps Report | 연간 DevOps 성숙도 조사 (DORA 메트릭 출처) |
+| ThoughtWorks Technology Radar | 분기별 기술 트렌드 (Adopt/Trial/Assess/Hold) |
+| CNCF Annual Survey | 클라우드 네이티브 채택 현황 |
+| RedMonk Programming Language Rankings | 언어 동향 |
+| StackOverflow Developer Survey | 개발자 도구 사용 |
+
+### 8순위: 뉴스레터·미디어
+
+| 소스 | 특징 |
+|------|------|
+| KubeWeekly | CNCF 공식 주간 뉴스 |
+| The New Stack | 클라우드 네이티브 심층 기사 |
+| DevOps Weekly | DevOps 전반 큐레이션 |
+| SRE Weekly | SRE 특화 |
+| Kubernetes Podcast by Google | K8s 심층 |
+| Software Engineering Daily | 폭넓은 주제 팟캐스트 |
+
+### 학습 로드맵 참고
+
 - roadmap.sh/devops
-- awesome-devops, awesome-kubernetes, awesome-sre
-- KubeCon 발표 (CNCF YouTube)
+- awesome-devops, awesome-kubernetes, awesome-sre (GitHub)
 
 ---
 
