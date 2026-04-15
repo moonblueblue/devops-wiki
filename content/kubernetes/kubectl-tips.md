@@ -147,6 +147,8 @@ kubectl ns -       # 이전 namespace로 돌아가기
   tar zxvf krew-linux_amd64.tar.gz &&
   ./krew-linux_amd64 install krew
 )
+# PATH에 krew bin 추가 (~/.bashrc 또는 ~/.zshrc)
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 # 추천 플러그인
 kubectl krew install ctx       # context 전환
