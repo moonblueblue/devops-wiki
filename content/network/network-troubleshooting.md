@@ -116,8 +116,11 @@ tcpdump -i eth0 -nn host 10.0.0.1
 # 포트 필터링
 tcpdump -i eth0 -nn port 443
 
-# SYN 패킷만 (연결 시도 추적)
+# SYN 또는 SYN-ACK 패킷 캡처 (연결 시도 및 응답 포함)
 tcpdump -i eth0 'tcp[tcpflags] & tcp-syn != 0'
+
+# 순수 SYN만 (연결 시도만, SYN-ACK 제외)
+tcpdump -i eth0 'tcp[tcpflags] & (tcp-syn|tcp-ack) == tcp-syn'
 
 # RST 패킷 (강제 종료)
 tcpdump -i eth0 'tcp[tcpflags] & tcp-rst != 0'
@@ -172,9 +175,9 @@ kubectl debug -it <pod-name> \
 ### DNS 트러블슈팅
 
 ```bash
-# dnsutils Pod로 DNS 테스트
+# DNS 테스트 Pod (agnhost: 공식 K8s 도구 이미지, jessie-dnsutils는 EOL)
 kubectl run dnsutils --rm -it \
-  --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 \
+  --image=registry.k8s.io/e2e-test-images/agnhost:2.39 \
   --restart=Never -- /bin/bash
 
 # 내부 서비스 조회
