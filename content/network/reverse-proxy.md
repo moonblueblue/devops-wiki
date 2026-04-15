@@ -119,7 +119,10 @@ http {
         location /api/public/ {
             proxy_cache app_cache;
             proxy_cache_valid 200 10m;
-            proxy_cache_use_stale error timeout;
+            proxy_cache_use_stale error timeout updating
+                                  http_500 http_502 http_503 http_504;
+            proxy_cache_background_update on;
+            proxy_cache_lock on;
             add_header X-Cache-Status $upstream_cache_status;
             proxy_pass http://api_backend;
         }
@@ -139,7 +142,7 @@ http {
 global
     log /dev/log local0
     maxconn 50000
-    tune.ssl.default-dh-param 2048
+    tune.ssl.default-dh-param 2048  # HAProxy 2.2+ 기본값, 구버전 대응용
 
 defaults
     mode http
@@ -164,7 +167,8 @@ frontend http_in
 
 backend app_servers
     balance leastconn
-    option httpchk GET /health
+    option httpchk
+    http-check send meth GET uri /health ver HTTP/1.1 hdr Host app.example.com
     http-check expect status 200
     server app1 10.0.1.10:8080 check
     server app2 10.0.1.11:8080 check
@@ -194,11 +198,12 @@ frontend stats
 
 ```bash
 # 런타임 API로 서버 상태 변경
+# 소켓 경로는 배포판마다 상이 (config의 stats socket 경로 확인)
 echo "disable server app_servers/app1" \
-  | socat stdio /var/run/haproxy.sock
+  | socat stdio unix-connect:/var/run/haproxy/admin.sock
 
 echo "enable server app_servers/app1" \
-  | socat stdio /var/run/haproxy.sock
+  | socat stdio unix-connect:/var/run/haproxy/admin.sock
 ```
 
 ---
@@ -229,6 +234,7 @@ http-response set-header X-Frame-Options SAMEORIGIN
 | `X-Forwarded-Proto` | 원본 프로토콜 (http/https) |
 | `X-Forwarded-Host` | 원본 Host 헤더 |
 | `X-Real-IP` | 클라이언트 IP (Nginx 단독 헤더) |
+| `Forwarded` | RFC 7239 표준 헤더. HAProxy는 `option forwarded`로 지원, Nginx는 map 블록 필요 |
 
 ---
 
