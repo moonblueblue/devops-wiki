@@ -102,8 +102,8 @@ sudo opensnoop -e         # 오류 발생 케이스만
 #### biolatency — 디스크 I/O 지연 분포
 
 ```bash
-# 30초간 블록 I/O 지연 히스토그램
-sudo biolatency -m 30
+# 블록 I/O 지연 히스토그램 (-m: ms 단위, 1초 간격 30회)
+sudo biolatency -mT 1 30
 
 # 출력 예시
 # Tracing block device I/O... Hit Ctrl-C to end.
@@ -227,8 +227,10 @@ bpftrace -e 'tracepoint:syscalls:sys_enter_read
   { @[comm] = count() }'
 
 # 파일 열기 추적 (오류 포함)
+# bpftrace 0.19+: args.filename (점 표기법)
+# bpftrace 0.18-: args->filename (deprecated)
 bpftrace -e 'tracepoint:syscalls:sys_exit_openat
-  /retval < 0/ { printf("%s: %s\n", comm, str(args->filename)) }'
+  /retval < 0/ { printf("%s: %s\n", comm, str(args.filename)) }'
 
 # read() 지연 히스토그램 (μs 단위)
 bpftrace -e '
@@ -240,19 +242,20 @@ bpftrace -e '
     delete(@start[tid]);
   }'
 
-# TCP 연결 시도 추적
+# TCP 연결 시도 추적 (BTF 미지원 환경 전용, 커널 버전별 구조체 레이아웃 상이)
+# BTF 지원 환경(커널 5.2+)에서는 tracepoint 방식 사용 권장
 bpftrace -e 'kprobe:tcp_connect
   { printf("%s → %s\n", comm, ntop(((struct sock*)arg0)->__sk_common.skc_daddr)) }'
 
 # 10ms 이상 걸리는 디스크 I/O
 bpftrace -e '
-  tracepoint:block:block_rq_issue { @start[args->dev, args->sector] = nsecs; }
+  tracepoint:block:block_rq_issue { @start[args.dev, args.sector] = nsecs; }
   tracepoint:block:block_rq_complete
-  /@start[args->dev, args->sector]/
+  /@start[args.dev, args.sector]/
   {
-    $ms = (nsecs - @start[args->dev, args->sector]) / 1000000;
+    $ms = (nsecs - @start[args.dev, args.sector]) / 1000000;
     if ($ms > 10) { printf("I/O %dms\n", $ms); }
-    delete(@start[args->dev, args->sector]);
+    delete(@start[args.dev, args.sector]);
   }'
 ```
 
@@ -293,8 +296,9 @@ hubble observe --protocol http
 # 설치
 kubectl krew install trace
 
-# 특정 Pod에서 bpftrace 실행
-kubectl trace run pod/<pod-name> -e \
+# 특정 Pod에서 bpftrace 실행 (네임스페이스 지정 필요)
+# ⚠️ kubectl-trace는 현재 유지보수 미흡, 프로덕션 사용 시 주의
+kubectl trace run pod/<pod-name> -n <namespace> -e \
   'tracepoint:syscalls:sys_enter_read { @[comm] = count() }'
 ```
 
@@ -336,11 +340,11 @@ sudo profile -F 99 -af 30 > out.stacks
 ### 디스크 I/O 지연 분석
 
 ```bash
-# 지연 분포 확인
-sudo biolatency -m 30
+# 지연 분포 확인 (-m: ms 단위, 1초 간격 30회)
+sudo biolatency -mT 1 30
 
-# 느린 I/O 파일 특정
-sudo biosnoop | awk '$5 > 10'  # 10ms 이상
+# 느린 I/O 파일 특정 ($NF: 마지막 컬럼 LAT(ms), 버전별 컬럼 위치 상이)
+sudo biosnoop | awk '$NF > 10'  # 10ms 이상
 
 # 파일시스템 레벨 확인
 sudo ext4slower 5   # 5ms 이상
@@ -391,11 +395,11 @@ sudo syscount -i 5
 # 무슨 프로세스가 파일을 여는가?
 sudo opensnoop
 
-# CPU 어디서 쓰는가?
-sudo profile -F 99 30 | head -20
+# CPU 어디서 쓰는가? (스택 트레이스 수집 후 Flame Graph 생성)
+sudo profile -F 99 -af 30 > /tmp/out.stacks
 
-# 디스크 어디서 느린가?
-sudo biolatency -m 10
+# 디스크 어디서 느린가? (1초 간격 10회)
+sudo biolatency -mT 1 10
 
 # CPU 런큐 대기 얼마나?
 sudo runqlat 10 1
