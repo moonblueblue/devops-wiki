@@ -175,9 +175,9 @@ kubectl rollout undo deployment/<name> \
 ### Endpoints 없음
 
 ```bash
-# 진단
-kubectl get endpoints <svc-name>
-# → "Endpoints: <none>" 이면 Pod 연결 안 됨
+# 진단 (K8s 1.33+ 권장)
+kubectl get endpointslices -l kubernetes.io/service-name=<svc-name>
+# → 출력 없으면 Pod 연결 안 됨
 
 # 라벨 셀렉터 일치 여부 확인
 kubectl get svc <svc> -o jsonpath='{.spec.selector}'
@@ -189,12 +189,12 @@ kubectl get pods -l app=myapp --show-labels
 # Service
 spec:
   selector:
-    app: myapp    ← 이 라벨을
+    app: myapp    # ← 이 라벨을
 
 # Pod
 metadata:
   labels:
-    app: myapp    ← Pod가 가지고 있어야 함
+    app: myapp    # ← Pod가 가지고 있어야 함
 ```
 
 ---
@@ -203,8 +203,8 @@ metadata:
 
 ```bash
 # 진단 순서
-# 1. Endpoints 확인
-kubectl get endpoints <svc>
+# 1. EndpointSlice 확인 (K8s 1.33+ 권장)
+kubectl get endpointslices -l kubernetes.io/service-name=<svc>
 
 # 2. Pod 포트 확인
 kubectl get pod <pod> -o yaml \
@@ -310,15 +310,11 @@ journalctl --vacuum-size=1G
 crictl rm $(crictl ps -a -q)
 ```
 
-```json
-// /etc/docker/daemon.json - 로그 용량 제한
-{
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
-}
+```yaml
+# /var/lib/kubelet/config.yaml - containerd 환경 로그 제한
+# (kubelet 설정 후 systemctl restart kubelet)
+containerLogMaxSize: "10Mi"
+containerLogMaxFiles: 3
 ```
 
 ---
