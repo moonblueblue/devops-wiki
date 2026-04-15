@@ -104,8 +104,9 @@ ping -M do -s 8972 <대상IP>
 ### 컨테이너/VXLAN 환경 MTU
 
 ```
-VXLAN 오버헤드: 50 bytes
-물리 MTU 1500 → Pod MTU 1450으로 설정 필요
+VXLAN 오버헤드: 50 bytes (IPv4 기준: Ethernet14 + IP20 + UDP8 + VXLAN8)
+IPv6 언더레이: 70 bytes → Pod MTU 1430
+물리 MTU 1500 → Pod MTU 1450 (IPv4) / 1430 (IPv6)으로 설정 필요
 
 Calico/Cilium은 자동으로 MTU를 감지하고 설정함
 수동 확인:
@@ -135,8 +136,12 @@ net.core.rmem_max = 134217728
 net.core.wmem_max = 134217728
 
 # ===== TIME_WAIT 관리 =====
+# tcp_tw_reuse: 0=비활성, 1=아웃바운드 전체, 2=loopback only (Linux 5.2+ 기본값)
+# ⚠️ NAT/클라우드 환경에서 = 1 사용 시 패킷 충돌 위험
 net.ipv4.tcp_tw_reuse = 1       # 아웃바운드 TIME_WAIT 재사용
-net.ipv4.tcp_fin_timeout = 15   # 기본 60초 → 단축
+# ⚠️ tcp_fin_timeout = 15는 내부 마이크로서비스 간 통신에만 권장
+# 인터넷 facing 서비스는 30초 이상 유지할 것
+net.ipv4.tcp_fin_timeout = 15   # 기본 60초 → 단축 (FIN_WAIT_2 타임아웃)
 net.ipv4.ip_local_port_range = 1024 65535  # 로컬 포트 범위 확장
 
 # ===== BBR 혼잡 제어 (Linux 4.9+) =====
@@ -167,6 +172,8 @@ sysctl net.core.somaxconn
 
 ```yaml
 # Namespaced sysctl은 Pod에서 직접 설정 가능
+# ⚠️ net.ipv4.tcp_tw_reuse는 unsafe sysctl
+# kubelet에 --allowed-unsafe-sysctls 플래그 설정 필요
 apiVersion: v1
 kind: Pod
 spec:
@@ -174,9 +181,9 @@ spec:
     sysctls:
       - name: net.ipv4.tcp_fin_timeout
         value: "15"
-      - name: net.ipv4.tcp_tw_reuse
+      - name: net.ipv4.tcp_tw_reuse   # unsafe sysctl (kubelet 허용 필요)
         value: "1"
-      - name: net.core.somaxconn
+      - name: net.core.somaxconn      # safe sysctl
         value: "65535"
 ```
 
@@ -204,7 +211,7 @@ spec:
             privileged: true
       containers:
         - name: pause
-          image: gcr.io/google_containers/pause:3.1
+          image: registry.k8s.io/pause:3.9
 ```
 
 ---
