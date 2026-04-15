@@ -70,8 +70,8 @@ ss -ti
 # cubic wscale:7,7 rto:204 rtt:0.8/0.4
 # retrans:0/2  lost:0  rcv_space:65536
 
-# Recv-Q / Send-Q 확인
-ss -tn | awk '$2 > 0 || $3 > 0'
+# Recv-Q / Send-Q 확인 (헤더 제외, Recv-Q=$3 Send-Q=$4)
+ss -tn | awk 'NR>1 && ($3 > 0 || $4 > 0)'
 ```
 
 | 컬럼 | 의미 | 주의 기준 |
@@ -213,7 +213,7 @@ sysctl net.ipv4.tcp_fin_timeout  # 기본 60초 → 15~30으로 줄이기
 |---------|--------|--------|------|
 | `somaxconn` | 4096 (5.4+) | 65535 | 연결 대기열 확장 |
 | `tcp_fin_timeout` | 60 | 15 | TIME_WAIT 단축 |
-| `tcp_tw_reuse` | 0 | 1 | TIME_WAIT 소켓 재사용 |
+| `tcp_tw_reuse` | 2 (4.12+, loopback only) | 1 (아웃바운드 전체, NAT 환경 주의) | TIME_WAIT 소켓 재사용 |
 
 ---
 
@@ -241,18 +241,19 @@ Pod A → veth → overlay(VXLAN) → Pod B  (오버레이 CNI)
 | Flannel | VXLAN overlay | 보통 | 단순, 소규모 적합 |
 | Calico | BGP (native L3) | **높음** | 확장성 우수, NetworkPolicy |
 | Cilium | eBPF | **최고** | iptables 우회, 관찰성 |
-| Weave | overlay | 보통 | 암호화 내장 |
+| Weave | overlay | 보통 | ⚠️ 2023년 이후 사실상 유지보수 중단, 신규 사용 비권장 |
 
 ### iptables vs IPVS
 
 Kubernetes Service는 kube-proxy가 iptables 또는 IPVS로 구현한다.
+K8s 1.29+에서는 nftables 모드(GA: 1.33+)가 더 나은 대안으로 권장된다.
 
 | 항목 | iptables | IPVS |
 |------|---------|------|
 | 규칙 조회 | O(n) 순차 | **O(1)** 해시 |
 | Service 5,000개 | 느려짐 | 영향 없음 |
 | 로드밸런싱 알고리즘 | round-robin만 | rr, lc, sh 등 |
-| 전환 기준 | Service < 1,000 | **Service ≥ 1,000 권장** |
+| 전환 기준 | Service < 1,000 | **Service ≥ 1,000 권장** (K8s 1.35부터 deprecated) |
 
 ```bash
 # IPVS 모드 확인
@@ -315,7 +316,7 @@ cat /proc/net/snmp | grep Tcp
 
 # 소켓별 재전송 실시간
 ss -ti | grep retrans
-# retrans:0/5 → 5회 재전송 발생
+# retrans:0/5 → 현재 활성 재전송 0회, 누적 재전송 5회
 ```
 
 ---
@@ -393,8 +394,9 @@ net.ipv4.tcp_max_tw_buckets = 1440000
 net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 
-# 로컬 포트 범위 확장
-net.ipv4.ip_local_port_range = 1024 65535
+# 로컬 포트 범위 확장 (서비스 포트와 겹치지 않도록 조정)
+# 기본값: 32768 60999, well-known port(0~1023) 충돌 주의
+net.ipv4.ip_local_port_range = 10240 65535
 ```
 
 ---
