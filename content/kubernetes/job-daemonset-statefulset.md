@@ -60,7 +60,8 @@ kind: CronJob
 metadata:
   name: daily-report
 spec:
-  schedule: "0 9 * * 1-5"     # 평일 오전 9시
+  schedule: "0 9 * * 1-5"     # 평일 오전 9시 (KST 기준)
+  timeZone: "Asia/Seoul"       # K8s 1.27+ GA. 미지정 시 UTC 기준
   concurrencyPolicy: Forbid    # 이전 Job 미완료 시 스킵
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
@@ -131,7 +132,7 @@ spec:
         effect: NoSchedule    # Control Plane에도 배포
       containers:
       - name: node-exporter
-        image: prom/node-exporter:latest
+        image: prom/node-exporter:v1.8.2  # 프로덕션에서는 latest 대신 버전 고정
         ports:
         - containerPort: 9100
           hostPort: 9100      # 호스트 포트 직접 바인딩
