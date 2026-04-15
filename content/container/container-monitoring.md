@@ -80,7 +80,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      # ⚠️ 프로덕션에서는 반드시 변경할 것
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASSWORD:-admin}
     volumes:
       - grafana-data:/var/lib/grafana
     networks:
@@ -115,10 +116,11 @@ scrape_configs:
 ### CPU
 
 ```promql
-# 컨테이너별 CPU 사용률 (%)
+# 컨테이너별 CPU 사용량 (코어 단위, 1.0 = 1 core)
+# ⚠️ * 100 해도 % 아님 — 멀티코어 환경에서 200 이상 가능
 rate(container_cpu_usage_seconds_total{
   name!=""
-}[5m]) * 100
+}[5m])
 
 # CPU 스로틀 비율 (제한에 의해 지연된 비율)
 rate(container_cpu_cfs_throttled_periods_total[5m])
@@ -129,11 +131,14 @@ rate(container_cpu_cfs_throttled_periods_total[5m])
 
 ```promql
 # 컨테이너 메모리 사용량 (bytes)
+# working_set = usage - inactive_file_cache
+# OOM killer 판단 기준에 더 가까운 지표
 container_memory_working_set_bytes{name!=""}
 
 # 메모리 제한 대비 사용률 (%)
+# limit 미설정 시 container_spec_memory_limit_bytes = 0 → +Inf 방지
 container_memory_working_set_bytes{name!=""}
-  / container_spec_memory_limit_bytes{name!=""}
+  / container_spec_memory_limit_bytes{name!="", container_spec_memory_limit_bytes > 0}
   * 100
 ```
 
@@ -151,11 +156,16 @@ rate(container_network_transmit_bytes_total[5m])
 
 ## 5. Grafana 대시보드
 
-Grafana에서 ID `193`으로 cAdvisor 공식 대시보드를 임포트할 수 있다.
+Grafana에서 cAdvisor 대시보드를 임포트할 수 있다.
 
 ```
-Grafana → Dashboards → Import → ID: 193
+Grafana → Dashboards → Import → ID 입력
 ```
+
+| ID | 설명 |
+|----|------|
+| `193` | Docker Monitoring (오래된 커뮤니티 대시보드, 일부 패널 불일치 가능) |
+| `19908` | Docker Container Monitoring (cAdvisor + Prometheus, 최신) |
 
 주요 패널:
 - CPU 사용률 (전체 / 컨테이너별)
