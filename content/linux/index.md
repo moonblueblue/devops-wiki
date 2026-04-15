@@ -20,9 +20,11 @@ sidebar_label: "Linux"
 ### 배포판과 기초
 
 - [ ] [리눅스 배포판 비교 (Ubuntu, RHEL, Alpine, AL2023)](linux-distro-comparison.md)
+- [ ] [Immutable OS (Flatcar, Bottlerocket, Talos Linux, Fedora CoreOS)](immutable-os.md)
 - [ ] [파일시스템 계층 구조 (FHS)](filesystem-hierarchy.md)
 - [ ] [사용자·그룹·퍼미션 (ACL, setuid)](user-group-permission.md)
 - [ ] [패키지 관리 (apt, dnf, apk, pacman)](package-management.md)
+- [ ] [Nix와 NixOS (선언적 패키지 관리)](nix-nixos.md)
 
 ### 부팅과 시스템 초기화
 
@@ -48,6 +50,7 @@ sidebar_label: "Linux"
 - [ ] [seccomp-bpf와 시스템콜 필터링](seccomp.md)
 - [ ] [auditd 감사 로깅](auditd.md)
 - [ ] [PAM (Pluggable Authentication Modules)](pam.md)
+- [ ] [LUKS/dm-crypt 디스크 암호화](luks-dm-crypt.md)
 
 ### 파일시스템과 스토리지
 
@@ -82,8 +85,10 @@ sidebar_label: "Linux"
 - [ ] [CPU 성능 분석 (perf, top, pidstat, mpstat)](cpu-performance.md)
 - [ ] [메모리 관리와 OOM (free, vmstat, slabtop)](memory-oom.md)
 - [ ] [디스크 I/O 분석 (iostat, iotop, blktrace)](disk-io-performance.md)
+- [ ] [io_uring과 비동기 I/O](io-uring.md)
 - [ ] [네트워크 성능 분석 (ss, iftop, nethogs, sar)](network-performance.md)
 - [ ] [eBPF 기반 성능 분석 (bpftrace, BCC, libbpf)](ebpf-performance.md)
+- [ ] [BPF CO-RE (Compile Once, Run Everywhere)](bpf-co-re.md)
 - [ ] [플레임 그래프 (Flame Graph)](flame-graph.md)
 - [ ] [USE 방법론과 Brendan Gregg 도구](use-methodology.md)
 
@@ -92,10 +97,11 @@ sidebar_label: "Linux"
 - [ ] [tmux와 screen](tmux-screen.md)
 - [ ] [셸 환경 개선 (zsh, fish, oh-my-zsh, starship)](shell-environment.md)
 
-### 가상화 기초
+### 가상화와 경량 격리
 
 - [ ] [KVM과 QEMU 개념](kvm-qemu.md)
 - [ ] [libvirt와 virsh](libvirt.md)
+- [ ] [systemd-nspawn (경량 격리)](systemd-nspawn.md)
 
 ---
 

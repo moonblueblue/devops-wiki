@@ -63,6 +63,7 @@ Prometheus·OpenTelemetry·eBPF 기반 관측까지 다룬다.
 - [ ] [Fluentd](fluentd.md)
 - [ ] [Fluent Bit](fluent-bit.md)
 - [ ] [Vector (by Datadog)](vector.md)
+- [ ] [Grafana Alloy (구 Grafana Agent)](grafana-alloy.md)
 - [ ] [Kubernetes 로깅 전략](k8s-logging-strategy.md)
 - [ ] [구조화 로깅과 로그 레벨](structured-logging.md)
 
@@ -71,6 +72,7 @@ Prometheus·OpenTelemetry·eBPF 기반 관측까지 다룬다.
 - [ ] [분산 트레이싱 개념 (Span, Trace, Context Propagation)](tracing-concepts.md)
 - [ ] [OpenTelemetry 개요 (SDK, API, Collector)](opentelemetry-overview.md)
 - [ ] [OpenTelemetry Collector 아키텍처와 파이프라인](otel-collector.md)
+- [ ] [OTel Collector 배포 패턴 (DaemonSet vs Sidecar vs Gateway)](otel-collector-patterns.md)
 - [ ] [OpenTelemetry Auto-Instrumentation](otel-auto-instrument.md)
 - [ ] [Jaeger](jaeger.md)
 - [ ] [Grafana Tempo](tempo.md)
@@ -80,6 +82,7 @@ Prometheus·OpenTelemetry·eBPF 기반 관측까지 다룬다.
 ### Continuous Profiling (4번째 기둥)
 
 - [ ] [Continuous Profiling 개념과 의의](profiling-overview.md)
+- [ ] [OpenTelemetry Profiling Signal (2026 Alpha)](otel-profiling-signal.md)
 - [ ] [Grafana Pyroscope](pyroscope.md)
 - [ ] [Parca](parca.md)
 - [ ] [eBPF 기반 프로파일링 (Parca Agent)](ebpf-profiling.md)
@@ -98,6 +101,14 @@ Prometheus·OpenTelemetry·eBPF 기반 관측까지 다룬다.
 - [ ] [Multi-window Multi-burn-rate](multi-window-alerting.md)
 - [ ] [Runbook 연결](alert-runbook.md)
 - [ ] [PagerDuty, Opsgenie 연동](alert-integrations.md)
+- [ ] [Grafana OnCall (오픈소스 on-call 관리)](grafana-oncall.md)
+
+### AIOps / AI-assisted Observability
+
+- [ ] [AIOps 개념과 2026 트렌드](aiops-overview.md)
+- [ ] [LLM 기반 로그 분석과 이상 탐지](llm-log-analysis.md)
+- [ ] [자동 RCA (Root Cause Analysis)](automated-rca.md)
+- [ ] [상용 도구 (Datadog Bits AI, Dynatrace Davis, New Relic AI)](commercial-aiops.md)
 
 ### Real User Monitoring과 Synthetic
 

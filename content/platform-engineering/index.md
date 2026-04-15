@@ -24,8 +24,10 @@ Internal Developer Platform(IDP), Golden Path, Self-Service를 통해
 - [ ] [DevOps vs Platform Engineering](devops-vs-platform-engineering.md)
 - [ ] [Platform as a Product 사고방식](platform-as-product.md)
 - [ ] [Internal Developer Platform (IDP) 정의](idp-definition.md)
+- [ ] [Developer Portal vs Developer Platform 구분](portal-vs-platform.md)
 - [ ] [Golden Path (황금길) 개념](golden-path.md)
 - [ ] [Thinnest Viable Platform (TVP)](thinnest-viable-platform.md)
+- [ ] [CNCF Platform Engineering Maturity Model](cncf-platform-maturity.md)
 
 ### 조직 이론 (Team Topologies)
 
@@ -51,6 +53,16 @@ Internal Developer Platform(IDP), Golden Path, Self-Service를 통해
 - [ ] [Ephemeral Environments (일회용 환경)](ephemeral-environments.md)
 - [ ] [Golden Path Templates (Scaffolding)](golden-path-templates.md)
 - [ ] [Service Catalog](service-catalog.md)
+- [ ] [kro (Kubernetes Resource Orchestrator)](kro-platform.md)
+- [ ] [Platform Orchestrator 패턴 (Humanitec Score)](platform-orchestrator.md)
+
+### AI/ML Platform Engineering
+
+- [ ] [AI 워크로드를 지원하는 플랫폼 설계](ai-platform-design.md)
+- [ ] [모델 서빙 플랫폼 (KServe, Seldon Core)](model-serving.md)
+- [ ] [Kubeflow와 MLOps 통합](kubeflow.md)
+- [ ] [GPU 리소스 관리와 공유](gpu-resource-management.md)
+- [ ] [AI 개발자 경험 (Notebook 플랫폼)](ai-developer-experience.md)
 
 ### Backstage (Spotify)
 

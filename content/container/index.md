@@ -28,6 +28,7 @@ OCI 표준, 공급망 보안까지 다룬다.
 - [ ] [Docker 설치와 기본 명령어](docker-basics.md)
 - [ ] [컨테이너 라이프사이클](container-lifecycle.md)
 - [ ] [Docker Desktop 라이선스 이슈 (2022 유료화)](docker-desktop-licensing.md)
+- [ ] [Docker Init과 Docker Scout](docker-init-scout.md)
 
 ### Dockerfile과 이미지 빌드
 
@@ -72,6 +73,12 @@ OCI 표준, 공급망 보안까지 다룬다.
 - [ ] [runc (low-level runtime)](runc.md)
 - [ ] [gVisor, Kata Containers, Firecracker](sandbox-runtime.md)
 
+### WebAssembly (Wasm) 컨테이너
+
+- [ ] [Wasm 컨테이너 개요와 containerd runwasi](wasm-containers.md)
+- [ ] [WASI Preview 2와 Component Model](wasi-preview-2.md)
+- [ ] [SpinKube와 Kubernetes에서 Wasm 실행](spinkube.md)
+
 ### 대안 도구
 
 - [ ] [Podman (데몬리스)](podman.md)
@@ -82,6 +89,7 @@ OCI 표준, 공급망 보안까지 다룬다.
 - [ ] [Docker Hub, GHCR, ECR/GCR/ACR](public-registry.md)
 - [ ] [Harbor 프라이빗 레지스트리](harbor.md)
 - [ ] [레지스트리 HA와 미러링](registry-ha.md)
+- [ ] [OCI Artifacts (Helm, Wasm, 범용 아티팩트)](oci-artifacts.md)
 
 ### 관측
 

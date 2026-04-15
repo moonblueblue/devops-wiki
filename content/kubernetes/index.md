@@ -105,6 +105,9 @@ sidebar_label: "Kubernetes"
 - [ ] [Admission Controllers (Mutating, Validating Webhook)](admission-controllers.md)
 - [ ] [API Aggregation Layer](api-aggregation.md)
 - [ ] [Scheduling Framework와 커스텀 스케줄러](custom-scheduler.md)
+- [ ] [kro (Kubernetes Resource Orchestrator)](kro.md)
+- [ ] [Native Sidecar Container (KEP-753)](native-sidecar.md)
+- [ ] [Image Volume (K8s 1.33 alpha)](image-volume.md)
 
 ### 보안
 
@@ -136,8 +139,12 @@ sidebar_label: "Kubernetes"
 - [ ] [etcd 백업과 복구](etcd-backup.md)
 - [ ] [DR 시나리오와 전략](disaster-recovery.md)
 
-### 멀티클러스터
+### 멀티테넌시와 멀티클러스터
 
+- [ ] [Multi-tenancy 전략 개요](multi-tenancy-overview.md)
+- [ ] [vCluster (가상 K8s 클러스터)](vcluster.md)
+- [ ] [Hierarchical Namespaces (HNC)](hierarchical-namespaces.md)
+- [ ] [Capsule 멀티테넌시 Operator](capsule.md)
 - [ ] [Cluster API (CAPI)](cluster-api.md)
 - [ ] [Karmada](karmada.md)
 - [ ] [Fleet 관리와 멀티클러스터 패턴](multi-cluster-patterns.md)
@@ -147,6 +154,13 @@ sidebar_label: "Kubernetes"
 - [ ] [GPU 스케줄링 (NVIDIA Device Plugin)](gpu-scheduling.md)
 - [ ] [KubeVirt (VM on K8s)](kubevirt.md)
 - [ ] [배치 워크로드 (Volcano, Kueue)](batch-workload.md)
+
+### AI/ML 워크로드 (2025~)
+
+- [ ] [Dynamic Resource Allocation (DRA)](dra.md)
+- [ ] [LeaderWorkerSet (LWS)](lws.md)
+- [ ] [JobSet API](jobset.md)
+- [ ] [AI 워크로드 스케줄링 패턴 (Kueue, Gang Scheduling)](ai-workload-scheduling.md)
 
 ### 트러블슈팅
 

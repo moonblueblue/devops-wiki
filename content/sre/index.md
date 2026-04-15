@@ -86,6 +86,7 @@ SLO·에러버짓·Toil·Postmortem·카오스 엔지니어링 등
 - [ ] [Gremlin (상용)](gremlin.md)
 - [ ] [AWS FIS (Fault Injection Service)](aws-fis.md)
 - [ ] [Game Day 운영 설계](game-day.md)
+- [ ] [Reliability as Code (CI/CD에 chaos test 내장)](reliability-as-code.md)
 
 ### 부하 테스트와 용량 계획
 
@@ -108,12 +109,28 @@ SLO·에러버짓·Toil·Postmortem·카오스 엔지니어링 등
 - [ ] [Dependency Mapping](dependency-mapping.md)
 - [ ] [장애 전파 분석 (Blast Radius)](blast-radius.md)
 
+### AI-assisted SRE / AIOps (2026)
+
+- [ ] [AI-assisted SRE 개요 (MTTR 40~70% 단축)](ai-sre-overview.md)
+- [ ] [LLM 기반 RCA와 Incident Investigation](llm-rca.md)
+- [ ] [AI-assisted Postmortem 작성](ai-postmortem.md)
+- [ ] [자동 Remediation 추천 (incident.io, Datadog Bits AI)](ai-remediation.md)
+- [ ] [PagerDuty AIOps와 알림 노이즈 감소](pagerduty-aiops.md)
+
 ### 조직과 문화
 
 - [ ] [Team Topologies (Stream-aligned, Platform, Enabling)](team-topologies-sre.md)
 - [ ] [DevOps/SRE 조직 모델 비교](org-models-comparison.md)
+- [ ] [SRE와 Platform Engineering의 관계](sre-vs-platform-engineering.md)
 - [ ] [DORA 메트릭 (SRE 관점 해석)](dora-metrics-sre.md)
 - [ ] [SPACE 프레임워크](space-framework.md)
+
+### Database Reliability Engineering (DRE)
+
+- [ ] [DRE 개념과 DBA와의 차이](dre-overview.md)
+- [ ] [DB 백업·복구 전략](db-backup-strategy.md)
+- [ ] [복제 지연과 Failover](replication-failover.md)
+- [ ] [Connection Pool 관리](connection-pool.md)
 
 ### 실전 케이스 스터디
 

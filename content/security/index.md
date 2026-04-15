@@ -62,6 +62,8 @@ IAM·시크릿·공급망·컨테이너·네트워크·컴플라이언스까지,
 - [ ] [이미지 취약점 스캔 (Trivy, Grype, Snyk, Clair)](image-scanning.md)
 - [ ] [런타임 보안 (Falco)](falco.md)
 - [ ] [Tracee (eBPF 런타임 보안)](tracee.md)
+- [ ] [Tetragon (Cilium eBPF 런타임 enforcement)](tetragon.md)
+- [ ] [eBPF 런타임 보안 비교 (Falco/Tracee/Tetragon)](ebpf-runtime-comparison.md)
 - [ ] [Pod Security Admission (PSA)](pod-security-admission-security.md)
 - [ ] [Container Escape 시나리오](container-escape.md)
 - [ ] [Rootless 컨테이너 보안](rootless-security.md)
@@ -69,6 +71,7 @@ IAM·시크릿·공급망·컨테이너·네트워크·컴플라이언스까지,
 ### 공급망 보안 (Supply Chain Security)
 
 - [ ] [SBOM (SPDX, CycloneDX)](sbom.md)
+- [ ] [VEX (Vulnerability Exploitability eXchange, OpenVEX)](vex.md)
 - [ ] [SLSA 프레임워크 (Level 1~4)](slsa.md)
 - [ ] [Sigstore (cosign, Rekor, Fulcio)](sigstore.md)
 - [ ] [Notary v2](notary-v2.md)
@@ -103,6 +106,8 @@ IAM·시크릿·공급망·컨테이너·네트워크·컴플라이언스까지,
 - [ ] [ISO 27001, SOC 2, PCI DSS](compliance-standards.md)
 - [ ] [GDPR와 개인정보보호법](privacy-laws.md)
 - [ ] [Compliance as Code (InSpec, Chef Compliance)](compliance-as-code.md)
+- [ ] [Kubescape (CNCF, CIS/NSA 자동 스캔)](kubescape.md)
+- [ ] [kube-bench](kube-bench.md)
 
 ### 애플리케이션 보안
 

@@ -39,9 +39,11 @@ sidebar_label: "IaC"
 - [ ] [Module 설계와 재사용](terraform-modules.md)
 - [ ] [State 관리와 Backend](terraform-state.md)
 - [ ] [State Locking과 Remote Backend](terraform-state-locking.md)
+- [ ] [OpenTofu State/Plan Encryption (v1.7+)](opentofu-state-encryption.md)
 - [ ] [Workspace와 디렉토리 전략](terraform-workspace.md)
 - [ ] [Import와 기존 리소스 관리](terraform-import.md)
 - [ ] [Terragrunt (대규모 Terraform 관리)](terragrunt.md)
+- [ ] [Terraform Stacks (HCP Terraform)](terraform-stacks.md)
 
 ### Terraform 운영 플랫폼
 
@@ -78,6 +80,13 @@ sidebar_label: "IaC"
 
 - [ ] [Pulumi (TypeScript, Python, Go, C#)](pulumi.md)
 - [ ] [Pulumi vs Terraform](pulumi-vs-terraform.md)
+- [ ] [CDKTF (CDK for Terraform)](cdktf.md)
+
+### AI-assisted IaC
+
+- [ ] [Ansible Lightspeed (IBM watsonx)](ansible-lightspeed.md)
+- [ ] [Pulumi AI와 Copilot 기반 IaC](pulumi-ai.md)
+- [ ] [AI-assisted IaC 리뷰 전략과 한계](ai-iac-review.md)
 
 ### 머신 이미지
 
