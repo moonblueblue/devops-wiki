@@ -9,7 +9,6 @@ tags:
   - apk
   - devops
 ---
-format: md
 
 # 리눅스 패키지 관리
 
@@ -23,7 +22,7 @@ format: md
 | **시스템 업그레이드** | `apt upgrade` | `dnf upgrade` | `apk upgrade` |
 | **패키지 설치** | `apt install nginx` | `dnf install nginx` | `apk add nginx` |
 | **패키지 삭제** | `apt remove nginx` | `dnf remove nginx` | `apk del nginx` |
-| **패키지+설정 삭제** | `apt purge nginx` | - | `apk del --purge nginx` |
+| **패키지+설정 삭제** | `apt purge nginx` | `dnf remove nginx` (설정 제거는 패키지별 상이) | `apk del --purge nginx` |
 | **패키지 검색** | `apt search nginx` | `dnf search nginx` | `apk search nginx` |
 | **패키지 정보** | `apt show nginx` | `dnf info nginx` | `apk info nginx` |
 | **설치된 패키지 목록** | `apt list --installed` | `dnf list installed` | `apk info` |
@@ -76,7 +75,8 @@ apt-mark unhold kubelet kubeadm kubectl
 ```bash title="/etc/apt/preferences.d/kubernetes"
 # /etc/apt/preferences.d/kubernetes
 Package: kubelet kubeadm kubectl
-Pin: version 1.30.*
+Pin: version 1.33.*
+# 실제 환경에 맞는 버전으로 변경할 것 (EOL 버전 사용 금지)
 Pin-Priority: 1000
 ```
 
@@ -186,8 +186,8 @@ dnf history undo 15
 /etc/apk/repositories
 
 # 기본 구성 예시
-http://dl-cdn.alpinelinux.org/alpine/v3.21/main
-http://dl-cdn.alpinelinux.org/alpine/v3.21/community
+http://dl-cdn.alpinelinux.org/alpine/v3.23/main
+http://dl-cdn.alpinelinux.org/alpine/v3.23/community
 
 # edge (최신 불안정) 저장소 추가 - 프로덕션에서는 비권장
 http://dl-cdn.alpinelinux.org/alpine/edge/main
@@ -211,7 +211,7 @@ apk upgrade --ignore nginx
 ### Dockerfile에서의 APK
 
 ```dockerfile
-FROM alpine:3.21
+FROM alpine:3.23
 
 # --no-cache: 인덱스를 임시로만 사용 (이미지 크기 절약)
 RUN apk add --no-cache \
@@ -264,9 +264,13 @@ dnf update --security
 
 ## 2025-2026 트렌드
 
-- **APT 2.9+**: 성능 개선, 더 나은 트랜잭션 처리
-- **DNF5**: Fedora 41+에서 기본. C++로 재작성되어 속도 대폭 향상
-- **Alpine 3.23**: /usr merge 도입, systemd 지원 준비
+- **APT 3.x** (Ubuntu 25.04+): 새 dependency solver 기본 적용,
+  `apt why` / `apt why-not` 명령어 추가
+- **DNF5**: Fedora 41+, **RHEL 10 / Rocky Linux 10 / AlmaLinux 10**에서
+  기본 채택. C++로 재작성되어 속도 대폭 향상
+  (`dnf update`는 `dnf upgrade`의 alias)
+- **Alpine 3.23**: apk-tools v3 도입,
+  /usr merge opt-in 지원 (기본 적용은 3.26~3.27로 연기)
 - **불변 OS**: Fedora CoreOS, Ubuntu Core 등에서 전통적 패키지 관리 대신 이미지 기반 업데이트 확산
 
 ## 참고 링크

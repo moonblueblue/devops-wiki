@@ -8,7 +8,6 @@ tags:
   - sudo
   - devops
 ---
-format: md
 
 # 사용자, 그룹, 퍼미션 관리
 
@@ -145,8 +144,8 @@ chmod 4755 /usr/local/bin/special
 > 보안 주의: setuid가 설정된 파일은 권한 상승(privilege escalation) 공격의 대상이 된다. 정기적으로 감사해야 한다.
 
 ```bash
-# 시스템의 setuid 파일 전체 검색 (보안 감사용)
-find / -perm -4000 -type f 2>/dev/null
+# setuid + setgid 파일 전체 검색 (보안 감사용)
+find / -perm /6000 -type f 2>/dev/null
 ```
 
 ### Setgid (2000)
@@ -186,7 +185,7 @@ chmod 1777 /opt/shared/uploads
 
 | 퍼미션 | 숫자 | 파일 효과 | 디렉토리 효과 | 표시 |
 |--------|------|-----------|---------------|------|
-| Setuid | 4000 | 소유자 권한으로 실행 | (무시) | `s` (owner x 자리) |
+| Setuid | 4000 | 소유자 권한으로 실행 | (리눅스에서 무시됨, 설정 자제) | `s` (owner x 자리) |
 | Setgid | 2000 | 그룹 권한으로 실행 | 하위 파일 그룹 상속 | `s` (group x 자리) |
 | Sticky | 1000 | (무시) | 소유자만 삭제 가능 | `t` (others x 자리) |
 
@@ -212,8 +211,9 @@ chmod 1777 /opt/shared/uploads
 
 # 모니터링 그룹 - 읽기 전용 명령만
 %monitoring ALL=(ALL) NOPASSWD: /usr/bin/journalctl, \
-                                /usr/bin/ss, \
-                                /usr/bin/top
+                                /usr/bin/ss
+# ⚠️ top, vim, less 등 대화형 바이너리는 NOPASSWD 부여 금지
+#    GTFOBins 등재 바이너리로 셸 탈출이 가능하다
 ```
 
 ### 보안 강화 옵션
@@ -273,6 +273,7 @@ ReadWritePaths=/var/lib/myapp /var/log/myapp
 - 전용 서비스 계정 사용 (root 금지)
 - 필요한 디렉토리에만 쓰기 권한
 - docker 그룹 추가 시 보안 영향 인지 (docker 그룹 = 사실상 root)
+- docker 소켓 공유 대신 rootless Docker 또는 Podman 사용을 권장
 - SSH 키는 배포 전용으로 분리
 
 ## 참고 링크

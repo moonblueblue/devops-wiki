@@ -10,7 +10,6 @@ tags:
   - journalctl
 sidebar_label: "systemd"
 ---
-format: md
 
 # systemd 서비스 관리
 
@@ -36,7 +35,8 @@ PID 1로 실행되며 부팅부터 종료까지 모든 프로세스를
 **systemd 259** (2025년 12월):
 
 - 저널 기본 저장 모드가 `persistent`로 변경
-- iptables 지원 제거, nftables만 지원
+- systemd-networkd/nspawn의 NAT 규칙 생성이
+  iptables/libiptc 제거 → nftables만 지원
 - SysVinit 지원 공식 폐기(deprecated)
 - `OOMKills`, `ManagedOOMKills` 속성 추가
 
@@ -159,6 +159,8 @@ SyslogIdentifier=mywebapp
 Environment=NODE_ENV=production
 Environment=PORT=3000
 EnvironmentFile=/opt/mywebapp/.env
+# ⚠️ EnvironmentFile 값이 Environment 값을 덮어씀
+#    .env에도 NODE_ENV가 있으면 .env 값이 우선됨
 
 # 보안 강화
 NoNewPrivileges=yes
@@ -215,7 +217,8 @@ WantedBy=multi-user.target
 sudo cp mywebapp.service /etc/systemd/system/
 
 # 2. 전용 사용자 생성
-sudo useradd -r -s /usr/sbin/nologin webapp
+sudo useradd -r -s $(which nologin) webapp
+# /usr/sbin/nologin (Debian/Ubuntu) vs /sbin/nologin (RHEL 계열)
 
 # 3. 데몬 재로드
 sudo systemctl daemon-reload
@@ -233,7 +236,7 @@ sudo systemctl status mywebapp.service
 
 | Type | 동작 방식 | 준비 완료 시점 | 용도 |
 |------|----------|-------------|------|
-| `simple` | 포그라운드 | fork 직후 | Node, Go |
+| `simple` | 포그라운드 | ExecStart 실행 직후 (준비 여부 확인 없음) | Node, Go |
 | `forking` | fork/부모 종료 | 부모 종료 시 | Apache |
 | `oneshot` | 실행 후 종료 | 종료 시 | 초기화 |
 | `notify` | sd_notify() | READY 전송 | 정밀 감지 |
@@ -310,9 +313,8 @@ ExecStart=/usr/local/bin/myserver
 ```ini
 [Unit]
 After=network-online.target postgresql.service redis.service
-Wants=network-online.target
+Wants=network-online.target redis.service
 Requires=postgresql.service
-Wants=redis.service
 ```
 
 PostgreSQL은 필수(Requires), Redis는 선택(Wants).
@@ -346,7 +348,8 @@ systemd는 cgroup v2와 통합되어 서비스별
 MemoryHigh=768M    # 소프트 제한 (회수 압력 증가)
 MemoryMax=1G       # 하드 제한 (초과 시 OOM Kill)
 MemoryMin=256M     # 최소 보장
-MemorySwapMax=0    # 스왑 사용 금지
+MemorySwapMax=0    # 스왑 및 zswap 사용 금지
+                   # (커널 6.2+: zswap은 MemoryZSwapMax로 별도 제어)
 ```
 
 ### CPU 제한
@@ -729,6 +732,8 @@ ProtectKernelLogs=yes
 PrivateDevices=yes
 SystemCallFilter=@system-service
 SystemCallErrorNumber=EPERM
+# ⚠️ Go/Java 런타임은 많은 syscall 사용 → 오작동 가능
+#    먼저 systemd-analyze security로 확인 후 적용
 ```
 
 > 참고:
@@ -736,4 +741,4 @@ SystemCallErrorNumber=EPERM
 > | [systemd 보안 강화 가이드][sec-guide]
 
 [rh-unit]: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd
-[sec-guide]: https://www.dotlinux.net/blog/how-to-increase-the-security-of-systemd-services/
+[sec-guide]: https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
