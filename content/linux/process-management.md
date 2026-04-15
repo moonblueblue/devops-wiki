@@ -10,7 +10,6 @@ tags:
   - troubleshooting
 sidebar_label: "프로세스 관리"
 ---
-format: md
 
 # Linux 프로세스 관리
 
@@ -41,7 +40,7 @@ pstree -p 1
 |------|------|------|
 | Running | `R` | CPU 실행 중 또는 실행 대기 |
 | Sleeping | `S` | I/O·시그널 대기 (인터럽트 가능) |
-| Uninterruptible | `D` | 디스크 I/O 대기 (kill -9 불가) |
+| Uninterruptible | `D` | I/O·커널 리소스 대기 (NFS hang 포함, kill -9 불가) |
 | Stopped | `T` | SIGSTOP으로 일시 중지 |
 | Zombie | `Z` | 종료됐지만 부모가 wait() 안 함 |
 
@@ -167,7 +166,8 @@ sudo dnf install htop    # RHEL/Fedora
 # 항상 이 순서로 종료
 kill <PID>           # 1단계: SIGTERM
 sleep 10             # 2단계: 정리 대기
-kill -9 <PID>        # 3단계: 응답 없으면 SIGKILL
+# PID 존재 여부 확인 후 SIGKILL
+kill -0 <PID> 2>/dev/null && kill -9 <PID>
 ```
 
 ### 실무 시그널 활용
@@ -179,7 +179,9 @@ kill -HUP $(cat /var/run/nginx.pid)
 # Nginx 로그 재오픈 (logrotate 후)
 kill -USR1 $(cat /var/run/nginx.pid)
 
-# Java thread dump 생성
+# Java thread dump 생성 (SIGQUIT)
+# JVM이 시그널을 잡아 stdout에 덤프 출력 (프로세스 종료 없음)
+# -Xrs 옵션 사용 시 동작 안 함
 kill -3 <JAVA_PID>
 
 # 프로세스 일시 중지/재개 (디버깅)
@@ -241,6 +243,11 @@ ps -eo pid,ni,comm | grep nginx
 | Realtime | 1 | 최우선 I/O (신중히 사용) |
 | Best-effort | 2 | 기본값, 우선순위 0-7 |
 | Idle | 3 | 다른 I/O 없을 때만 실행 |
+
+> ⚠️ Linux 5.0에서 CFQ 스케줄러가 제거되어
+> ionice는 `bfq` 또는 `mq-deadline` 스케줄러에서만 유효하다.
+> NVMe 등 non-rotational 디스크는 기본값이 `none`이라 효과 없음.
+> `cat /sys/block/sda/queue/scheduler` 로 현재 스케줄러 확인.
 
 ```bash
 # I/O 부하 작업을 idle 클래스로
@@ -413,6 +420,7 @@ nginx     hard    nofile    65535
 
 > **주의**: systemd 서비스는 limits.conf가 적용되지 않는다.
 > 유닛 파일에서 직접 설정해야 한다.
+> SSH 로그인 등 PAM을 거치는 세션에는 limits.conf가 유효하다.
 
 ```ini title="/etc/systemd/system/myapp.service"
 [Service]
@@ -426,7 +434,7 @@ LimitCORE=infinity
 ```bash
 # 조회
 cat /proc/sys/fs/file-max
-cat /proc/sys/fs/file-nr   # 현재 사용량
+cat /proc/sys/fs/file-nr   # 출력: <할당된 FD> <미사용(항상 0)> <최대값>
 
 # 영구 설정: /etc/sysctl.d/99-custom.conf
 # fs.file-max = 2097152
@@ -444,7 +452,8 @@ cat /proc/sys/fs/file-nr   # 현재 사용량
 
 자식이 종료됐지만 부모가 `wait()`를 호출하지 않으면
 프로세스 테이블에 PID와 종료 상태만 남는다.
-누적되면 PID 고갈 위험이 있다 (기본 최대: 32768).
+누적되면 PID 고갈 위험이 있다
+(`/proc/sys/kernel/pid_max`, 기본값: 32768, 최대: 4194304).
 
 ```bash
 # 좀비 찾기
@@ -481,9 +490,11 @@ init가 주기적으로 `wait()`를 호출하므로
 RUN apt-get install -y tini
 ENTRYPOINT ["tini", "--"]
 CMD ["./myapp"]
+```
 
-# Docker 내장 init
-# docker run --init myimage
+```bash
+# Docker 내장 init 사용 (tini 설치 불필요)
+docker run --init myimage
 ```
 
 ---
@@ -514,8 +525,9 @@ strace -e trace=open,openat -f ./myapp 2>&1 \
 strace -c -p <PID>
 ```
 
-> **주의**: strace는 성능에 영향을 준다.
-> 프로덕션에서는 짧게 사용하라.
+> **주의**: strace는 ptrace 기반으로 성능에 영향을 준다.
+> 컨테이너에서는 `SYS_PTRACE` capability가 없으면 attach 실패.
+> 경량 대안: `perf trace`, `bpftrace` (eBPF 기반, 오버헤드 낮음)
 
 ### lsof: 열린 파일 조회
 
@@ -594,7 +606,7 @@ Kubernetes는 QoS 클래스에 따라 `oom_score_adj`를
 
 | QoS 클래스 | oom_score_adj | 조건 |
 |-----------|---------------|------|
-| Guaranteed | -997 | requests == limits (전부) |
+| Guaranteed | -997 | 모든 컨테이너 requests == limits (값 > 0) |
 | BestEffort | 1000 | requests/limits 미설정 |
 | Burstable | 2~999 | requests < limits |
 
