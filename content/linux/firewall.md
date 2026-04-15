@@ -12,7 +12,6 @@ tags:
   - kubernetes
 sidebar_label: "방화벽"
 ---
-format: md
 
 # 리눅스 방화벽
 
@@ -199,13 +198,14 @@ nftables의 강력한 기능으로 IP 목록이나
 포트 매핑을 효율적으로 관리할 수 있다.
 
 ```bash
-# IP 차단 목록 (set)
+# IP 차단 목록 (set) - CIDR 포함 시 flags interval 필수
 nft add set inet myfilter blocklist \
-  { type ipv4_addr \; flags timeout \; }
+  { type ipv4_addr \; flags timeout,interval \; auto-merge \; }
 
 # IP 추가 (24시간 자동 만료)
 nft add element inet myfilter blocklist \
   { 192.168.1.100 timeout 24h }
+# CIDR 추가 (flags interval 없으면 오류: value type mismatch)
 nft add element inet myfilter blocklist \
   { 10.0.0.0/8 }
 
@@ -224,7 +224,8 @@ flush ruleset
 table inet filter {
   set blocklist {
     type ipv4_addr
-    flags timeout
+    flags timeout, interval
+    auto-merge
   }
 
   chain input {
@@ -505,8 +506,10 @@ firewall-cmd --add-forward-port=\
 사설 네트워크의 인터넷 접근을 위한 NAT 설정이다.
 
 ```bash
-# 커널 IP 포워딩 활성화
+# 커널 IP 포워딩 활성화 (재부팅 후 초기화됨)
 sysctl -w net.ipv4.ip_forward=1
+# 영구 적용은 sysctl.d에 설정
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.d/99-ip-forward.conf && sysctl -p
 
 # nftables
 nft add table ip nat
@@ -551,13 +554,19 @@ kube-proxy는 Service의 ClusterIP/NodePort를
 
 | 모드 | 백엔드 | 상태 (K8s 1.33) |
 |------|--------|-----------------|
-| `iptables` | iptables | 기본값, 안정 |
+| `iptables` | iptables | **기본값**, 안정 |
 | `ipvs` | IPVS (L4 LB) | 안정 |
-| `nftables` | nftables | GA (1.33, 2025) |
+| `nftables` | nftables | GA (1.33+, 커널 5.13+ 필요) |
+
+> nftables GA 이후에도 호환성 유지를 위해
+> `iptables`가 기본값으로 유지된다.
+> nftables 모드로 전환하려면 명시적으로 설정해야 한다.
 
 nftables 모드는 iptables와 IPVS 모두를 대체하는 것이 목표다.
 30,000개 Service 클러스터에서 nftables의 p99 지연이
 iptables의 p01 지연보다 빠른 성능을 보인다.
+단, **커널 5.13 미만** 환경에서는 비활성 폴백이 발생하므로
+커널 버전을 반드시 확인할 것.
 
 ```yaml
 # kube-proxy 설정 (ConfigMap)
