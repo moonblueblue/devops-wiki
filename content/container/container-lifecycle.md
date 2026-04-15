@@ -18,7 +18,7 @@ created ──start──> running ──pause──> paused
                       │                  │
                    stop/kill          unpause
                       │                  │
-                   stopped <────────────┘
+                   exited  <────────────┘
                       │
                     rm
                       │
@@ -29,7 +29,7 @@ created ──start──> running ──pause──> paused
 |------|------|
 | `created` | 생성됨, 실행 전 |
 | `running` | 실행 중 |
-| `paused` | 일시 정지 (SIGSTOP) |
+| `paused` | 일시 정지 (cgroup freezer 사용, SIGSTOP 아님) |
 | `exited` | 정상/비정상 종료 |
 | `dead` | 제거 실패 상태 |
 
@@ -63,6 +63,10 @@ docker update --restart on-failure:3 myapp
 
 **운영 환경 권장:** `unless-stopped`
 **임시 서비스:** `no` 또는 `on-failure`
+
+> Kubernetes 환경에서는 컨테이너 재시작을 Pod의
+> `restartPolicy`(Always/OnFailure/Never)로 관리한다.
+> 위 설정은 Docker 단독 운영에만 해당한다.
 
 ---
 
@@ -104,6 +108,7 @@ docker inspect myapp --format='{{.State.OOMKilled}}'
 
 ```dockerfile
 # tini 사용 (Docker 공식 초기화 프로세스)
+# Alpine: /sbin/tini, Debian/Ubuntu 계열: /usr/bin/tini
 FROM node:20-alpine
 RUN apk add --no-cache tini
 ENTRYPOINT ["/sbin/tini", "--"]
@@ -154,6 +159,10 @@ STOPSIGNAL SIGINT   # 기본값: SIGTERM
 | exited(0) | Succeeded | 정상 완료 |
 | exited(≠0) | Failed | 비정상 종료 |
 | - | Unknown | 노드 통신 불가 |
+
+> `Terminating`은 공식 Phase가 아니다. `kubectl delete pod` 후
+> 종료 중인 Pod에 STATUS 컬럼에 표시되는 값이며,
+> 기본 gracePeriod는 30초다.
 
 ```bash
 # K8s Pod 라이프사이클 이벤트 확인
