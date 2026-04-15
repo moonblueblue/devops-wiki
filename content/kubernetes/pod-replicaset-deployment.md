@@ -43,7 +43,7 @@ metadata:
 spec:
   initContainers:          # 메인 컨테이너 실행 전 완료
   - name: init-db-check
-    image: busybox:latest
+    image: busybox:1.37
     command:
     - sh
     - -c
@@ -63,7 +63,7 @@ spec:
         memory: 512Mi
 
   - name: sidecar          # 로깅, 프록시 등 부가 기능
-    image: logging-agent:latest
+    image: fluent/fluent-bit:3.3
 ```
 
 ---
@@ -109,8 +109,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1        # 동시에 추가 생성 가능한 Pod 수
-      maxUnavailable: 1  # 동시에 제거 가능한 Pod 수
+      maxSurge: 1        # 동시에 추가 생성 가능한 Pod 수 (기본값 25%)
+      maxUnavailable: 1  # 동시에 Unavailable 허용 Pod 수 (Ready 아닌 상태, 기본값 25%)
   selector:
     matchLabels:
       app: myapp
