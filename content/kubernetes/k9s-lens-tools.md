@@ -63,7 +63,7 @@ Shift+C 로그 복사
 
 ### 플러그인 예시
 
-`~/.config/k9s/plugin.yaml`:
+`~/.config/k9s/plugins.yaml`:
 
 ```yaml
 plugins:
