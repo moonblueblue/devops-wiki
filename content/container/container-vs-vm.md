@@ -69,12 +69,16 @@ VM의 격리성과 컨테이너의 경량성을 결합한 기술이다.
 | **Firecracker** | microVM (AWS) | 125ms 부팅, Lambda/Fargate 기반 |
 
 ```bash
-# Kata Containers 확인
+# RuntimeClass 목록 확인
 kubectl get runtimeclass
+```
 
+```yaml
 # gVisor로 Pod 실행
 apiVersion: v1
 kind: Pod
+metadata:
+  name: secure-pod
 spec:
   runtimeClassName: gvisor
   containers:
