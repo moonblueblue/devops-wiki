@@ -103,9 +103,10 @@ crictl rmi <image-id>               # 이미지 삭제
 Docker 명령어와 거의 동일한 인터페이스로 containerd를 직접 제어한다.
 
 ```bash
-# 설치 (Linux)
-wget https://github.com/containerd/nerdctl/releases/latest/download/nerdctl-2.0.0-linux-amd64.tar.gz
-sudo tar -xf nerdctl-2.0.0-linux-amd64.tar.gz -C /usr/local/bin
+# 설치 (Linux) - 버전은 github.com/containerd/nerdctl/releases 에서 확인
+NERDCTL_VERSION=2.2.2
+wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz
+sudo tar -xf nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz -C /usr/local/bin
 
 # Docker와 동일한 명령어
 nerdctl run -d --name nginx -p 80:80 nginx:latest
@@ -137,7 +138,7 @@ Podman:    CLI             ────────── → runc
 | 데몬 | 있음 | 없음 |
 | Rootless | 복잡 | 네이티브 |
 | Pod 지원 | 없음 | 네이티브 |
-| K8s 호환 | 간접 | 높음 |
+| K8s 호환 | 간접 | OCI 호환, CRI 미구현 (K8s 런타임으로 직접 사용 불가) |
 | 보안 | 표준 | 더 안전 (daemon-less) |
 
 ```bash
@@ -161,7 +162,7 @@ podman run -d --pod web-pod nginx:latest
 | GKE (Google) | containerd | Docker 제거됨 |
 | AKS (Azure) | containerd | Docker 제거됨 |
 | kubeadm | containerd | 권장 |
-| RHEL/Fedora | CRI-O or Podman | Red Hat 기본 |
+| RHEL/Fedora | CRI-O (K8s 런타임) | Red Hat 기본. Podman은 개발/운영 CLI로 별도 사용 |
 | Docker Desktop | containerd (내부) | 호환성 유지 |
 
 ---
