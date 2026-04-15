@@ -73,8 +73,8 @@ spec:
 kubectl get svc
 kubectl describe svc myapp
 
-# 연결된 Pod 목록 (Endpoints)
-kubectl get endpoints myapp
+# 연결된 Pod 목록 (K8s 1.33+ 권장)
+kubectl get endpointslices -l kubernetes.io/service-name=myapp
 
 # Service 테스트
 kubectl run -it --rm test --image=busybox --restart=Never \
@@ -134,7 +134,7 @@ kubectl describe ingress myapp-ingress
 
 ---
 
-## 3. Gateway API (K8s 1.31 GA)
+## 3. Gateway API (v1.0 GA 2023-10, K8s 버전 독립)
 
 Ingress의 후속 표준. 더 강력한 라우팅과 역할 분리를 제공한다.
 
@@ -221,7 +221,7 @@ rules:
 
 | 항목 | Ingress | Gateway API |
 |-----|---------|------------|
-| K8s 버전 | Stable | GA (1.31+) |
+| K8s 버전 | Stable | GA (K8s 1.24+ 설치 가능) |
 | 라우팅 | host/path | host/path + 헤더/가중치 |
 | 프로토콜 | HTTP/S | HTTP, HTTPS, TCP, UDP |
 | 역할 분리 | 불가 | GatewayClass/Gateway/Route 분리 |
