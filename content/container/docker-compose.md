@@ -20,7 +20,8 @@ sidebar_label: "Docker Compose"
 | 컨테이너 이름 | `project_web_1` | `project-web-1` |
 | 포함 방식 | 별도 바이너리 | Docker CLI 플러그인 |
 
-v2가 2026년 기준 표준이다. `version:` 최상위 필드는 더 이상 권장하지 않는다.
+v2가 2026년 기준 표준이다. `version:` 최상위 필드는 선언 시 경고(warning)가
+출력되며, Compose v2는 이를 무시한다. 삭제가 맞다.
 
 ---
 
@@ -112,18 +113,28 @@ LOG_LEVEL=debug
 ```
 
 ```yaml
+# 방법 1: .env에서 보간 (Compose 파일 변수 치환)
 services:
   app:
-    # 방법 1: .env에서 보간
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
+```
 
-    # 방법 2: env_file로 파일 통째로 주입
+```yaml
+# 방법 2: env_file로 파일 통째로 주입
+# 나중에 선언된 파일이 앞 파일을 덮어씀 (순서 = 우선순위)
+# .env.local은 자동 로딩되지 않음 — env_file에 명시해야 적용됨
+services:
+  app:
     env_file:
       - .env
-      - .env.local  # 우선순위 높음
+      - .env.local  # .env보다 나중에 선언 → 우선순위 높음
+```
 
-    # 방법 3: 직접 값 명시
+```yaml
+# 방법 3: 직접 값 명시
+services:
+  app:
     environment:
       DB_HOST: db
       DB_PORT: "5432"
