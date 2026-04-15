@@ -18,9 +18,9 @@ sidebar_label: "Docker 네트워크"
 | `bridge` | 있음 (기본) | 보통 | 단일 호스트 컨테이너 통신 |
 | `host` | **없음** | **최고** | 성능 최우선, 포트 충돌 주의 |
 | `none` | 완전 격리 | - | 네트워크 불필요 컨테이너 |
-| `overlay` | 있음 | 보통 | Docker Swarm 멀티 호스트 |
+| `overlay` | 있음 | 보통 | Docker Swarm 멀티 호스트 (`--attachable`로 standalone 컨테이너도 사용 가능) |
 | `macvlan` | 있음 | 높음 | 컨테이너에 MAC 주소 직접 할당 |
-| `ipvlan` | 있음 | 높음 | L2/L3 모드, 라우터 직접 연결 |
+| `ipvlan` | 있음 | 높음 | L2: macvlan 유사, L3: ARP/브로드캐스트 차단 대규모 라우팅 |
 
 ```bash
 # 네트워크 목록 확인
@@ -69,7 +69,9 @@ docker run --network host nginx
 ```
 
 > 성능은 최고지만 컨테이너 간 포트 충돌 가능성 있다.
-> Linux 전용. macOS/Windows Docker Desktop에서는 동작 다름.
+> Linux 전용. macOS/Windows Docker Desktop에서는 Docker Desktop 내부
+> Linux VM의 네트워크 스택을 공유하므로, 호스트 OS의 포트·인터페이스에
+> 직접 접근되지 않는다. 포트 포워딩(-p)을 사용해야 한다.
 
 ---
 
@@ -127,7 +129,9 @@ networks:
 ```
 
 > `internal: true`로 설정된 네트워크는
-> 인터넷 접근이 차단되어 DB 격리에 유용하다.
+> 외부 인터넷 및 호스트 네트워크 모두 차단된다.
+> 여러 네트워크에 연결된 컨테이너는 다른 네트워크를 통해
+> 외부 접근이 가능하므로 주의 (위 예시에서 `app`은 `frontend`를 통해 접근 가능).
 
 ---
 
@@ -140,7 +144,7 @@ docker inspect <container> \
 
 # 컨테이너 내부에서 연결 테스트
 docker exec -it <container> \
-  sh -c "wget -qO- http://other-container/health"
+  sh -c "curl -sf http://other-container/health"
 
 # 전체 네트워크 정리 (미사용)
 docker network prune
