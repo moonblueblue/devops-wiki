@@ -10,14 +10,13 @@ tags:
   - automation
 sidebar_label: "crontab"
 ---
-format: md
 
 # crontab과 주기적 작업 관리
 
 ## 1. cron 개요
 
 cron은 유닉스/리눅스의 시간 기반 작업 스케줄러다.
-crond 데몬이 매분 crontab을 스캔하여
+cron 데몬(Ubuntu: `cron`, RHEL: `crond`)이 매분 crontab을 스캔하여
 시각이 일치하는 명령을 자동 실행한다.
 
 서버 운영에서 로그 정리, 백업, 헬스체크,
@@ -59,7 +58,7 @@ crond 데몬이 매분 crontab을 스캔하여
 |------|------|------|
 | `*` | 모든 값 | `* * * * *` (매분) |
 | `,` | 값 나열 | `0,30 * * * *` (0분, 30분) |
-| `-` | 범위 | `9-17 * * *` (9시~17시) |
+| `-` | 범위 | `0 9-17 * * *` (9시~17시 매 정각) |
 | `/` | 간격 | `*/5 * * * *` (매 5분) |
 
 ### 특수 키워드
@@ -198,7 +197,7 @@ HOME=/home/deploy
 | `SHELL` | `/bin/sh` | 명령 실행 쉘 |
 | `PATH` | `/usr/bin:/bin` | 명령 검색 경로 |
 | `MAILTO` | crontab 소유자 | 출력 메일 수신자 |
-| `HOME` | 사용자 홈 | 작업 실행 디렉토리 |
+| `HOME` | 사용자 홈 | 작업 기본 경로 (cron의 working directory 기준) |
 
 ```bash
 # MAILTO 비활성화 (메일 안 보냄)
@@ -222,7 +221,7 @@ MAILTO="admin@example.com,oncall@example.com"
 |--------|----------|--------|
 | RHEL/CentOS | `/var/log/cron` | `tail -f /var/log/cron` |
 | Ubuntu/Debian | `/var/log/syslog` | `grep CRON /var/log/syslog` |
-| systemd 전체 | journald | `journalctl -u cron` |
+| systemd 전체 | journald | `journalctl -u cron` (Ubuntu) / `journalctl -u crond` (RHEL) |
 
 ### 출력 리다이렉트
 
@@ -230,7 +229,7 @@ MAILTO="admin@example.com,oncall@example.com"
 # stdout + stderr를 파일로 저장
 0 3 * * * /opt/backup.sh >> /var/log/backup.log 2>&1
 
-# 타임스탬프 포함 로깅
+# 타임스탬프 포함 로깅 (moreutils 패키지의 ts 명령 필요)
 */5 * * * * /opt/check.sh 2>&1 \
   | ts '[%Y-%m-%d %H:%M:%S]' >> /var/log/check.log
 
@@ -255,7 +254,8 @@ ls -la /opt/backup.sh
 /bin/sh -c '/opt/backup.sh'
 
 # 5. 최근 cron 로그 확인
-journalctl -u cron --since "1 hour ago"
+journalctl -u cron --since "1 hour ago"  # Ubuntu
+journalctl -u crond --since "1 hour ago" # RHEL/CentOS
 ```
 
 ---
@@ -299,6 +299,9 @@ Description=Daily backup
 Type=oneshot
 ExecStart=/opt/backup.sh
 User=deploy
+
+# [Install] 섹션은 timer가 관리하므로 생략 가능
+# timer의 WantedBy=timers.target 이 트리거 역할을 한다
 ```
 
 ```bash
@@ -369,7 +372,8 @@ echo "guest" | sudo tee /etc/cron.deny
 
 ```bash
 # flock으로 락 파일 기반 중복 방지
-*/5 * * * * flock -n /tmp/sync.lock \
+# /tmp 대신 /run/lock/ 사용 (재부팅 시 자동 정리)
+*/5 * * * * flock -n /run/lock/sync.lock \
   /opt/sync.sh >> /var/log/sync.log 2>&1
 ```
 
@@ -408,6 +412,6 @@ crontab -e
 
 > 참고:
 > [crontab(5) man page](https://man7.org/linux/man-pages/man5/crontab.5.html)
-> | [Cron vs Systemd Timers 2026](https://crongen.com/blog/cron-vs-systemd-timers-2026)
+> | [systemd.timer man page](https://www.freedesktop.org/software/systemd/man/systemd.timer.html)
 > | [Healthchecks.io Blog](https://blog.healthchecks.io/2023/01/using-logs-to-troubleshoot-failing-cron-jobs/)
 > | [SigNoz - Crontab Logs](https://signoz.io/guides/crontab-logs/)
