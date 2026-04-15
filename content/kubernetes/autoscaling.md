@@ -20,7 +20,7 @@ sidebar_label: "오토스케일링"
 | HPA | Pod 수 | CPU/메모리/커스텀 메트릭 | 쿠버네티스 내장 |
 | VPA | Pod 리소스 | 실제 사용량 | addon |
 | Cluster Autoscaler | Node 수 | Pending Pod | addon |
-| Karpenter | Node 수 | Pending Pod + 비용 최적화 | addon (AWS) |
+| Karpenter | Node 수 | Pending Pod + 비용 최적화 | addon (AWS·Azure 등) |
 
 ---
 
@@ -98,7 +98,7 @@ kubectl describe hpa myapp-hpa
 ## 3. VPA (Vertical Pod Autoscaler)
 
 Pod의 CPU/메모리 requests를 자동으로 조정한다.
-별도 설치 필요 (metrics-server + VPA addon).
+별도 설치 필요 (Metrics API 제공자 + VPA addon).
 
 ```yaml
 apiVersion: autoscaling.k8s.io/v1
@@ -143,8 +143,9 @@ kubectl describe vpa myapp-vpa
 #     Upper Bound:    cpu: 500m, memory: 512Mi
 ```
 
-> HPA와 VPA는 CPU 기준으로 동시 사용 불가.
-> VPA `Off` 모드로 권장값 참고 후 HPA 적용이 일반적이다.
+> HPA와 VPA는 CPU·메모리 기준을 동시에 관리하면 충돌한다.
+> 안전한 병용법: VPA `Off` 모드(권장값만 참고)로 HPA 설정, 또는
+> HPA를 커스텀 메트릭 기반으로 구성하고 VPA의 `controlledResources`를 분리.
 
 ---
 
@@ -165,7 +166,8 @@ spec:
     spec:
       containers:
       - name: cluster-autoscaler
-        image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0
+        image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.33.0
+        # ⚠️ CA 버전은 클러스터 K8s 마이너 버전과 일치시킨다
         command:
         - ./cluster-autoscaler
         - --cloud-provider=aws
@@ -190,11 +192,12 @@ kubectl get events -n kube-system \
 
 ## 5. Karpenter
 
-AWS에서 Cluster Autoscaler를 대체하는 차세대 오토스케일러다.
-ASG 없이 직접 EC2를 프로비저닝한다.
+AWS에서 주로 사용되는 차세대 오토스케일러다.
+ASG 없이 직접 EC2를 프로비저닝하며,
+Azure(AKS Node Auto-Provisioning, 2025년 GA) 등으로 확장 중이다.
 
 ```yaml
-# NodePool (v1 API, Karpenter v0.33+)
+# NodePool (v1 stable API, Karpenter v1.0+)
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
@@ -220,8 +223,8 @@ spec:
     cpu: 100              # 클러스터 전체 CPU 상한
     memory: 400Gi
   disruption:
-    consolidationPolicy: WhenUnderutilized
-    consolidateAfter: 30s
+    consolidationPolicy: WhenEmptyOrUnderutilized  # v1.0+에서 변경됨
+    consolidateAfter: 1m  # 너무 짧으면 잦은 노드 교체 유발
 ---
 apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
@@ -246,7 +249,7 @@ spec:
 | 속도 | ~수분 | ~수십 초 |
 | 인스턴스 선택 | 고정 (ASG 설정) | 동적 (요구사항 기반) |
 | Spot 지원 | 제한적 | 강력 (자동 다변화) |
-| 플랫폼 | 멀티 클라우드 | AWS 전용 |
+| 플랫폼 | 멀티 클라우드 | AWS 공식, Azure·GCP 프로바이더 확장 중 |
 
 ---
 
