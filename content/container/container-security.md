@@ -86,7 +86,7 @@ services:
 
 | Capability | 용도 |
 |-----------|------|
-| `NET_BIND_SERVICE` | 1024 미만 포트 바인딩 |
+| `NET_BIND_SERVICE` | 1024 미만 포트 바인딩 (containerd 기본값: 필요. `--sysctl net.ipv4.ip_unprivileged_port_start=0`으로 우회 가능하나 런타임별 동작 상이) |
 | `CHOWN` | 파일 소유자 변경 |
 | `SETUID` / `SETGID` | 프로세스 UID/GID 변경 |
 | `SYS_ADMIN` | 광범위한 시스템 권한 (위험) |
@@ -122,7 +122,10 @@ services:
 ## 5. seccomp 프로파일
 
 시스템 콜(syscall)을 제한한다.
-Docker 기본 프로파일은 300개 이상 syscall 중 위험한 44개를 차단한다.
+Docker 기본 프로파일은 허용 목록(allowlist) 방식으로 동작하며,
+불필요한 syscall은 기본 차단된다.
+(차단 수는 버전마다 다름 — 최신 목록은
+[default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) 참조)
 
 ```bash
 # 기본 프로파일 명시적 적용
@@ -184,7 +187,7 @@ CI/CD:
 ```bash
 # Docker Bench for Security 실행
 docker run --rm \
-  --net host \
+  --net host \   # 벤치마크 도구가 호스트 네트워크 정보 수집에 필요
   --pid host \
   -v /var/lib:/var/lib \
   -v /var/run:/var/run \
