@@ -34,9 +34,9 @@ Pod 간 통신 가능
 
 | 항목 | Flannel | Calico | Cilium |
 |------|---------|--------|--------|
-| 데이터플레인 | VXLAN (overlay) | BGP (native L3) | **eBPF** |
+| 데이터플레인 | VXLAN (overlay) | BGP / VXLAN / eBPF (선택) | **eBPF** |
 | 성능 | 보통 | 높음 | **최고** |
-| NetworkPolicy | **미지원** (별도 필요) | **지원** | **지원 + L7** |
+| NetworkPolicy | **기본 미지원** (kube-network-policies 옵션 존재, 비권장) | **지원** | **지원 + L7** |
 | 관찰성 | 낮음 | 보통 | **Hubble (내장)** |
 | 설치 복잡도 | **쉬움** | 보통 | 보통 |
 | 적합 규모 | 소규모 | 중~대규모 | 중~대규모 |
@@ -77,8 +77,9 @@ Pod A → veth → 라우팅 테이블 (BGP) → Pod B
 
 ```bash
 # Calico 설치 (Tigera Operator)
+# 설치 전 https://github.com/projectcalico/calico/releases 에서 최신 버전 확인
 kubectl create -f \
-  https://raw.githubusercontent.com/projectcalico/calico/v3.31.0/manifests/tigera-operator.yaml
+  https://raw.githubusercontent.com/projectcalico/calico/v3.31.4/manifests/tigera-operator.yaml
 
 # 상태 확인
 kubectl get tigerastatus
@@ -124,9 +125,12 @@ Pod A → eBPF 프로그램 (커널 내 처리) → Pod B
 ```bash
 # Cilium 설치 (Helm)
 helm repo add cilium https://helm.cilium.io/
+# kube-proxy 완전 대체 시 API 서버 주소 필수
 helm install cilium cilium/cilium \
   --namespace kube-system \
-  --set kubeProxyReplacement=true
+  --set kubeProxyReplacement=true \
+  --set k8sServiceHost=<API_SERVER_IP> \
+  --set k8sServicePort=6443
 
 # 상태 확인
 cilium status
@@ -180,7 +184,8 @@ hubble observe --verdict DROPPED
 | Calico (eBPF) | **O(1)** | 해시맵 |
 | Cilium (eBPF) | **O(1)** | 해시맵 |
 
-eBPF 기반은 iptables 대비 **15~22배 빠르다** (1,000개 규칙 기준).
+iptables는 규칙 수 증가에 따라 선형(O(n)) 지연이 발생하며,
+eBPF는 해시맵 기반 O(1)로 규칙 수와 무관하게 일정한 성능을 유지한다.
 
 ---
 
@@ -208,3 +213,6 @@ eBPF 기반은 iptables 대비 **15~22배 빠르다** (1,000개 규칙 기준).
 - [Calico 공식 문서](https://docs.tigera.io/calico/latest/about/)
 - [Cilium 공식 문서](https://docs.cilium.io/en/stable/)
 - [Flannel GitHub](https://github.com/flannel-io/flannel)
+
+> **Weave Net**: Weaveworks 사가 2024년 1월 서비스 종료 후 레포가 archived 처리됨.
+> 신규 환경에서 사용 비권장.
