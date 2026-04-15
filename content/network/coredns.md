@@ -82,7 +82,7 @@ spec:
 
 | 정책 | 동작 |
 |------|------|
-| `ClusterFirst` | 클러스터 DNS 우선, 실패 시 외부 DNS |
+| `ClusterFirst` | 클러스터 내부 도메인은 CoreDNS 처리, 나머지는 upstream 포워딩 |
 | `ClusterFirstWithHostNet` | hostNetwork: true Pod에서 ClusterFirst 유지 |
 | `Default` | 노드의 DNS 설정 상속 |
 | `None` | dnsConfig 직접 지정 |
@@ -126,9 +126,9 @@ spec:
     options:
       - name: ndots
         value: "2"
-# 점이 2개 이상이면 바로 외부 쿼리
-# api.example.com (점 1개) → 내부 먼저 시도
-# api.v1.example.com (점 2개) → 바로 외부 쿼리
+# 점의 수가 ndots 값 미만이면 서치 도메인 우선 시도
+# api.example.com (점 1개 < 2) → 서치 도메인 먼저 시도
+# api.v1.example.com (점 2개 >= 2) → 바로 외부 쿼리
 ```
 
 ---
@@ -143,15 +143,22 @@ kubectl edit configmap coredns -n kube-system
 ```
 
 ```
+# ⚠️ forward 플러그인은 서버 블록당 1개만 허용
+# 두 번 선언 시 CoreDNS CrashLoopBackOff 발생
+# 도메인별 포워딩은 별도 서버 블록으로 분리
+
+# 사내 도메인 전용 블록
+corp.internal:53 {
+    forward . 10.0.0.53
+    cache 30
+}
+
+# 메인 블록 (나머지 모든 도메인)
 .:53 {
-    # 내부 도메인은 CoreDNS 처리
     kubernetes cluster.local in-addr.arpa ip6.arpa {
         pods insecure
         fallthrough in-addr.arpa ip6.arpa
     }
-    # 사내 도메인은 사내 DNS 서버로
-    forward corp.internal 10.0.0.53
-    # 나머지는 외부 DNS로
     forward . 8.8.8.8 1.1.1.1
     cache 30
 }
@@ -161,7 +168,7 @@ kubectl edit configmap coredns -n kube-system
 
 ## 6. 성능 튜닝
 
-```yaml
+```bash
 # CoreDNS Deployment 레플리카 증가
 kubectl scale deployment coredns -n kube-system --replicas=3
 
@@ -176,8 +183,9 @@ CoreDNS 부하를 줄이고 레이턴시를 낮춘다.
 
 ```bash
 # NodeLocal DNSCache 설치
-kubectl apply -f \
-  https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/dns/nodelocaldns/nodelocaldns.yaml
+# ⚠️ master 브랜치 URL에는 플레이스홀더 변수 미치환 상태의 YAML 포함 → 직접 사용 금지
+# 공식 절차 참조: kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/
+# 릴리즈별 태그 URL 또는 배포판 제공 방법 사용 권장
 ```
 
 ---
@@ -185,8 +193,8 @@ kubectl apply -f \
 ## 7. 트러블슈팅
 
 ```bash
-# DNS 테스트용 Pod 실행
-kubectl run dnsutils --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 \
+# DNS 테스트용 Pod 실행 (agnhost: 공식 K8s 도구 이미지, jessie-dnsutils는 EOL)
+kubectl run dnsutils --image=registry.k8s.io/e2e-test-images/agnhost:2.39 \
   --restart=Never -it --rm -- /bin/bash
 
 # 내부 서비스 조회
@@ -210,7 +218,8 @@ curl localhost:9153/metrics | grep coredns_dns_requests_total
 | NXDOMAIN for internal service | CoreDNS Pod 다운 | Pod 재시작 확인 |
 | 외부 DNS 느림 | ndots: 5 기본값 | ndots 낮추기 |
 | DNS 타임아웃 | CoreDNS 과부하 | 레플리카 증가, NodeLocal DNS |
-| 간헐적 실패 | conntrack 테이블 부족 | nf_conntrack_max 증가 |
+| 간헐적 실패 (conntrack 부족) | conntrack 테이블 고갈 | nf_conntrack_max 증가 |
+| 간헐적 실패 (race condition) | UDP A/AAAA 동시 쿼리 충돌 (커널 5.1 미만) | NodeLocal DNSCache 도입 또는 커널 5.1+ 업그레이드 |
 
 ---
 
