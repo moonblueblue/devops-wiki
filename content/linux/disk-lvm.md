@@ -11,7 +11,6 @@ tags:
   - devops
 sidebar_label: "디스크·LVM"
 ---
-format: md
 
 # 디스크·파티션·LVM 관리
 
@@ -48,7 +47,7 @@ parted -s /dev/sdb mklabel gpt \
 |------|-----|-----|
 | 최대 디스크 | 2 TB | 9.4 ZB |
 | 최대 파티션 | 4개 (확장 파티션 우회) | 128개 |
-| 부팅 방식 | Legacy BIOS | UEFI |
+| 부팅 방식 | Legacy BIOS | UEFI (GRUB2로 Legacy BIOS도 지원) |
 | 데이터 보호 | 단일 헤더 | CRC + 백업 헤더 |
 | **권장** | 레거시 호환 시에만 | **모든 신규 디스크** |
 
@@ -78,6 +77,10 @@ parted -s /dev/sdb mklabel gpt \
 | SQLite 동시 쓰기 | ext4 | XFS | Btrfs |
 | 순차 읽기 | XFS | ext4 | Btrfs |
 | 랜덤 I/O | ext4 ≈ XFS | - | Btrfs |
+
+> **주의:** 성능 결과는 커널 버전, 스토리지 하드웨어,
+> 워크로드 특성에 따라 크게 달라진다.
+> 실제 환경에서는 직접 벤치마크할 것을 권장한다.
 
 **선택 가이드:**
 
@@ -121,7 +124,8 @@ umount -l /mnt/data   # lazy unmount
 ```text title="/etc/fstab"
 # <device>       <mount>   <type> <options>       <dump> <pass>
 UUID=abc-123     /data     ext4   defaults,noatime  0      2
-UUID=def-456     /app      xfs    defaults,nofail   0      2
+# XFS는 fsck.xfs가 no-op이므로 pass=0 권장
+UUID=def-456     /app      xfs    defaults,nofail   0      0
 ```
 
 **주요 마운트 옵션:**
@@ -221,9 +225,10 @@ mkfs.xfs /dev/data_vg/app_lv
 mkdir -p /app
 mount /dev/data_vg/app_lv /app
 
-# fstab 등록
+# fstab 등록 (echo >> 보다 편집기로 직접 수정 권장)
+# XFS는 pass=0 (fsck.xfs는 no-op)
 echo "$(blkid -s UUID -o value \
-  /dev/data_vg/app_lv) /app xfs defaults 0 2" \
+  /dev/data_vg/app_lv) /app xfs defaults 0 0" \
   >> /etc/fstab
 ```
 
@@ -264,6 +269,7 @@ lvextend -r -l +100%FREE /dev/data_vg/app_lv
 
 ```bash
 # Thin Pool 생성 (실제 물리 공간)
+# 대용량 풀(수십 TB 이상)은 --poolmetadatasize 1G 추가 권장
 lvcreate -L 100G --thinpool thin_pool data_vg
 
 # Thin Volume 생성 (가상 크기 > 풀 크기 가능)
@@ -272,8 +278,8 @@ lvcreate -V 200G --thin \
 lvcreate -V 300G --thin \
   -n thin_db data_vg/thin_pool
 
-# Thin Pool 사용량 확인
-lvs -o+data_percent data_vg/thin_pool
+# Thin Pool 사용량 확인 (메타데이터 100% 시 즉시 read-only 전환)
+lvs -o+data_percent,metadata_percent data_vg/thin_pool
 
 # Thin Pool 확장 (축소 불가)
 lvextend -L +50G data_vg/thin_pool
@@ -487,7 +493,13 @@ cat /proc/mdstat
 mdadm --detail /dev/md0
 
 # 설정 저장 (재부팅 유지)
-mdadm --detail --scan >> /etc/mdadm.conf
+# Debian/Ubuntu: /etc/mdadm/mdadm.conf
+# RHEL/CentOS:   /etc/mdadm.conf
+mdadm --detail --scan >> /etc/mdadm.conf  # RHEL
+# mdadm --detail --scan >> /etc/mdadm/mdadm.conf  # Debian/Ubuntu
+# 변경 후 initramfs 재생성 필수
+# Debian: update-initramfs -u
+# RHEL:   dracut -f
 
 # 장애 디스크 교체
 mdadm /dev/md0 --fail /dev/sdc
@@ -514,7 +526,7 @@ mdadm /dev/md0 --add /dev/sdd
 ## 참고 링크
 
 - [ArchWiki - fstab](https://wiki.archlinux.org/title/Fstab)
-- [RHEL - LVM Administration](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/logical_volume_manager_administration/)
+- [RHEL 9 - LVM Administration](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_logical_volumes/index)
 - [AWS - EBS 볼륨 확장](https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html)
 - [ArchWiki - RAID](https://wiki.archlinux.org/title/RAID)
 - [man7 - fstab(5)](https://man7.org/linux/man-pages/man5/fstab.5.html)

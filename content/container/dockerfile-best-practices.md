@@ -82,7 +82,7 @@ RUN npm install
 
 # 좋은 예: 의존성 파일 먼저 복사 (package.json 변경 시에만 재설치)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev  # --only=production은 npm 8.3+ deprecated
 
 COPY . .
 ```
@@ -103,8 +103,9 @@ LABEL version="1.0.0"
 WORKDIR /app
 
 # 의존성 먼저 복사 (캐시 최적화)
+# builder는 devDependencies 포함 전체 설치 (빌드 도구 필요)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # 소스 복사
 COPY . .
@@ -120,9 +121,14 @@ WORKDIR /app
 # 비root 사용자 생성
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+# tini 설치 (PID 1 init 프로세스)
+RUN apk add --no-cache tini
+
 # 빌드 결과물만 복사
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+# 프로덕션 의존성만 재설치 (--omit=dev, npm 8.3+ 권장)
+COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
 
 # 사용자 변경 (root로 실행 금지)
 USER appuser
@@ -130,11 +136,11 @@ USER appuser
 # 문서화 포트
 EXPOSE 3000
 
-# 헬스체크
+# 헬스체크 (Alpine BusyBox wget: HTTP만 지원)
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD wget -qO- http://localhost:3000/health || exit 1
 
-# 초기화 프로세스 사용
+# 초기화 프로세스 사용 (Alpine: /sbin/tini)
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "dist/server.js"]
 ```

@@ -75,12 +75,14 @@ VPC(Virtual Private Cloud)는 클라우드 위에 구성하는
 
 ## 4. 보안 그룹 vs NACL
 
+> AWS 기준 용어. GCP: VPC Firewall Rules, Azure: NSG(Network Security Group)가 대응 개념.
+
 | 항목 | 보안 그룹 | NACL |
 |------|---------|------|
 | 적용 레벨 | 인스턴스(ENI) | 서브넷 |
 | 상태 추적 | **Stateful** (응답 자동 허용) | Stateless (인/아웃 모두 명시) |
 | 규칙 순서 | 없음 (모두 평가) | **있음** (낮은 번호 우선) |
-| 기본 동작 | 허용 없음 (거부) | 모두 허용 |
+| 기본 동작 | 허용 없음 (거부) | Default NACL: 모두 허용 / 커스텀 NACL: 모두 거부 |
 | 주 용도 | 인스턴스 간 세밀한 제어 | 서브넷 단위 차단 |
 
 ```
@@ -103,7 +105,11 @@ VPC(Virtual Private Cloud)는 클라우드 위에 구성하는
 | 관리 복잡도 | VPC 증가 시 급증 | 중앙 집중 관리 |
 
 ```
-VPC Peering (3개 VPC = 3개 피어링 필요):
+VPC Peering (C(n,2) = n×(n-1)/2 개):
+ 3개 VPC →  3개 피어링
+ 5개 VPC → 10개 피어링
+10개 VPC → 45개 피어링 (급격히 증가)
+
 VPC-A ←→ VPC-B
 VPC-A ←→ VPC-C
 VPC-B ←→ VPC-C
@@ -119,8 +125,11 @@ VPC-C ─┘
 | 방식 | 특징 | 용도 |
 |------|------|------|
 | Site-to-Site VPN | 인터넷 경유, 암호화, 빠른 설정 | PoC, 백업 경로 |
-| Direct Connect / ExpressRoute | 전용선, 낮은 레이턴시 | 운영 환경 |
-| 두 방식 병행 | DX + VPN 이중화 | **고가용성 권장** |
+| 전용 회선 (Dedicated Line) | 전용선, 낮은 레이턴시 | 운영 환경 |
+| 두 방식 병행 | 전용선 + VPN 이중화 | **고가용성 권장** |
+
+> 전용 회선 벤더별 구현:
+> AWS Direct Connect / Azure ExpressRoute / GCP Cloud Interconnect
 
 ---
 

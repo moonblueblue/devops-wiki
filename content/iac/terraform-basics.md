@@ -101,7 +101,7 @@ terraform destroy -target=aws_instance.web  # 특정 리소스만
 ```hcl
 # terraform.tf
 terraform {
-  required_version = "~> 1.8"
+  required_version = "~> 1.9"  # 최신: 1.14.x (2026-04 기준)
 
   required_providers {
     aws = {
@@ -169,8 +169,8 @@ instance_type = "t3.small"
 
 ```
 1. -var, -var-file 플래그
-2. terraform.tfvars
-3. *.auto.tfvars (알파벳 순)
+2. *.auto.tfvars (알파벳 순)
+3. terraform.tfvars
 4. TF_VAR_name 환경변수
 5. 기본값 (default)
 ```

@@ -66,9 +66,13 @@ iptables -t nat -A PREROUTING \
   -p tcp --dport 80 \
   -j DNAT --to-destination 10.0.0.5:8080
 
-# 포워딩 활성화
-echo 1 > /proc/sys/net/ipv4/ip_forward
+# 포워딩 활성화 (일시적, 재부팅 시 초기화)
 sysctl -w net.ipv4.ip_forward=1
+
+# 영구 설정
+echo "net.ipv4.ip_forward=1" | \
+  tee /etc/sysctl.d/99-ip-forward.conf
+sysctl -p /etc/sysctl.d/99-ip-forward.conf
 ```
 
 ```bash
@@ -99,10 +103,14 @@ POSTROUTING (SNAT/Masquerade 적용)
 ```
 
 ```bash
-# 영구 설정 저장
+# 영구 설정 저장 (배포판별 경로 상이)
+# Debian/Ubuntu (iptables-persistent 패키지)
 iptables-save > /etc/iptables/rules.v4
 
-# 복원
+# RHEL/CentOS (iptables-services 패키지)
+iptables-save > /etc/sysconfig/iptables
+
+# 복원 (iptables-restore 또는 서비스 재시작으로 자동 적용)
 iptables-restore < /etc/iptables/rules.v4
 ```
 
@@ -116,9 +124,9 @@ Kubernetes는 Service → Pod IP 변환을 NAT로 구현한다.
 
 | 모드 | 구현 방식 | 성능 | 비고 |
 |------|---------|------|------|
-| iptables | DNAT 규칙 체인 | O(n) | 기본값 |
-| IPVS | 커널 해시 테이블 | **O(1)** | Service 1000개+ 권장 |
-| nftables | nft 테이블 | O(1) | Linux 6.x+, 차세대 |
+| iptables | DNAT 규칙 체인 | O(n) | 기본값 (K8s 1.33 미만) |
+| IPVS | 커널 해시 테이블 | **O(1)** | **K8s 1.35 deprecated**, nftables로 대체 |
+| nftables | nft 테이블 | O(1) | **kernel 5.13+**, K8s 1.33 GA, 권장 |
 
 ```bash
 # ClusterIP → Pod IP 변환 확인
@@ -134,8 +142,10 @@ ipvsadm -Ln | grep <cluster-ip>
 외부 트래픽
     ↓
 NodePort: iptables DNAT (NodeIP:NodePort → PodIP:Port)
-    ↓
-ClusterIP: iptables DNAT (ClusterIP → PodIP)
+    ↓  ← NodePort는 ClusterIP를 경유하지 않고 직접 Pod로 DNAT
+Pod
+
+ClusterIP: iptables DNAT (ClusterIP:Port → PodIP:Port)
     ↓
 Pod
 ```
@@ -161,8 +171,10 @@ docker run -p 8080:80 nginx
 iptables -t nat -L DOCKER -n
 
 # 사용자 정의 규칙은 DOCKER-USER 체인에 삽입
-iptables -I DOCKER-USER -s 10.0.0.0/8 -j RETURN
+# ⚠️ -I는 체인 맨 앞에 삽입 → DROP을 먼저 넣고, RETURN을 나중에 넣어야
+#    최종 순서: RETURN(10.0.0.0/8 허용) → DROP(나머지 차단)
 iptables -I DOCKER-USER -j DROP
+iptables -I DOCKER-USER -s 10.0.0.0/8 -j RETURN
 ```
 
 > Docker는 `iptables` 규칙을 자동 관리한다.

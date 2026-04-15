@@ -34,7 +34,7 @@ sidebar_label: "로드밸런서"
 |------|---------------|-----------------|
 | 동작 계층 | TCP/UDP | HTTP/HTTPS |
 | 라우팅 기준 | IP + 포트 | URL, 헤더, 쿠키, 메서드 |
-| TLS 처리 | Pass-through | **TLS 종료 가능** |
+| TLS 처리 | Pass-through (일부 제품은 Termination 지원, 예: AWS NLB TLS listener) | **TLS 종료 가능** |
 | 콘텐츠 기반 라우팅 | **불가** | **가능** |
 | 속도 | **빠름** | 상대적으로 느림 |
 | 주요 용도 | TCP 서비스, DB | HTTP 서비스 |
@@ -60,7 +60,7 @@ Host: api.example.com → API 서버
 | Weighted RR | 가중치 비율로 분산 | 서버 스펙 상이 |
 | Least Connections | 현재 연결 수 가장 적은 서버 | **장시간 연결** |
 | IP Hash | 클라이언트 IP 기반 고정 | 세션 유지 필요 |
-| Random | 무작위 선택 | HAProxy 3.x 기본값 |
+| Random | 2개 무작위 선택 후 연결 수 적은 쪽 (power-of-two) | HAProxy 3.3+ 기본값 |
 
 ---
 
@@ -72,7 +72,9 @@ L7 헬스체크: HTTP GET /health → 200 응답 확인
 ```
 
 ```nginx
-# Nginx upstream 헬스체크 (nginx-plus 또는 lua 필요)
+# Nginx upstream 헬스체크
+# - passive 헬스체크(실패 감지 기반)는 오픈소스 기본 지원
+# - active 헬스체크(주기적 프로브)는 NGINX Plus 전용
 upstream backend {
     server 10.0.1.10:8080;
     server 10.0.1.11:8080;
@@ -80,9 +82,11 @@ upstream backend {
 ```
 
 ```haproxy
-# HAProxy 헬스체크
+# HAProxy 헬스체크 (HAProxy 2.2+ 권장 문법)
+# option httpchk GET /health 는 2.2부터 deprecated
 backend app_servers
-    option httpchk GET /health
+    option httpchk
+    http-check send meth GET uri /health ver HTTP/1.1 hdr Host app.example.com
     http-check expect status 200
     server app1 10.0.1.10:8080 check inter 2s rise 2 fall 3
     server app2 10.0.1.11:8080 check inter 2s rise 2 fall 3
@@ -142,7 +146,7 @@ SSL Pass-through:
 |------|---------|-------|-------|
 | 주요 용도 | L4/L7 LB | 웹서버 + 리버스 프록시 | 서비스 메시 사이드카 |
 | 성능 | **최고** | 높음 | 높음 |
-| 설정 방식 | 선언적 (haproxy.cfg) | 선언적 (nginx.conf) | xDS API (동적) |
+| 설정 방식 | 선언적 (haproxy.cfg) | 선언적 (nginx.conf) | xDS API (동적) 또는 static YAML |
 | 동적 설정 | Runtime API | 제한적 | **완전 동적** |
 | 관찰성 | 통계 페이지 | stub_status | **내장 메트릭** |
 | 주요 사용처 | 고성능 LB | 웹/프록시 | Istio, K8s Ingress |

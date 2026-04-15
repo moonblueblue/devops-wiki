@@ -5,7 +5,6 @@ tags: [linux, boot, grub2, uefi, bios, systemd,
   initramfs, dracut, cloud-init, devops]
 sidebar_label: "부트 프로세스"
 ---
-format: md
 
 # Linux 부트 프로세스
 
@@ -160,7 +159,7 @@ cat /proc/cmdline
 | `biosdevname=` | Dell BIOS NIC 이름 | `biosdevname=0` |
 | `crashkernel=` | kdump 메모리 예약 | `crashkernel=256M` |
 | `rd.lvm.lv=` | LVM 볼륨 활성화 | `rd.lvm.lv=rhel/root` |
-| `selinux=` | SELinux 활성화 | `selinux=0` (비활성화) |
+| `selinux=` | SELinux 활성화 | `selinux=0` (**프로덕션 사용 금지**, 트러블슈팅 전용) |
 | `enforcing=` | SELinux 모드 | `enforcing=0` (permissive) |
 | `rd.break` | initramfs 중단 | root 패스워드 리셋 시 |
 | `systemd.unit=` | 부팅 target 지정 | `rescue.target` |
@@ -291,7 +290,10 @@ grub> initrd /initramfs.img
 grub> boot
 
 # grub rescue> 프롬프트에서 복구
-grub rescue> set prefix=(hd0,1)/boot/grub2
+# 경로는 파티션 구성에 따라 다름:
+#   RHEL (별도 /boot 파티션): (hd0,1)/grub2
+#   Debian (/boot가 루트에 포함):  (hd0,1)/boot/grub
+grub rescue> set prefix=(hd0,1)/grub2
 grub rescue> insmod normal
 grub rescue> normal
 ```
@@ -299,11 +301,20 @@ grub rescue> normal
 ### 라이브 USB로 GRUB 재설치
 
 ```bash
+# ⚠️ BIOS(Legacy) 환경 전용
 sudo mount /dev/sda2 /mnt
 sudo mount /dev/sda1 /mnt/boot
 sudo grub2-install --boot-directory=/mnt/boot /dev/sda
 sudo grub2-mkconfig -o /mnt/boot/grub2/grub.cfg
 ```
+
+> **UEFI 환경**에서는 `grub2-install`로 부트로더 재설치 불가.
+> Secure Boot 체인(shim → grubx64.efi)이 깨진다.
+> UEFI + RHEL 계열:
+> ```bash
+> dnf reinstall grub2-efi-x64 shim-x64
+> grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+> ```
 
 ### rd.break로 root 패스워드 리셋
 
@@ -312,7 +323,10 @@ sudo grub2-mkconfig -o /mnt/boot/grub2/grub.cfg
 mount -o remount,rw /sysroot
 chroot /sysroot
 passwd root
-touch /.autorelabel    # SELinux 재레이블링
+
+# SELinux 재레이블링 (RHEL 8+ 권장 방식)
+fixfiles -F onboot
+# 레거시: touch /.autorelabel (전체 재레이블 → 대용량 서버에서 수십분 소요)
 exit
 exit
 ```
@@ -361,6 +375,11 @@ curl -s \
 curl -s -H "Metadata-Flavor: Google" \
   http://metadata.google.internal/computeMetadata/v1/\
 instance/machine-type
+
+# Azure
+curl -s -H "Metadata:true" \
+  "http://169.254.169.254/metadata/instance\
+?api-version=2021-02-01"
 ```
 
 ### cloud-init 디버깅
@@ -469,9 +488,48 @@ sudo systemd-tmpfiles \
   --create --prefix /var/log/journal
 ```
 
-기본적으로 journald는 재부팅 시 로그를 삭제한다.
+기본값은 `Storage=auto`이며, `/var/log/journal/` 디렉토리가
+존재하면 영구 저장, 없으면 재부팅 시 삭제된다.
+RHEL 계열은 기본적으로 persistent인 경우가 많다.
 장애 분석을 위해 `Storage=persistent` 설정을
-프로덕션 서버에 반드시 적용하자.
+프로덕션 서버에 명시적으로 적용하는 것을 권장한다.
+
+---
+
+## 8. 부트로더 최신 동향 (2025-2026)
+
+### systemd-boot
+
+GRUB2 대신 systemd가 제공하는 경량 UEFI 부트로더.
+Fedora 37+에서 기본 채택, RHEL 10 로드맵에 포함됐다.
+
+| 항목 | GRUB2 | systemd-boot |
+|------|-------|-------------|
+| 설정 | `/etc/default/grub` | `/boot/efi/loader/loader.conf` |
+| 부트 엔트리 | 스크립트 기반 자동 생성 | `.conf` 파일 하나씩 |
+| Secure Boot | shim 경유 | shim 또는 직접 서명 |
+| 관리 도구 | `grubby`, `grub2-mkconfig` | `bootctl` |
+
+```bash
+# systemd-boot 상태 확인
+bootctl status
+
+# 부트 엔트리 목록
+bootctl list
+```
+
+### UKI (Unified Kernel Image)
+
+커널 + initramfs + cmdline을 하나의 `.efi` 바이너리로 묶는 방식.
+TPM PCR 측정으로 무결성 검증이 가능해 보안이 강화된다.
+
+```bash
+# UKI 생성 (dracut)
+dracut --uefi /boot/efi/EFI/Linux/linux.efi
+
+# TPM2 + LUKS 연동 (systemd-cryptenroll)
+systemd-cryptenroll --tpm2-device=auto /dev/sda3
+```
 
 ---
 

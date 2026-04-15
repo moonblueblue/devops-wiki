@@ -11,7 +11,6 @@ tags:
   - cloud
 sidebar_label: "SSH"
 ---
-format: md
 
 # SSH 설정과 키 관리
 
@@ -54,8 +53,12 @@ SSH 연결은 다음 단계로 이루어진다.
 ### OpenSSH 최신 동향
 
 OpenSSH 10.0이 2025년 4월에 릴리스되었다.
-DSA 키 지원이 완전히 제거되었으며
-Ed25519가 사실상 표준 키 타입으로 자리잡았다.
+
+주요 변경사항:
+- **DSA 키 지원 완전 제거** → Ed25519가 사실상 표준 키 타입으로 자리잡음
+- **기본 KEX 변경**: `mlkem768x25519-sha256`(ML-KEM 기반 포스트퀀텀) 기본 채택
+- **sshd-auth 바이너리 분리**: 인증 단계를 별도 프로세스로 격리하여
+  공격 표면 축소
 
 > 2025년 초 CVE-2025-26465(MITM)와
 > CVE-2025-26466(Pre-auth DoS)이 발견되었다.
@@ -78,7 +81,7 @@ RSA는 레거시 시스템 호환이 필요할 때만 사용하며
 | Ed25519 | 256bit 고정 | 최고 | 매우 빠름 | **기본** |
 | Ed25519-SK | 256bit+FIDO2 | 최고+물리 | 빠름 | 하드웨어 키 |
 | RSA | 3072-4096bit | 양호 | 느림 | 레거시 호환 |
-| ECDSA | 256-521bit | 양호 | 빠름 | 비권장 |
+| ECDSA | 256-521bit | 양호 | 빠름 | 비권장 (ECDSA-SK는 FIDO2 하드웨어 키에 한해 사용) |
 
 ### ssh-keygen 사용법
 
@@ -251,7 +254,11 @@ aes256-gcm@openssh.com,\
 aes128-gcm@openssh.com
 MACs hmac-sha2-512-etm@openssh.com,\
 hmac-sha2-256-etm@openssh.com
-KexAlgorithms sntrup761x25519-sha512@openssh.com,\
+# OpenSSH 10.0+: mlkem768x25519-sha256 기본 채택
+# 명시적 고정 시 ML-KEM 알고리즘 배제 위험이 있으므로
+# 기본값 신뢰를 권장하며, 고정이 필요한 경우 아래 사용
+KexAlgorithms mlkem768x25519-sha256,\
+sntrup761x25519-sha512@openssh.com,\
 curve25519-sha256,curve25519-sha256@libssh.org
 ```
 
@@ -275,9 +282,6 @@ LoginGraceTime 30
 ClientAliveInterval 60
 ClientAliveCountMax 5
 
-# 프로토콜 버전 2만 허용
-Protocol 2
-
 # 배너 설정
 Banner /etc/ssh/banner
 ```
@@ -290,7 +294,7 @@ Banner /etc/ssh/banner
 | `PermitRootLogin` | no | root 공격 차단 |
 | `AllowUsers/Groups` | 지정 | 접속 화이트리스트 |
 | `MaxAuthTries` | 3 | 인증 시도 제한 |
-| `Port` | 비표준 | 스캐너 회피 |
+| `Port` | 비표준 | 스캐너 노이즈 감소 (보조 수단, AllowUsers·fail2ban 병행 필수) |
 | `X11Forwarding` | no | 불필요한 기능 차단 |
 | `ClientAliveInterval` | 60 | 유휴 세션 감지 |
 | `PermitEmptyPasswords` | no | 빈 비밀번호 차단 |
@@ -308,7 +312,12 @@ sudo dnf install fail2ban    # RHEL/Fedora
 enabled  = true
 port     = 2222
 filter   = sshd
-logpath  = /var/log/auth.log
+# Ubuntu 22.04+/Debian 12+는 rsyslog 미설치 시 journald만 사용
+# → backend = systemd 설정 필요 (logpath 불필요)
+backend  = systemd
+# rsyslog 사용 환경에서는 아래 logpath 사용 (backend 주석 처리)
+# backend  = auto
+# logpath  = /var/log/auth.log
 maxretry = 3
 bantime  = 3600
 findtime = 600
@@ -324,8 +333,10 @@ sudo cp /etc/ssh/sshd_config \
 # 2. 설정 문법 검증
 sudo sshd -t
 
-# 3. 기존 세션 유지한 채 sshd 재시작
-sudo systemctl restart sshd
+# 3. 설정 리로드 (기존 세션 유지, 포트 변경 없는 경우 권장)
+sudo systemctl reload sshd
+# 포트 변경 등 reload가 효과 없는 경우에만 restart 사용
+# sudo systemctl restart sshd
 
 # 4. 새 터미널에서 접속 테스트
 ssh user@server -p 2222

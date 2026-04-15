@@ -87,17 +87,20 @@ gVisor Sentry (사용자 공간 커널)
 호스트 Linux Kernel
 ```
 
-```bash
+```toml
 # gVisor 설치 후 런타임 등록
 # /etc/containerd/config.toml
-[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.gvisor]
+# 공식 권장 키 이름은 runsc (handler와 일치)
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]
   runtime_type = "io.containerd.runsc.v1"
+```
 
-# gVisor로 컨테이너 실행
+```bash
+# gVisor로 컨테이너 실행 (Docker)
 docker run --runtime=runsc nginx:latest
 
-# K8s RuntimeClass
-nerdctl run --runtime=gvisor nginx:latest
+# nerdctl로 gVisor 컨테이너 실행
+nerdctl run --runtime=runsc nginx:latest
 ```
 
 **적합한 사용 시점:**
@@ -135,7 +138,7 @@ docker run --runtime=kata nginx:latest
 | 하이퍼바이저 | 특징 |
 |------------|------|
 | QEMU/KVM | 성숙도 높음, 풍부한 기능 |
-| Firecracker | AWS 기반, 초경량, 빠른 시작 |
+| Firecracker | AWS가 개발한 오픈소스 VMM, 초경량, 빠른 시작 |
 | Cloud Hypervisor | 최소 기능, 고성능 |
 
 **적합한 사용 시점:**
@@ -155,7 +158,7 @@ apiVersion: node.k8s.io/v1
 kind: RuntimeClass
 metadata:
   name: gvisor
-handler: gvisor
+handler: runsc   # containerd config.toml의 runtimes 키 이름과 일치해야 함
 ---
 apiVersion: node.k8s.io/v1
 kind: RuntimeClass

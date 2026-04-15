@@ -24,8 +24,8 @@ sidebar_label: "클러스터 업그레이드"
 |---------|-------------|
 | kube-apiserver | N (기준) |
 | controller-manager, scheduler | N-1 |
-| kubelet | N-2 |
-| kube-proxy | N-2 |
+| kubelet | N-3 (K8s 1.28+) |
+| kube-proxy | N-3 (K8s 1.28+) |
 | kubectl | N-1 ~ N+1 |
 
 - apiserver가 항상 가장 높은 버전이어야 한다.
@@ -36,21 +36,32 @@ sidebar_label: "클러스터 업그레이드"
 
 ### Control Plane 업그레이드
 
+> K8s 1.28+ 패키지는 `pkgs.k8s.io` 공식 레포를 사용한다.
+> 마이너 버전 업그레이드 시 레포 URL도 함께 변경해야 한다.
+
 ```bash
-# 1. kubeadm 업그레이드 (패키지 매니저)
+# 0. 레포 URL 업그레이드 (예: 1.30 → 1.31)
+# /etc/apt/sources.list.d/kubernetes.list 편집
+sed -i 's|/v1.30/|/v1.31/|' /etc/apt/sources.list.d/kubernetes.list
+apt-get update
+
+# 1. kubeadm 업그레이드
 apt-mark unhold kubeadm
-apt-get install -y kubeadm=1.31.0-00
+apt-get install -y kubeadm=1.31.0-1.1
 apt-mark hold kubeadm
 
 # 2. 업그레이드 계획 확인
 kubeadm upgrade plan
 
-# 3. 업그레이드 실행
+# 3. 업그레이드 실행 (첫 번째 Control Plane만)
 kubeadm upgrade apply v1.31.0
+
+# HA 클러스터의 추가 Control Plane 노드는 아래 명령 사용
+# kubeadm upgrade node
 
 # 4. kubelet, kubectl 업그레이드
 apt-mark unhold kubelet kubectl
-apt-get install -y kubelet=1.31.0-00 kubectl=1.31.0-00
+apt-get install -y kubelet=1.31.0-1.1 kubectl=1.31.0-1.1
 apt-mark hold kubelet kubectl
 
 # 5. kubelet 재시작
@@ -71,10 +82,13 @@ kubectl drain node-1 \
   --delete-emptydir-data
 
 # 2. Worker Node에서 패키지 업그레이드
+# 레포 URL 업그레이드 (Control Plane과 동일하게)
+sed -i 's|/v1.30/|/v1.31/|' /etc/apt/sources.list.d/kubernetes.list
+apt-get update
 apt-mark unhold kubeadm kubelet kubectl
-apt-get install -y kubeadm=1.31.0-00
+apt-get install -y kubeadm=1.31.0-1.1
 kubeadm upgrade node
-apt-get install -y kubelet=1.31.0-00 kubectl=1.31.0-00
+apt-get install -y kubelet=1.31.0-1.1 kubectl=1.31.0-1.1
 apt-mark hold kubeadm kubelet kubectl
 
 # 3. kubelet 재시작
@@ -187,7 +201,8 @@ pluto detect-helm --helm-version 3
 | v1.25 | PodSecurityPolicy 제거 |
 | v1.26 | FlowSchema/PriorityLevelConfig v1beta1 제거 |
 | v1.29 | flowcontrol.apiserver.k8s.io/v1beta2 제거 |
-| v1.32 | VolumeAttributesClass GA |
+| v1.32 | flowcontrol.apiserver.k8s.io/v1beta3 제거 |
+| v1.33 | Endpoints API deprecated, `status.nodeInfo.kubeProxyVersion` 필드 제거 |
 
 ---
 
@@ -204,8 +219,8 @@ kubectl get pods -n kube-system
 kubectl get deployments -A
 kubectl get daemonsets -A
 
-# API 서버 버전
-kubectl version --short
+# API 서버 버전 (--short는 K8s 1.28에서 제거됨)
+kubectl version
 ```
 
 ---

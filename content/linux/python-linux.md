@@ -9,7 +9,6 @@ tags:
   - scripting
 sidebar_label: "Python 자동화"
 ---
-format: md
 
 # 파이썬으로 리눅스 커맨드 구현
 
@@ -321,11 +320,14 @@ recv_mb = net.bytes_recv / (1024**2)
 print(f"송신: {sent_mb:.1f} MB")
 print(f"수신: {recv_mb:.1f} MB")
 
-# 활성 연결 (ss -tuln)
-for conn in psutil.net_connections(kind="inet"):
-    if conn.status == "LISTEN":
-        addr = conn.laddr
-        print(f"LISTEN {addr.ip}:{addr.port}")
+# 활성 연결 (ss -tuln) — root 권한 없으면 일부 연결 누락 가능
+try:
+    for conn in psutil.net_connections(kind="inet"):
+        if conn.status == "LISTEN":
+            addr = conn.laddr
+            print(f"LISTEN {addr.ip}:{addr.port}")
+except psutil.AccessDenied:
+    print("연결 목록 조회 실패: root 권한 필요")
 ```
 
 ### 프로세스 관리
@@ -387,8 +389,12 @@ import paramiko
 def ssh_exec(host, user, key_path, command):
     """SSH로 원격 명령을 실행한다."""
     client = paramiko.SSHClient()
+    # ⚠️ AutoAddPolicy는 MITM 공격에 취약 (Bandit B507)
+    # 프로덕션에서는 RejectPolicy + known_hosts 사전 등록 사용:
+    #   client.set_missing_host_key_policy(paramiko.RejectPolicy())
+    #   client.load_host_keys(os.path.expanduser("~/.ssh/known_hosts"))
     client.set_missing_host_key_policy(
-        paramiko.AutoAddPolicy()
+        paramiko.AutoAddPolicy()  # 개발/테스트 환경 전용
     )
     try:
         client.connect(
@@ -460,6 +466,7 @@ SERVERS = [
 def run_on_server(server, command, key_path):
     """단일 서버에 명령을 실행한다."""
     client = paramiko.SSHClient()
+    # ⚠️ AutoAddPolicy: 개발/테스트 전용, 프로덕션 사용 금지
     client.set_missing_host_key_policy(
         paramiko.AutoAddPolicy()
     )
@@ -481,7 +488,8 @@ def run_on_server(server, command, key_path):
         client.close()
 
 # 병렬 실행
-key = "~/.ssh/id_ed25519"
+from pathlib import Path
+key = str(Path("~/.ssh/id_ed25519").expanduser())  # ~ 자동 확장
 with ThreadPoolExecutor(max_workers=5) as pool:
     futures = [
         pool.submit(
@@ -707,9 +715,11 @@ def parse_log(log_path, pattern=r"\[error\]"):
 
     matches = []
     regex = re.compile(pattern, re.IGNORECASE)
-    for line in path.read_text().splitlines():
-        if regex.search(line):
-            matches.append(line.strip())
+    # read_text() 대신 스트리밍 처리 → 대용량 로그 OOM 방지
+    with path.open(encoding="utf-8", errors="replace") as f:
+        for line in f:
+            if regex.search(line):
+                matches.append(line.strip())
     return matches
 
 def summarize(matches):
@@ -767,7 +777,8 @@ def scan_ports(host, ports, workers=50):
             pool.submit(check_port, host, p): p
             for p in ports
         }
-        for f in futures:
+        # futures는 {Future: port} 딕셔너리 → .items()로 순회
+        for f, port in futures.items():
             result = f.result()
             if result:
                 open_ports.append(result)

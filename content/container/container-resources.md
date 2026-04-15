@@ -46,7 +46,7 @@ docker run --memory=512m --memory-reservation=256m myapp:latest
 | 옵션 | 설명 | 기본값 |
 |-----|------|--------|
 | `--memory` | 하드 메모리 제한 | 무제한 |
-| `--memory-swap` | 메모리+스왑 합계 | `--memory`의 2배 |
+| `--memory-swap` | 메모리+스왑 합계 | `--memory`의 2배 (스왑 가용량 = --memory-swap - --memory) |
 | `--memory-reservation` | 소프트 제한 | 무제한 |
 | `--oom-kill-disable` | OOM Kill 비활성화 | false |
 
@@ -83,9 +83,17 @@ cpu.max        → --cpus 기반 (period quota 형식)
 ```
 
 ```bash
-# cgroups v2 확인
+# cgroup 드라이버 확인
+docker info | grep 'Cgroup Driver'
+# Cgroup Driver: systemd   ← Ubuntu 22.04+, RHEL 9+ 기본값
+# Cgroup Driver: cgroupfs  ← 구형 환경
+
+# cgroupfs 드라이버 경로
 cat /sys/fs/cgroup/docker/<container-id>/memory.max
-cat /sys/fs/cgroup/docker/<container-id>/cpu.max
+
+# systemd 드라이버 경로 (현대 Linux 기본값)
+cat /sys/fs/cgroup/system.slice/docker-<longid>.scope/memory.max
+cat /sys/fs/cgroup/system.slice/docker-<longid>.scope/cpu.max
 # 출력 예: "100000 100000" = 100ms 주기에 100ms 사용 (1코어)
 # 출력 예: "50000 100000" = 100ms 주기에 50ms 사용 (0.5코어)
 ```
@@ -150,6 +158,11 @@ docker stats --format \
 ---
 
 ## 7. Compose에서 리소스 제한
+
+> Docker Compose v2 플러그인(`docker compose`)에서는
+> `deploy.resources` 제한이 standalone 환경에서도 적용된다.
+> 구형 docker-compose v1(Python)에서는 `--compatibility` 플래그
+> 없이 이 설정이 무시된다.
 
 ```yaml
 services:

@@ -48,7 +48,7 @@ sidebar_label: "클러스터 구성요소"
 | 구성요소 | 역할 |
 |---------|------|
 | `kubelet` | Pod 수명주기 관리, CRI 호출 |
-| `kube-proxy` | Service 트래픽 라우팅 (iptables/IPVS) |
+| `kube-proxy` | Service 트래픽 라우팅 (iptables/nftables 권장, IPVS는 K8s 1.35 deprecated·1.36 제거 예정) |
 | `container runtime` | 실제 컨테이너 실행 (containerd) |
 
 ---
@@ -86,7 +86,7 @@ HA 구성 (3 Masters):
   [API Server 3]
 
   [etcd 1]
-  [etcd 2]  ← Raft 합의 (2/3 이상 동의 필요)
+  [etcd 2]  ← Raft 합의 (과반수 = floor(N/2)+1 이상 동의 필요)
   [etcd 3]
 ```
 
@@ -101,7 +101,11 @@ HA 구성 (3 Masters):
 
 ```bash
 # 클러스터 구성요소 상태
-kubectl get componentstatus
+# ⚠️ kubectl get componentstatus는 K8s 1.19부터 deprecated
+# 대신 아래 방법 사용
+kubectl get pods -n kube-system
+curl -s https://<api-server>/healthz  # API 서버 상태
+curl -s https://<api-server>/readyz   # 준비 상태
 
 # 시스템 Pod 전체 확인
 kubectl get pods -n kube-system

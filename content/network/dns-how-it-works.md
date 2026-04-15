@@ -121,8 +121,9 @@ dig +short example.com @8.8.8.8      # Google DNS
 dig +short example.com @1.1.1.1      # Cloudflare DNS
 dig +short example.com @208.67.222.222  # OpenDNS
 
-# 로컬 DNS 캐시 확인 (Linux)
-systemd-resolve --statistics
+# 로컬 DNS 캐시 확인 (Linux, systemd 239+)
+resolvectl statistics
+# 구버전: systemd-resolve --statistics (deprecated)
 # Cache: 45 current entries
 ```
 
@@ -133,7 +134,7 @@ systemd-resolve --statistics
 | NXDOMAIN | 레코드 없음 | 레코드 생성 확인 |
 | SERVFAIL | 권한 서버 응답 없음 | NS 레코드 확인 |
 | 오래된 IP 반환 | TTL 캐시 | TTL 만료 대기 또는 낮춤 |
-| 내부/외부 응답 다름 | Split-horizon DNS | 각 서버 설정 확인 |
+| 내부/외부 응답 다름 | Split-horizon DNS | `dig @<내부DNS>` vs `dig @8.8.8.8` 비교 후 View/Zone 설정 확인 |
 
 ---
 
@@ -143,7 +144,7 @@ systemd-resolve --statistics
 |------|------|------|
 | 기본 DNS | UDP/53, TCP/53 | 평문, 감청 가능 |
 | DoT (DNS over TLS) | TCP/853 | TLS 암호화 |
-| DoH (DNS over HTTPS) | TCP/443 | HTTPS로 위장, 방화벽 우회 |
+| DoH (DNS over HTTPS) | TCP/443 | 표준 HTTPS 포트 사용, 일반 웹 트래픽과 포트 구분 불가 |
 
 ---
 
@@ -162,24 +163,30 @@ kubectl get configmap coredns -n kube-system -o yaml
 ### Pod DNS 쿼리 순서
 
 ```
-Pod 내부에서 "myservice" 쿼리 시:
+Pod 내부에서 "myservice" 쿼리 시 (ndots:5 기본값):
   1. myservice.default.svc.cluster.local
   2. myservice.svc.cluster.local
   3. myservice.cluster.local
-  4. myservice (외부)
+  4. myservice.<노드 도메인> (노드 search domain이 있을 경우)
+  5. myservice. (절대명, 외부 DNS로 질의)
 ```
 
 ```yaml
-# ndots 설정으로 외부 DNS 쿼리 성능 개선
+# ndots 설정으로 외부 DNS 쿼리 성능 개선 (외부 API 호출이 많은 Pod에 한해 적용)
 spec:
   dnsConfig:
     options:
       - name: ndots
-        value: "2"   # 기본값 5 → 점 2개 미만이면 바로 외부 쿼리
+        value: "3"   # 기본값 5 → 점이 3개 미만이면 search domain 먼저 붙임
+                     # 3개 이상이면 절대명(FQDN)으로 바로 질의
 ```
 
-> `ndots: 5` 기본값은 외부 도메인 쿼리 시 불필요한 내부 쿼리를 5번 먼저 시도한다.
-> 외부 API를 많이 호출하는 서비스는 `ndots: 2`로 낮추면 레이턴시가 개선된다.
+> `ndots: 5` 기본값은 외부 도메인 쿼리 시 search domain 조합을 먼저 시도해
+> 레이턴시를 높인다.
+> `ndots: 2`는 `api.github.com`(점 2개) 같은 외부 도메인이 경계값에 걸려
+> 동작이 불명확해질 수 있다.
+> **`ndots: 3`이 클러스터 내부 단축명을 유지하면서 외부 쿼리 개선이 가능한
+> 안전한 절충값이다.** 클러스터 전체가 아닌 대상 워크로드에만 선택적 적용 권장.
 
 ---
 

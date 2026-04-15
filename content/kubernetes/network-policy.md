@@ -23,7 +23,8 @@ NetworkPolicy 적용 후: 명시적 허용 규칙 없으면 차단
 ```
 
 > CNI 플러그인이 NetworkPolicy를 지원해야 한다.
-> Calico, Cilium, Weave 등이 지원한다. Flannel 기본 설정은 미지원.
+> Calico, Cilium 등이 지원한다. Flannel 기본 설정은 미지원.
+> (Weave Net은 2022년 이후 아카이브됨. 신규 사용 비권장)
 
 ---
 

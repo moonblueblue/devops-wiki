@@ -244,14 +244,16 @@ spec:
 spec:
   initContainers:
   - name: log-collector
-    image: fluentbit:latest
+    image: fluent/fluent-bit:3.3
     restartPolicy: Always  # 이것이 사이드카의 핵심
 ```
 
 ### kube-proxy: iptables → nftables 전환
 
-- v1.33: nftables 백엔드 베타
-- v1.35: ipvs 모드 공식 디프리케이트
+- v1.29: nftables 백엔드 알파
+- v1.31: 베타 (기본 활성화)
+- v1.33: GA
+- v1.35: IPVS 모드 공식 디프리케이트, v1.36 제거 예정
 - 향후 nftables가 기본값이 될 예정
 
 ```bash

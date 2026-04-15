@@ -80,7 +80,7 @@ spec:
 CRD(IngressRoute) 기반. Let's Encrypt 자동 TLS를 지원한다.
 
 ```yaml
-apiVersion: traefik.io/v1alpha1
+apiVersion: traefik.io/v1alpha1  # Traefik v3. v1alpha1 deprecated 예정, v1 전환 권장
 kind: IngressRoute
 metadata:
   name: api-route
@@ -100,7 +100,7 @@ spec:
     certResolver: letsencrypt  # 자동 인증서
 ---
 # Rate Limiting Middleware
-apiVersion: traefik.io/v1alpha1
+apiVersion: traefik.io/v1alpha1  # Traefik v3
 kind: Middleware
 metadata:
   name: rate-limit
@@ -159,7 +159,8 @@ spec:
 
 ## 6. Gateway API (신규 표준)
 
-K8s 1.31에서 GA. 역할별 리소스로 권한을 분리한다.
+v1.0 GA 2023년 10월 (K8s 버전 독립, K8s 1.24+ 설치 가능).
+역할별 리소스로 권한을 분리한다.
 
 ```
 GatewayClass   → 인프라 팀 관리 (어떤 구현체 사용)
@@ -168,6 +169,7 @@ HTTPRoute      → 개발팀 관리 (라우팅 규칙)
 ```
 
 ```yaml
+# Gateway API v1.2+ 기준 (timeouts: Standard, retries: Experimental)
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -205,9 +207,10 @@ spec:
       weight: 10
     timeouts:
       request: 30s
-    retries:
-      attempts: 3
-      backoffPolicy: Exponential
+    # retries: v1.2+ Experimental Channel 전용
+    # retries:
+    #   attempts: 3
+    #   backoff: 500ms
 ```
 
 ---
@@ -220,12 +223,10 @@ spec:
 # ingress2gateway 설치
 go install sigs.k8s.io/ingress2gateway@latest
 
-# 변환
-ingress2gateway convert \
-  --input-file ingress.yaml \
-  --output-file gateway.yaml
+# 파일 변환 (stdout 출력)
+ingress2gateway print --input-file ingress.yaml > gateway.yaml
 
-# 또는 클러스터에서 직접 변환
+# 클러스터에서 직접 읽어 변환
 ingress2gateway print
 ```
 

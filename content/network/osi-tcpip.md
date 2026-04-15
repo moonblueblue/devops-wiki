@@ -19,7 +19,7 @@ sidebar_label: "OSI·TCP/IP"
 5  Session       RPC, NetBIOS                  ← 세션 수립/유지/종료
 4  Transport     TCP, UDP                      ← 포트, 흐름 제어, 신뢰성
 3  Network       IP, ICMP, BGP, OSPF           ← 라우팅, 논리 주소
-2  Data Link     Ethernet, ARP, VLAN           ← MAC 주소, 프레임 전송
+2  Data Link     Ethernet, ARP/NDP, VLAN       ← MAC 주소, 프레임 전송
 1  Physical      케이블, 광섬유, 무선 신호     ← 비트 전송
 ```
 
@@ -43,8 +43,8 @@ sidebar_label: "OSI·TCP/IP"
 |--------|---------|-------------|
 | Application | 5, 6, 7 | HTTP, DNS, SSH, SMTP |
 | Transport | 4 | TCP, UDP |
-| Internet | 3 | IP, ICMP, ARP |
-| Link | 1, 2 | Ethernet, Wi-Fi |
+| Internet | 3 | IP, ICMP |
+| Link | 1, 2 | Ethernet, Wi-Fi, ARP (IPv6: NDP) |
 
 OSI는 **개념 모델** (트러블슈팅, 교육용),
 TCP/IP는 **구현 모델** (실제 동작)이다.
@@ -106,7 +106,7 @@ L7 애플리케이션: 앱 응답? HTTP 상태코드?
 |------|-------|-------|
 | 동작 계층 | Transport | Application |
 | 라우팅 기준 | IP + 포트 | URL, 헤더, 쿠키 |
-| TLS 처리 | 없음 (pass-through) | TLS 종료 가능 |
+| TLS 처리 | 없음 (pass-through, 단 TLS 종료 지원 제품 존재 예: AWS NLB TLS listener) | TLS 종료 가능 |
 | 속도 | **빠름** | 상대적으로 느림 |
 | 지능형 라우팅 | 불가 | **가능** |
 | 예시 | AWS NLB, HAProxy TCP | AWS ALB, Nginx, Envoy |
@@ -132,4 +132,4 @@ ip neigh flush all
 
 - [Cloudflare - OSI Model](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/)
 - [MDN - HTTP Overview](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview)
-- [RFC 793 - TCP](https://www.rfc-editor.org/rfc/rfc793)
+- [RFC 9293 - TCP (RFC 793 obsoletes)](https://www.rfc-editor.org/rfc/rfc9293)

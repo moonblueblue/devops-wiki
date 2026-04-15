@@ -55,6 +55,8 @@ metadata:
 
 ```bash
 # Terminating 상태 리소스 조회
+# ⚠️ get all은 CRD 리소스를 조회하지 않는다.
+# CRD 리소스 확인은 아래 섹션 4의 api-resources 방식을 사용한다.
 kubectl get all -A \
   | grep Terminating
 
@@ -182,7 +184,8 @@ kubectl delete pod <name> \
 ```
 
 > **주의**: StatefulSet Pod를 강제 삭제하면 데이터 손실 위험이 있다.
-> EBS/Longhorn 볼륨은 두 Pod가 동시에 마운트를 시도할 수 있다.
+> EBS/Longhorn(RWO) 볼륨은 이전 노드에서 detach 완료 전
+> 새 Pod의 attach 시도로 마운트 실패 또는 데이터 손상이 발생할 수 있다.
 
 ---
 
@@ -235,7 +238,8 @@ ETCDCTL_API=3 etcdctl del \
   /registry/pods/<ns>/<pod-name>
 ```
 
-> etcd 직접 조작 후에는 반드시 API 서버를 재시작한다.
+> etcd 직접 조작 후 변경사항은 watch 메커니즘으로 API 서버에 자동 반영된다.
+> API 서버 재시작은 불필요하며 오히려 서비스 중단을 유발한다.
 > 클러스터 전체에 영향을 미칠 수 있으므로 최후 수단으로만 사용한다.
 
 ---

@@ -191,11 +191,14 @@ spec:
 ## 6. 주요 명령어
 
 ```bash
-# 레포지토리 관리
-helm repo add bitnami \
-  oci://registry-1.docker.io/bitnamicharts
+# 전통 HTTP 레포지토리 관리 (OCI 이전 방식)
+helm repo add ingress-nginx \
+  https://kubernetes.github.io/ingress-nginx
 helm repo update
-helm search repo nginx
+helm search repo ingress-nginx
+
+# OCI 레지스트리는 repo add 없이 직접 사용
+# helm install myapp oci://ghcr.io/myorg/mychart --version 1.0.0
 
 # 설치/업그레이드
 helm install myapp ./mychart -f values-prod.yaml
@@ -221,9 +224,16 @@ helm uninstall myapp
 
 ---
 
-## 7. OCI 레지스트리 (2025 기준 기본값)
+## 7. OCI 레지스트리
 
-Helm 3.8.0+에서 GA. Bitnami는 2025년부터 OCI 레지스트리를 기본으로 사용한다.
+Helm 3.8.0+에서 GA.
+Bitnami는 2024년 11월부터 OCI 전용으로 전환했으나,
+2025년 8월 이후 무료 차트가 대폭 축소(Broadcom 유료 구독)되었다.
+실습 예시로는 ghcr.io 또는 자체 레지스트리를 사용하는 것을 권장한다.
+
+> `helm repo add`는 OCI URL을 지원하지 않는다.
+> OCI 레지스트리는 `helm install oci://...`로 직접 사용한다.
+> `helm search repo`도 OCI 레지스트리에서는 동작하지 않는다.
 
 ```bash
 # OCI 레지스트리 로그인

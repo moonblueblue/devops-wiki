@@ -9,7 +9,6 @@ tags:
   - troubleshooting
 sidebar_label: "iproute2"
 ---
-format: md
 
 # iproute2 명령어
 
@@ -144,9 +143,9 @@ ip link set eth0 nomaster
 ### 본딩 생성
 
 ```bash
-# active-backup 본딩
-ip link add bond0 type bond \
-  mode active-backup miimon 100
+# active-backup 본딩 (커널 3.x+, iproute2 3.x+ 에서 인라인 파라미터 지원)
+ip link add bond0 type bond
+ip link set bond0 type bond miimon 100 mode active-backup
 ip link set eth0 down
 ip link set eth0 master bond0
 ip link set eth1 down
@@ -284,8 +283,8 @@ ss -s
 # ESTABLISHED 상태만
 ss -t state established
 
-# 특정 포트 필터
-ss -tlnp sport = :443
+# 특정 포트 필터 (필터 표현식은 따옴표로 감쌀 것)
+ss -tlnp 'sport = :443'
 
 # 목적지 필터
 ss dst 192.168.1.0/24
@@ -388,7 +387,7 @@ nsenter -t $PID -n ip addr show
        ↓
 [5] 포트 리스닝 (ss -tulpn)
        ↓
-[6] 네임스페이스 (ip netns identify)
+[6] 네임스페이스 (ip netns list / nsenter)
 ```
 
 ### 단계별 명령
@@ -429,7 +428,8 @@ ip route replace default via 192.168.1.254
 ip route add blackhole 10.99.0.0/16
 
 # 시나리오 4: 인터페이스 통계로 에러 확인
-ip -s link show eth0 | grep -E "errors|dropped"
+# -s -s (이중)로 상세 에러 통계 출력
+ip -s -s link show eth0 | grep -A1 -E "RX:|TX:"
 
 # 시나리오 5: 연결 상태별 카운트
 ss -t state established | wc -l

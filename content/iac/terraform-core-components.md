@@ -144,14 +144,14 @@ resource "aws_db_instance" "main" {
 기존 리소스를 읽기 전용으로 조회한다.
 
 ```hcl
-# 최신 Amazon Linux 2 AMI 조회
-data "aws_ami" "amazon_linux_2" {
+# 최신 Amazon Linux 2023 AMI 조회 (AL2 EOL 2025-06)
+data "aws_ami" "amazon_linux_2023" {
   most_recent = true
   owners      = ["amazon"]
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+    values = ["al2023-ami-*-x86_64"]
   }
 }
 
@@ -165,7 +165,7 @@ data "aws_caller_identity" "current" {}
 
 # 사용
 resource "aws_instance" "web" {
-  ami       = data.aws_ami.amazon_linux_2.id
+  ami       = data.aws_ami.amazon_linux_2023.id
   subnet_id = data.aws_subnet.main.id
 
   tags = {

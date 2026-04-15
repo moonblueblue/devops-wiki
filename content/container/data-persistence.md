@@ -83,8 +83,10 @@ docker exec postgres pg_dump \
   > backup-$(date +%Y%m%d).sql
 
 # PostgreSQL 전체 클러스터 (binary)
+# ⚠️ pg_basebackup은 REPLICATION 권한 또는 superuser 필요
+# 일반 앱 유저(dbuser)로는 "must be superuser or replication role" 오류 발생
 docker exec postgres pg_basebackup \
-  -U dbuser -D /backups/base-$(date +%Y%m%d) \
+  -U postgres -D /backups/base-$(date +%Y%m%d) \
   -Ft -z
 
 # MySQL
@@ -106,6 +108,8 @@ docker exec redis redis-cli BGSAVE
 
 ```bash
 # 컨테이너 중지 후 백업 (데이터 일관성 보장)
+# ⚠️ 다운타임 발생 — 개발/소규모 환경에 적합
+# 프로덕션에서는 pg_dump(온라인) 또는 파일시스템 스냅샷(LVM, EBS snapshot) 사용
 docker stop postgres
 
 docker run --rm \
@@ -154,13 +158,16 @@ services:
       - backups:/backups
     environment:
       PGPASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER:-postgres}  # postgres 서비스와 동일한 유저 사용
     entrypoint: |
       sh -c 'while true; do
-        pg_dump -h postgres -U postgres myapp \
+        pg_dump -h postgres -U ${POSTGRES_USER:-postgres} myapp \
           > /backups/backup-$$(date +%Y%m%d-%H%M%S).sql
         find /backups -name "backup-*" -mtime +7 -delete
         sleep 86400
       done'
+    # ⚠️ sleep 루프는 컨테이너 재시작 시 주기 리셋, 실패 감지 불가
+    # 프로덕션에서는 Kubernetes CronJob 또는 전용 백업 솔루션 사용 권장
 
 volumes:
   postgres-data:

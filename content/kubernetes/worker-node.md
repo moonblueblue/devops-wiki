@@ -25,7 +25,7 @@ Worker Node
 │  runc → 실제 컨테이너                       │
 │                                             │
 │  kube-proxy                                 │
-│  (iptables/IPVS 규칙으로 Service 구현)      │
+│  (iptables/nftables 규칙으로 Service 구현)      │
 └─────────────────────────────────────────────┘
 ```
 
@@ -100,14 +100,17 @@ kubectl describe pod <pod-name>
 
 모든 Node에서 실행되며 Service의 네트워크 규칙을 관리한다.
 
-### iptables vs IPVS 모드
+### kube-proxy 모드 비교
 
-| 항목 | iptables | IPVS |
-|-----|---------|------|
-| 구현 방식 | 체인 규칙 순차 탐색 | 커널 해시 테이블 |
-| 확장성 | Service 수 증가 시 느려짐 | 대규모에서도 일정 속도 |
-| LB 알고리즘 | random | rr, lc, dh 등 다양 |
-| 적합한 환경 | 소규모 (<1000 Service) | 대규모 |
+> ⚠️ IPVS 모드는 K8s 1.35에서 deprecated, 1.36에서 제거 예정.
+> 신규 클러스터는 **nftables** 모드 권장 (K8s 1.29 GA, kernel 5.13+).
+
+| 항목 | iptables | nftables (권장) | IPVS (deprecated) |
+|-----|---------|----------------|-------------------|
+| 구현 방식 | 체인 규칙 순차 탐색 | nf_tables 서브시스템 | 커널 해시 테이블 |
+| 확장성 | 느려짐 | 빠름 | 빠름 |
+| LB 알고리즘 | random | random | rr, lc, dh 등 |
+| 적합한 환경 | 레거시 환경 | 현재 권장 | 사용 비권장 |
 
 ### Service 트래픽 흐름
 
@@ -120,8 +123,8 @@ kubectl describe pod <pod-name>
 ```
 
 ```bash
-# kube-proxy 모드 확인
-kubectl get configmap -n kube-system kube-proxy -o yaml | grep mode
+# kube-proxy 모드 확인 (data.config.conf 내 KubeProxyConfiguration 블록)
+kubectl get configmap kube-proxy -n kube-system -o yaml
 
 # iptables 규칙 확인 (Node에서)
 sudo iptables -t nat -L -n | grep KUBE | head -20
@@ -129,15 +132,18 @@ sudo iptables -t nat -L -n | grep KUBE | head -20
 # IPVS 규칙 확인
 sudo ipvsadm -Ln
 
-# Service와 연결된 Pod 목록
-kubectl get endpoints <service-name>
+# Service와 연결된 Pod 목록 (K8s 1.33+ 권장)
+kubectl get endpointslices -l kubernetes.io/service-name=<service-name>
+# 구형 방법 (K8s 1.33에서 Endpoints API deprecated)
+# kubectl get endpoints <service-name>
 ```
 
 ---
 
 ## 4. containerd (컨테이너 런타임)
 
-K8s 1.24부터 기본 런타임이다.
+K8s 1.24에서 dockershim이 제거되면서 CRI 호환 런타임을 직접 지정해야 한다.
+대부분의 배포판(EKS, GKE, AKS, kubeadm)은 containerd를 기본으로 사용한다.
 
 ```
 kubelet

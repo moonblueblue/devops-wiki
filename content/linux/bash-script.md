@@ -9,7 +9,6 @@ tags:
   - automation
 sidebar_label: "Bash 스크립트"
 ---
-format: md
 
 # Bash 스크립트 기본 문법
 
@@ -391,7 +390,8 @@ TODAY=$(date +%Y-%m-%d)
 FILE_COUNT=$(find /tmp -type f | wc -l)
 
 # 중첩 가능
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+# readlink -f는 macOS(BSD)에서 미지원 → 이식성 필요 시 아래 사용
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ```
 
 백틱(`` ` ``)은 중첩이 어렵고 가독성이 떨어지므로
@@ -474,8 +474,8 @@ apt install shellcheck         # Debian/Ubuntu
 # 실행
 shellcheck script.sh
 
-# CI에서 경고 이상만 검사
-shellcheck --severity=warning scripts/*.sh
+# CI에서 경고 이상만 검사 (-S 또는 --severity 공백 구분)
+shellcheck -S warning scripts/*.sh
 ```
 
 ---
@@ -544,6 +544,9 @@ log() { printf "[%s] %s\n" "$(date +%T)" "$1"; }
 
 cleanup() { log "정리 작업 수행"; }
 trap cleanup EXIT
+
+# 로그 파일 쓰기 가능 여부 사전 검증
+touch "$LOG" 2>/dev/null || LOG="/tmp/${APP}-deploy.log"
 
 log "배포 시작: ${APP} v${VERSION}" | tee -a "$LOG"
 

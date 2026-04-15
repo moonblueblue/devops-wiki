@@ -70,11 +70,11 @@ spec:
 
 ## 3. kube-proxy 모드
 
-| 모드 | 구현 | 성능 | 권장 상황 |
-|------|------|------|---------|
-| iptables | DNAT 규칙 | O(n) | Service 1,000개 미만 |
-| IPVS | 커널 해시 테이블 | **O(1)** | **Service 1,000개 이상** |
-| nftables | nft 테이블 | O(1) | Linux 6.x+ (차세대) |
+| 모드 | 구현 | 성능 | 비고 |
+|------|------|------|------|
+| iptables | DNAT 규칙 | O(n) | 기본값 (K8s 1.33 미만) |
+| IPVS | 커널 해시 테이블 | O(1) | **K8s 1.35 deprecated, 1.36 제거 예정** |
+| nftables | nft 테이블 | O(1) | **kernel 5.13+, K8s 1.33 GA, 현재 권장** |
 
 ```bash
 # 현재 kube-proxy 모드 확인
@@ -143,14 +143,15 @@ spec:
 | HAProxy Ingress | 고성능 | 고트래픽 |
 | Cilium | eBPF 기반, Gateway API 내장 | Cilium CNI 환경 |
 
-> **주의:** Ingress-NGINX는 2026년 3월 공식 지원 종료 예정.
-> **Gateway API로 마이그레이션을 권장한다.**
+> **주의:** Ingress-NGINX는 2026년 3월 공식 지원 종료됨.
+> 현재 신규 릴리즈 및 보안 패치 없음. **Gateway API로 마이그레이션을 권장한다.**
 
 ---
 
 ## 5. Gateway API (차세대 표준)
 
-Ingress의 한계를 극복한 차세대 API다. 2024년 GA.
+Ingress의 한계를 극복한 차세대 API다.
+v1.0 GA는 2023년 10월, 현재 v1.4 (2025년 11월).
 
 ```
 GatewayClass (인프라 제공자 정의)

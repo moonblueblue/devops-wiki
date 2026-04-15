@@ -18,14 +18,17 @@ OCI(Open Container Initiative)는 Linux Foundation 산하의 컨테이너 표준
 Docker, Google, Red Hat 등이 참여하여 컨테이너 생태계의 상호운용성을 보장한다.
 
 ```
-OCI 표준 4종
-┌────────────────┬────────────────────────────────┐
-│ Image Spec     │ 이미지 레이어, manifest, config │
-│ Runtime Spec   │ 컨테이너 실행 방식, 라이프사이클│
-│ Distribution   │ 레지스트리 API                 │
-│ Spec           │                                │
-│ Artifact Spec  │ 이미지 외 아티팩트 저장        │
-└────────────────┴────────────────────────────────┘
+OCI 공식 스펙 3종
+┌────────────────┬─────────────────────────────────────────────┐
+│ Image Spec     │ 이미지 레이어, manifest, config             │
+│                │ v1.1(2024-02): artifactType 필드 추가       │
+│ Runtime Spec   │ 컨테이너 실행 방식, 라이프사이클            │
+│ Distribution   │ 레지스트리 API                              │
+│ Spec           │ v1.1(2024-02): Referrers API 추가           │
+└────────────────┴─────────────────────────────────────────────┘
+
+※ "OCI Artifact Spec"은 별도 공식 스펙이 아님.
+   Artifact 지원은 Image Spec v1.1 + Distribution Spec v1.1에 통합됨.
 ```
 
 ---
@@ -106,6 +109,9 @@ docker export $(docker create alpine) | tar -xf - -C container/rootfs
 
 cd container
 runc spec              # config.json 생성
+# ⚠️ 기본 config.json은 process.terminal=true → 터미널 할당 실패 가능
+# 비대화형 실행 시 config.json에서 process.terminal을 false로 변경 필요
+# 또한 runc는 루트 권한 필요 (비루트 환경: --rootless 플래그)
 
 runc create mycontainer
 runc start mycontainer
@@ -162,9 +168,15 @@ helm push mychart-1.0.0.tgz oci://registry.example.com/charts
 
 # SBOM 저장 (oras 도구)
 syft myapp:latest -o spdx-json > sbom.json
+# oras v2: 파일명:미디어타입 형식으로 명시
 oras push registry.example.com/myapp:latest-sbom \
   --artifact-type application/vnd.sbom.v1+json \
-  sbom.json
+  sbom.json:application/spdx+json
+
+# OCI Referrers API 활용: oras attach로 원본 이미지에 연결
+oras attach registry.example.com/myapp:latest \
+  --artifact-type application/vnd.sbom.v1+json \
+  sbom.json:application/spdx+json
 
 # 레지스트리에서 이미지 메타데이터 확인 (skopeo)
 skopeo inspect docker://nginx:latest
@@ -199,3 +211,4 @@ skopeo list-tags docker://docker.io/library/nginx
 - [OCI Image Spec](https://github.com/opencontainers/image-spec)
 - [OCI Runtime Spec](https://github.com/opencontainers/runtime-spec)
 - [OCI Distribution Spec](https://github.com/opencontainers/distribution-spec)
+- [OCI Image/Distribution Spec v1.1 릴리즈 블로그](https://opencontainers.org/posts/blog/2024-03-13-image-and-distribution-1-1/)

@@ -141,8 +141,13 @@ btt -i trace.blktrace.*
 
 ### fio (벤치마크)
 
+> ⚠️ **경고:** `--filename=/dev/xxx` 옵션은 raw 블록 디바이스에
+> 직접 쓴다. 기존 데이터가 **즉시 덮어써진다.**
+> 반드시 마운트 해제 확인 후 실행하거나
+> `--filename=/tmp/fio-test`처럼 임시 파일 경로를 사용할 것.
+
 ```bash
-# 랜덤 읽기 IOPS (DB 워크로드)
+# 랜덤 읽기 IOPS (DB 워크로드) - 안전한 임시 파일 사용 예시
 fio --name=rand-read \
     --ioengine=libaio \
     --iodepth=32 \
@@ -151,8 +156,11 @@ fio --name=rand-read \
     --size=1G \
     --numjobs=4 \
     --runtime=60 \
-    --filename=/dev/nvme0n1 \
+    --filename=/tmp/fio-test \
     --direct=1
+
+# 블록 디바이스 직접 테스트 시 (마운트 해제 필수)
+# --filename=/dev/nvme0n1
 
 # 순차 쓰기 처리량 (백업/로그)
 fio --name=seq-write \
@@ -161,7 +169,7 @@ fio --name=seq-write \
     --rw=write \
     --bs=1M \
     --size=4G \
-    --filename=/dev/sda \
+    --filename=/tmp/fio-seqtest \
     --direct=1
 ```
 
@@ -191,7 +199,8 @@ read: IOPS=45.2k, BW=176MiB/s
 | `kyber` | 레이턴시 목표 기반 | 저레이턴시 SSD |
 | `bfq` | 프로세스별 공정 배분 | 데스크톱, 혼합 워크로드 |
 
-> Linux 5.3에서 cfq / deadline / noop (레거시) 완전 제거됨.
+> 싱글큐 스케줄러(cfq, deadline, noop)는 Linux 5.0에서 멀티큐 전환과 함께 제거됨.
+> 5.0+ 커널에서는 mq-deadline, bfq, kyber, none만 사용 가능.
 
 ```bash
 # 현재 스케줄러 확인
@@ -205,7 +214,9 @@ echo mq-deadline > /sys/block/sda/queue/scheduler
 cat /etc/udev/rules.d/60-io-scheduler.rules
 # ACTION=="add|change", KERNEL=="sd[a-z]",
 #   ATTR{queue/scheduler}="mq-deadline"
-# ACTION=="add|change", KERNEL=="nvme[0-9]*",
+# nvme[0-9]*n[0-9]* 형식으로 namespace만 매칭 (파티션 제외)
+# nvme[0-9]* 패턴은 파티션(nvme0n1p1)도 매칭되어 udev 오류 발생
+# ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*",
 #   ATTR{queue/scheduler}="none"
 ```
 
@@ -343,8 +354,8 @@ echo 'ACTION=="add|change", KERNEL=="sda",
 | 옵션 | 효과 |
 |------|------|
 | `noatime` | 파일 읽기 시 atime 업데이트 안 함 → 쓰기 I/O 감소 |
-| `data=writeback` | ext4 메타데이터만 저널링 → 성능 향상 (데이터 안전성 ↓) |
-| `discard` | SSD TRIM 자동화 (주기적 fstrim도 고려) |
+| `data=writeback` | ext4 메타데이터만 저널링 → 성능 향상 (비정상 종료 시 파일 내용 손상 가능, DB 데이터 디렉터리 사용 금지) |
+| `discard` | SSD TRIM 자동화 (I/O 집중 워크로드에서 쓰기 레이턴시 증가 가능, DB 서버는 `systemd fstrim.timer` 권장) |
 
 ### ext4 vs XFS 선택
 

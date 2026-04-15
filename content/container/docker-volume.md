@@ -79,7 +79,9 @@ docker run -d \
   nginx:latest
 ```
 
-> Bind Mount는 호스트 경로가 없으면 디렉토리가 자동 생성된다.
+> `-v` 문법: 호스트 경로가 없으면 디렉토리가 자동 생성된다.
+> `--mount type=bind`: 호스트 경로가 반드시 사전에 존재해야 한다.
+> 경로가 없으면 `bind source path does not exist` 오류 발생.
 > 소유권 문제가 발생할 수 있으므로 권한을 미리 확인하라.
 
 ---
@@ -87,12 +89,16 @@ docker run -d \
 ## 4. tmpfs Mount
 
 ```bash
-# 메모리 기반 임시 저장소
+# 메모리 기반 임시 저장소 (tmpfs)
+# -v 문법은 tmpfs 미지원
+
+# 방법 1: --tmpfs (간결, 단순 사용에 적합)
+docker run -d --tmpfs /run/secrets:size=100m myapp:latest
+
+# 방법 2: --mount (세밀한 옵션 설정 가능)
 docker run -d \
   --mount type=tmpfs,target=/run/secrets,tmpfs-size=100m \
   myapp:latest
-
-# -v로 불가, --mount 사용 필수
 ```
 
 ---

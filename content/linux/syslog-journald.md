@@ -11,7 +11,6 @@ tags:
   - devops
 sidebar_label: "syslog·journald"
 ---
-format: md
 
 # syslog과 journald
 
@@ -130,12 +129,17 @@ cron.*                 /var/log/cron
 
 ### 모듈 로드
 
+> **주의:** `imjournal`과 `ForwardToSyslog=yes`를 동시에 사용하면
+> 로그가 중복 수집된다.
+> - `imjournal` 사용 시 → `journald.conf`에서 `ForwardToSyslog=no` 설정
+> - `imuxsock` 사용 시 → `ForwardToSyslog=yes` 필요
+
 ```bash
-# journald에서 메시지 수신
+# 방식 1: imjournal로 journald 직접 읽기 (ForwardToSyslog=no 필요)
 module(load="imjournal")
 
-# 로컬 유닉스 소켓 입력
-module(load="imuxsock")
+# 방식 2: imuxsock으로 소켓 수신 (ForwardToSyslog=yes 필요)
+# module(load="imuxsock")
 
 # UDP 원격 수신
 module(load="imudp")
@@ -243,7 +247,7 @@ MaxLevelSyslog=debug
 | `SystemKeepFree` | 파일시스템의 15% (상한 4GiB) |
 | `SystemMaxFileSize` | SystemMaxUse의 1/8 |
 | `Compress` | yes |
-| `ForwardToSyslog` | yes |
+| `ForwardToSyslog` | no (upstream 기본값; 배포판에 따라 yes로 오버라이드될 수 있음) |
 
 ### 설정 반영
 
@@ -467,6 +471,7 @@ module(load="omrelp")
   protocol="tcp"
   queue.type="LinkedList"
   queue.filename="fwd_queue"
+  queue.spoolDirectory="/var/spool/rsyslog"
   queue.maxDiskSpace="1g"
   queue.saveOnShutdown="on"
   action.resumeRetryCount="-1"
@@ -599,6 +604,7 @@ sd_journal_send(
 journalctl DEPLOY_VERSION=v2.1.0
 
 # 복수 필드 조합 (AND)
+# PRIORITY= 는 정확히 해당 값만 매칭 (범위 필터는 -p 옵션 사용)
 journalctl _SYSTEMD_UNIT=nginx.service \
            PRIORITY=3
 

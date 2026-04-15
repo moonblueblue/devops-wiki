@@ -10,7 +10,6 @@ tags:
   - backup
 sidebar_label: "자동화 스크립트"
 ---
-format: md
 
 # 실무 자동화 스크립트 예제
 
@@ -157,7 +156,8 @@ readonly REPORT_FILE="/tmp/health_$(date +%Y%m%d).txt"
 
 check_cpu() {
     local usage
-    usage=$(top -bn1 \
+    # LC_ALL=C: 로케일에 따른 필드 순서 변화 방지
+    usage=$(LC_ALL=C top -bn1 \
         | awk '/Cpu\(s\)/ {printf "%.1f", 100-$8}')
     echo "CPU 사용률: ${usage}%"
     if (( $(echo "$usage > 90" | bc -l) )); then
@@ -480,6 +480,8 @@ backup_mysql() {
     mkdir -p "${BACKUP_DIR}/db"
     log "MySQL 백업 시작: ${DB_NAME}"
 
+    # -p"$DB_PASS" 방식은 ps aux에 비밀번호 노출 위험
+    # 프로덕션에서는 ~/.my.cnf 또는 --defaults-extra-file 사용 권장
     mysqldump \
         -h "$DB_HOST" \
         -u "$DB_USER" \
@@ -502,17 +504,18 @@ backup_mysql() {
 
 backup_postgresql() {
     local dest
-    dest="${BACKUP_DIR}/db/pg_${DB_NAME}_${DATE}"
-    dest+=".sql.gz"
+    dest="${BACKUP_DIR}/db/pg_${DB_NAME}_${DATE}.dump"
     mkdir -p "${BACKUP_DIR}/db"
     log "PostgreSQL 백업 시작: ${DB_NAME}"
 
+    # -Fc는 자체 압축 포함 → gzip 이중 압축 불필요
+    # 파일 확장자는 .dump 관례에 맞게 변경 권장
     PGPASSWORD="$DB_PASS" pg_dump \
         -h "$DB_HOST" \
         -U "$DB_USER" \
-        -Fc "$DB_NAME" | gzip > "$dest"
+        -Fc "$DB_NAME" > "$dest"
 
-    if gzip -t "$dest" 2>/dev/null; then
+    if [[ -s "$dest" ]]; then
         local size
         size=$(du -h "$dest" | cut -f1)
         log "PostgreSQL 백업 완료: ${dest} (${size})"
@@ -899,7 +902,7 @@ build_release() {
     cd "$release_dir"
     log "의존성 설치"
     if [[ -f "package.json" ]]; then
-        npm ci --production
+        npm ci --omit=dev  # npm v9+: --production → --omit=dev
     elif [[ -f "requirements.txt" ]]; then
         pip install -r requirements.txt
     fi
@@ -1058,6 +1061,8 @@ send_slack() {
         *)        color="#439FE0" ;;
     esac
 
+    # attachments는 레거시 API — Slack Block Kit 마이그레이션 권장
+    # https://api.slack.com/messaging/attachments-to-blocks
     curl -s -X POST "$SLACK_WEBHOOK_URL" \
         -H 'Content-Type: application/json' \
         -d "{
