@@ -43,8 +43,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+# -w -s: 디버그 정보 제거 (크기 최소화)
 RUN CGO_ENABLED=0 GOOS=linux go build \
-  -ldflags="-w -s" \   # 디버그 정보 제거 (크기 최소화)
+  -ldflags="-w -s" \
   -o /app/server .
 
 # 런타임 스테이지 (distroless 또는 scratch)
@@ -69,7 +70,8 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:21-jre-alpine AS extractor
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-RUN java -Djarmode=layertools -jar app.jar extract
+# Spring Boot 3.3+: -Djarmode=tools (3.3 미만: -Djarmode=layertools)
+RUN java -Djarmode=tools -jar app.jar extract
 
 # 런타임 스테이지
 FROM eclipse-temurin:21-jre-alpine
@@ -91,7 +93,7 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev  # --only=production은 npm 8.3+ deprecated
 
 # 빌드 스테이지
 FROM node:20-alpine AS builder
@@ -156,7 +158,7 @@ RUN go build -o /app/server .
 ## 4. BuildKit 고급 기능
 
 ```dockerfile
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1
 
 # 캐시 마운트 (빌드 시 캐시 재사용, 이미지에 포함 안 됨)
 RUN --mount=type=cache,target=/root/.cache/go-build \
