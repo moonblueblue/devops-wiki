@@ -38,7 +38,7 @@ ENTRYPOINT ["/server"]
 
 ```
 Alpine 장점:
-  - 5 MB 미만 (ubuntu 대비 93% 작음)
+  - ~5.3 MB (ubuntu 대비 약 93% 작음)
   - 최소 공격 표면
   - apk 패키지 관리자
 
@@ -64,6 +64,9 @@ RUN apk add --no-cache libc6-compat
 
 ```dockerfile
 # Node.js with distroless
+# gcr.io/distroless → Artifact Registry로 이전됨
+# 현재 권장 경로: gcr.io가 Artifact Registry로 프록시되어 동작
+# 최신 경로는 https://github.com/GoogleContainerTools/distroless 확인
 FROM gcr.io/distroless/nodejs20-debian12
 COPY --from=builder /app /app
 WORKDIR /app
@@ -105,7 +108,12 @@ RUN dnf install -y curl && dnf clean all
 ```bash
 # 설치
 brew install dive  # macOS
-apt install dive   # Ubuntu
+
+# Ubuntu/Debian: dive는 공식 APT 저장소에 없음 → .deb 직접 설치
+DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" \
+  | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+curl -fOL "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb"
+sudo apt install ./dive_${DIVE_VERSION}_linux_amd64.deb
 
 # 이미지 레이어 분석
 dive myapp:latest
