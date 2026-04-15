@@ -57,8 +57,9 @@ ss -tn state time-wait | wc -l   # TIME_WAIT 수
   TIME_WAIT (2×MSL 대기)
 ```
 
-`TIME_WAIT` 상태는 최대 2분간 유지된다 (기본 MSL=60초).
-`tcp_fin_timeout`으로 조정 가능하다.
+`TIME_WAIT` 지속 시간은 커널 내부 상수
+(`TCP_TIMEWAIT_LEN`, 기본 60초)로 고정되며 sysctl로 조정 불가하다.
+`tcp_fin_timeout`은 **FIN_WAIT_2** 상태 타임아웃을 제어하는 별개의 파라미터다.
 
 ---
 
@@ -102,7 +103,7 @@ ss -tan | awk 'NR>1 {print $1}' | sort | uniq -c | sort -rn
 | 알고리즘 | 방식 | 특징 |
 |---------|------|------|
 | CUBIC | 패킷 손실 기반 | Linux 기본값 |
-| BBR | 대역폭+RTT 기반 | 고대역폭·고RTT 환경 유리 |
+| BBR v1/v3 | 대역폭+RTT 기반 | 고대역폭·고RTT 환경 유리 (Google 개발) |
 
 ```bash
 # 현재 혼잡 제어 알고리즘
@@ -132,7 +133,7 @@ UDP 사용 사례:
 QUIC은 UDP 기반으로 TCP의 신뢰성을 직접 구현한 프로토콜이다.
 
 ```
-TCP + TLS:      TCP handshake (1-RTT) + TLS handshake (1-RTT) = 2-RTT
+TCP + TLS 1.3:  TCP handshake (1-RTT) + TLS 1.3 handshake (1-RTT) = 2-RTT
 QUIC:           단일 핸드셰이크 (1-RTT), 재연결 시 0-RTT
 ```
 
@@ -144,7 +145,7 @@ QUIC:           단일 핸드셰이크 (1-RTT), 재연결 시 0-RTT
 | 헤더 압축 | HPACK | **QPACK** |
 
 ```bash
-# HTTP/3 지원 서버 확인
+# HTTP/3 지원 서버 확인 (HTTP/3 빌드가 필요, 배포판 기본 curl 미지원일 수 있음)
 curl -sI --http3 https://cloudflare.com | head -1
 
 # QUIC 연결 상태 확인
@@ -173,7 +174,7 @@ ss -u state established
 
 ## 참고 문서
 
-- [RFC 793 - TCP](https://www.rfc-editor.org/rfc/rfc793)
+- [RFC 9293 - TCP (RFC 793 obsoletes)](https://www.rfc-editor.org/rfc/rfc9293)
 - [RFC 768 - UDP](https://www.rfc-editor.org/rfc/rfc768)
 - [RFC 9000 - QUIC](https://www.rfc-editor.org/rfc/rfc9000)
 - [Cloudflare - TCP vs UDP](https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/)
