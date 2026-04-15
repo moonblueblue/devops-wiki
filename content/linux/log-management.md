@@ -12,7 +12,6 @@ tags:
   - devops
 sidebar_label: "로그 관리"
 ---
-format: md
 
 # 대규모 로그 관리 전략
 
@@ -113,7 +112,7 @@ Promtail 대비 메모리 70% 이상 절감 사례가 보고되었다.
 **Filebeat** : Elastic Stack과 기본 연동된다.
 단순 포워딩에 적합하나 고처리량에서 유실 보고가 있다.
 
-> 참고: Promtail은 2026-03-02부로 EOL이다.
+> 참고: Promtail은 2026년 2월 말 EOL이 완료되었다.
 > 신규 프로젝트는
 > [Grafana Alloy](https://grafana.com/docs/alloy/)
 > 또는 Vector를 사용한다.
@@ -292,19 +291,28 @@ Loki는 메타데이터만 인덱싱하여 비용을 절감한다.
 오브젝트 스토리지를 백엔드로 사용한다.
 
 ```yaml
-# Loki storage_config 예시
+# Loki 3.0+ storage_config 예시 (tsdb 인덱스 스토어)
+# boltdb_shipper는 Loki 2.8부터 deprecated, 3.0에서 제거
 storage_config:
-  boltdb_shipper:
+  tsdb_shipper:
     active_index_directory: /loki/index
     cache_location: /loki/cache
-    shared_store: s3
   aws:
     s3: s3://region/bucket-name
     s3forcepathstyle: true
 
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
 limits_config:
   retention_period: 720h    # 30일
-  max_query_lookback: 720h
 ```
 
 > 참고:
@@ -333,17 +341,16 @@ limits_config:
 ### 샘플링 전략
 
 ```toml
-# Vector 샘플링 설정 예시
+# Vector 샘플링 설정 예시 (Vector 0.x+)
 [transforms.sample_info]
 type = "sample"
 inputs = ["parsed_logs"]
 rate = 100          # 100건 중 1건
-exclude.level = [
-  "error",
-  "warn",
-  "critical"
-]
+# exclude는 VRL 표현식 문자열을 받음 (배열 문법 오류)
 # ERROR/WARN/CRITICAL은 샘플링 제외 (전량 수집)
+[transforms.sample_info.exclude]
+type = "vrl"
+source = 'includes(["error","warn","critical"], .level)'
 ```
 
 ### 대수(로그) 샘플링
