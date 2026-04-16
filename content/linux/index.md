@@ -28,7 +28,7 @@ sidebar_label: "Linux"
 
 ### 부팅과 시스템 초기화
 
-- [ ] [부팅 프로세스 (BIOS/UEFI → GRUB → systemd)](boot-init/boot-process.md)
+- [x] [부팅 프로세스 (BIOS/UEFI → GRUB → systemd)](boot-init/boot-process.md)
 - [ ] [systemd 서비스 관리](boot-init/systemd.md)
 - [ ] [systemd-timer와 crontab](boot-init/scheduled-tasks.md)
 - [ ] [커널 파라미터 (sysctl, /proc, /sys)](boot-init/kernel-parameters.md)
