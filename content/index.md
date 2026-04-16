@@ -6,6 +6,7 @@ tags:
   - roadmap
   - news
 sidebar_label: "홈"
+displayed_sidebar: wikiSidebar
 ---
 
 # Moon Blue's DevOps Wiki

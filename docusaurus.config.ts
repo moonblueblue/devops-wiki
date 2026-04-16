@@ -74,6 +74,7 @@ const config: Config = {
       logo: {
         alt: 'Moon Blue Logo',
         src: 'img/logo.svg',
+        href: '/',
       },
       items: [
         {
