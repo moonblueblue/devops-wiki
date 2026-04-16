@@ -31,7 +31,7 @@ sidebar_label: "Linux"
 - [x] [부팅 프로세스 (BIOS/UEFI → GRUB → systemd)](boot-init/boot-process.md)
 - [x] [systemd 서비스 관리](boot-init/systemd.md)
 - [x] [systemd-timer와 crontab](boot-init/scheduled-tasks.md)
-- [ ] [커널 파라미터 (sysctl, /proc, /sys)](boot-init/kernel-parameters.md)
+- [x] [커널 파라미터 (sysctl, /proc, /sys)](boot-init/kernel-parameters.md)
 - [ ] [커널 모듈 관리 (modprobe, lsmod)](boot-init/kernel-modules.md)
 
 ### 프로세스와 리소스 격리
