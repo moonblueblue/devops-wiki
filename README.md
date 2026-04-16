@@ -24,8 +24,6 @@ devops-wiki/
 │   ├── observability/       # Prometheus, Grafana, ELK
 │   ├── security/            # DevSecOps, 시크릿, 공급망 보안
 │   └── sre/                 # 장애 대응, SLI/SLO
-├── raw/                     # 수집한 원본 소스 (git 추적 제외)
-├── quartz/                  # Quartz v4 엔진 (SSG 빌드)
 ├── .github/                 # GitHub Actions, PR 템플릿
 ├── CLAUDE.md                # LLM 운영 규칙
 └── package.json             # Quartz 의존성
@@ -33,9 +31,8 @@ devops-wiki/
 
 ## 운영 흐름
 
-1. **수집 (ingest)** — 웹 리서치로 최신 자료를 `raw/`에 저장
-2. **작성 (compile)** — `raw/` 기반으로 `content/`에 위키 글 작성
-3. **발행 (publish)** — feature 브랜치 → PR → 검수 → merge
+1. **리서치 & 작성** — 웹 리서치로 최신 자료를 조사하여 `content/`에 직접 작성 (출처는 글 내 기록)
+2. **발행 (publish)** — feature 브랜치 → PR → 검수 → merge
 
 ## 카테고리 (로드맵 순서)
 
