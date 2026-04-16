@@ -24,7 +24,7 @@ sidebar_label: "Linux"
 - [x] [파일시스템 계층 구조 (FHS)](distro-basics/filesystem-hierarchy.md)
 - [x] [사용자·그룹·퍼미션 (ACL, setuid)](distro-basics/user-group-permission.md)
 - [x] [패키지 관리 (apt, dnf, apk, pacman)](distro-basics/package-management.md)
-- [ ] [Nix와 NixOS (선언적 패키지 관리)](distro-basics/nix-nixos.md)
+- [x] [Nix와 NixOS (선언적 패키지 관리)](distro-basics/nix-nixos.md)
 
 ### 부팅과 시스템 초기화
 
