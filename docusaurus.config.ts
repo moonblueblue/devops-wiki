@@ -33,7 +33,6 @@ const config: Config = {
           path: 'content',
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/moonblueblue/devops-wiki/edit/main/',
         },
         blog: false,
         theme: {
