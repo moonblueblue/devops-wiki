@@ -21,7 +21,7 @@ sidebar_label: "Linux"
 
 - [x] [리눅스 배포판 비교 (Ubuntu, RHEL, Alpine, AL2023)](distro-basics/linux-distro-comparison.md)
 - [x] [Immutable OS (Flatcar, Bottlerocket, Talos Linux, Fedora CoreOS)](distro-basics/immutable-os.md)
-- [ ] [파일시스템 계층 구조 (FHS)](distro-basics/filesystem-hierarchy.md)
+- [x] [파일시스템 계층 구조 (FHS)](distro-basics/filesystem-hierarchy.md)
 - [ ] [사용자·그룹·퍼미션 (ACL, setuid)](distro-basics/user-group-permission.md)
 - [ ] [패키지 관리 (apt, dnf, apk, pacman)](distro-basics/package-management.md)
 - [ ] [Nix와 NixOS (선언적 패키지 관리)](distro-basics/nix-nixos.md)
