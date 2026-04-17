@@ -194,23 +194,26 @@ Beta:   v1.13.0-beta.1         Clang 빌드 커널 + ThinLTO
 
 **핵심 아키텍처**:
 
+**기존 Linux 노드**
+
 ```mermaid
 graph TD
-    subgraph traditional["기존 Linux 노드"]
-        T1[systemd] --> T2[sshd]
-        T2 --> T3[bash]
-        T3 --> T4[패키지 관리자]
-        T2 -->|"운영자 직접 접속·수정"| T5((운영자))
-    end
+    T1[systemd] --> T2[sshd]
+    T2 --> T3[bash]
+    T3 --> T4[패키지 관리자]
+    T2 -->|"운영자 직접 접속·수정"| T5((운영자))
+```
 
-    subgraph talos["Talos 노드"]
-        M["machined (PID 1)"]
-        M --> AP["apid\n(gRPC 게이트웨이, 포트 50000)"]
-        M --> TR["trustd\n(인증서 배포, Root of Trust)"]
-        M --> CT["containerd\n(컨테이너 런타임)"]
-        M --> KB["kubelet\n(K8s 에이전트)"]
-        TC((talosctl)) -->|"gRPC"| AP
-    end
+**Talos 노드**
+
+```mermaid
+graph TD
+    M["machined (PID 1)"]
+    M --> AP["apid\n(gRPC 게이트웨이, 포트 50000)"]
+    M --> TR["trustd\n(인증서 배포, Root of Trust)"]
+    M --> CT["containerd\n(컨테이너 런타임)"]
+    M --> KB["kubelet\n(K8s 에이전트)"]
+    TC((talosctl)) -->|"gRPC"| AP
 ```
 
 방화벽 규칙: talosctl은 **apid**(포트 50000/TCP)와 통신한다.

@@ -242,29 +242,18 @@ Debian 12 "Bookworm" 릴리즈: 2023-06-10  EOL: 2028-06
 
 ## 환경별 배포판 선택 가이드
 
-```mermaid
-graph TD
-    Q["어떤 환경인가?"]
-
-    Q --> AWS["AWS 클라우드"]
-    Q --> ONP["온프레미스 엔터프라이즈"]
-    Q --> CTR["컨테이너 베이스 이미지"]
-    Q --> STB["안정성 최우선 서버"]
-
-    AWS --> AWS1["Amazon Linux 2023\n(AWS 네이티브 워크로드)"]
-    AWS --> AWS2["Ubuntu LTS\n(범용 / 이식성 중시)"]
-
-    ONP --> ONP1["RHEL\n(규제·인증 필요, FIPS/STIG)"]
-    ONP --> ONP2["Rocky Linux\n(RHEL 호환 + 무료, 신형 HW)"]
-    ONP --> ONP3["AlmaLinux\n(RHEL 호환 + 무료, 구형 HW)"]
-
-    CTR --> CTR1["Alpine\n(Go / Rust 정적 바이너리)"]
-    CTR --> CTR2["Distroless / Chainguard\n(CVE 최소화 / 공급망 보안)"]
-    CTR --> CTR3["Debian slim\n(Python / Java / Node.js)"]
-    CTR --> CTR4["Ubuntu\n(범용, glibc 호환 최우선)"]
-
-    STB --> STB1["Debian stable\n(데이터베이스, 장기 운영)"]
-```
+| 환경 | 추천 배포판 | 선택 이유 |
+|------|-----------|---------|
+| **AWS 클라우드** | Amazon Linux 2023 | AWS 네이티브 워크로드 최적화 |
+| | Ubuntu LTS | 범용, 이식성 중시 |
+| **온프레미스 엔터프라이즈** | RHEL | 규제·인증 필요 (FIPS/STIG) |
+| | Rocky Linux | RHEL 호환 + 무료, 신형 HW |
+| | AlmaLinux | RHEL 호환 + 무료, 구형 HW |
+| **컨테이너 베이스 이미지** | Alpine | Go/Rust 정적 바이너리 |
+| | Distroless / Chainguard | CVE 최소화, 공급망 보안 |
+| | Debian slim | Python / Java / Node.js |
+| | Ubuntu | 범용, glibc 호환 최우선 |
+| **안정성 최우선 서버** | Debian stable | 데이터베이스, 장기 운영 |
 
 > Kubernetes 노드 OS로 불변 인프라를 구성할 경우
 > Flatcar, Bottlerocket, Talos Linux 같은 컨테이너 특화

@@ -35,13 +35,11 @@ Nix는 패키지 관리를 **함수형 모델**로 재정의한다.
 설치된다. 해시는 소스 코드·의존성·빌드 스크립트·환경변수를
 SHA-256으로 압축한 32자 base32 문자열이다.
 
-```
-/nix/store/
-  ├── 7hd63g2p4…-nginx-1.24.0/        ← 이 빌드만의 고유 경로
-  ├── 9ab3f1m2c…-nginx-1.24.0/        ← 다른 옵션으로 빌드된 동명 패키지
-  ├── 2dq8r7k1s…-openssl-3.3.1/
-  └── …
-```
+| 경로 | 설명 |
+|------|------|
+| `/nix/store/7hd63g2p4…-nginx-1.24.0/` | 이 빌드만의 고유 경로 |
+| `/nix/store/9ab3f1m2c…-nginx-1.24.0/` | 다른 옵션으로 빌드된 동명 패키지 |
+| `/nix/store/2dq8r7k1s…-openssl-3.3.1/` | 의존 라이브러리 |
 
 결과:
 - **DLL Hell 없음**: 같은 이름이라도 해시가 다르면 완전히 독립
@@ -64,10 +62,10 @@ derivation {
 }
 ```
 
-```
-/nix/store/<hash>-hello-2.12.1.drv   ← 명세서
-/nix/store/<hash>-hello-2.12.1/      ← 결과물
-```
+| 파일 | 역할 |
+|------|------|
+| `/nix/store/<hash>-hello-2.12.1.drv` | 빌드 명세서 |
+| `/nix/store/<hash>-hello-2.12.1/` | 빌드 결과물 |
 
 `nix derivation show nixpkgs#hello` 명령으로 내용 확인 가능.
 
@@ -79,10 +77,11 @@ derivation {
 **실제 데이터는 /nix/store에 그대로 있고**,
 프로파일 심링크만 교체되므로 롤백은 즉각적이다.
 
-```
-~/.nix-profile
-  → /nix/var/nix/profiles/per-user/alice/profile
-    → profile-43-link → /nix/store/<hash>-user-environment/
+```mermaid
+graph LR
+    A["~/.nix-profile"] -->|심링크| B["/nix/var/.../alice/profile"]
+    B -->|심링크| C["profile-43-link"]
+    C -->|심링크| D["/nix/store/&lt;hash&gt;-user-environment/"]
 ```
 
 ```bash
