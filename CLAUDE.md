@@ -18,13 +18,7 @@
 
 ## 프로젝트 개요
 
-DevOps 엔지니어를 위한 오픈 테크 블로그/위키.
-입문자부터 실무자까지, 로드맵 순서대로 학습할 수 있도록 구성한다.
-
-## 디렉토리 구조
-
-- `content/` : 최종 글. LLM이 작성·관리
-- `CLAUDE.md` : 운영 규칙 (이 파일)
+DevOps 엔지니어를 위한 기술 위키. `content/`에 글을 작성·관리한다.
 
 ## 운영 방식
 
@@ -128,11 +122,6 @@ DevOps 엔지니어를 위한 오픈 테크 블로그/위키.
 - 계층이 깊으면 레벨별로 다이어그램을 분리한다
   예) 루트 구조 / `/usr` 하위 / `/var` 하위
 
-> **배경**: Mermaid의 레이아웃 엔진(Dagre)은 같은 레벨에
-> 노드가 많아지면 수평으로 무한히 펼쳐진다. 이는 구조적
-> 한계로 코드로 해결할 수 없다. 노드 수 제한과 분리가
-> 유일한 해결책이다.
-
 ---
 
 ## 카테고리 구조 (DevOps 로드맵 순서)
@@ -189,121 +178,5 @@ content/ 하위 12개 카테고리를 학습 로드맵 순서로 운영한다.
 
 ## 레퍼런스 소스
 
-이 위키는 **글로벌 스탠다드** 수준의 DevOps/SRE 지식을 다룬다.
-글 작성·검수 시 아래 레퍼런스를 우선 참조한다.
-reviewer는 이 목록을 기준으로 "필수 개념"을 판정한다.
-
-### 1순위: 재단·표준 기관
-
-클라우드 네이티브와 OSS 생태계의 최상위 권위체.
-
-| 기관 | 역할 | 주요 리소스 |
-|------|------|------------|
-| CNCF | 클라우드 네이티브 프로젝트 관장 | cncf.io, CNCF Landscape, TOC, Graduated/Incubating 분류 |
-| Linux Foundation | OSS 표준의 최상위 | linuxfoundation.org, OpenSSF |
-| Apache Software Foundation | 대규모 OSS (Kafka, Spark 등) | apache.org |
-| OpenInfra Foundation | 인프라 OSS (구 OpenStack) | openinfra.dev |
-| OCI (Open Container Initiative) | 컨테이너 표준 | opencontainers.org |
-
-### 2순위: 공식 문서
-
-| 영역 | 소스 |
-|------|------|
-| Kubernetes | kubernetes.io/docs, SIG 그룹, KEP |
-| 컨테이너 | docs.docker.com, containerd, podman.io |
-| HashiCorp | developer.hashicorp.com (Terraform, Vault, Consul, Nomad) |
-| 관측성 | prometheus.io, grafana.com/docs, opentelemetry.io, jaegertracing.io |
-| GitOps | argo-cd.readthedocs.io, fluxcd.io, argoproj.github.io |
-| 서비스 메시 | istio.io, linkerd.io, envoyproxy.io |
-| 보안 | openpolicyagent.org, falco.org, sigstore.dev, spiffe.io |
-| 클라우드 | docs.aws.amazon.com, cloud.google.com/docs, learn.microsoft.com/azure |
-
-### 3순위: 컨퍼런스 (최신 동향·실전 사례)
-
-| 컨퍼런스 | 주최 | 관점 |
-|---------|------|------|
-| KubeCon + CloudNativeCon | CNCF | 클라우드 네이티브 전반 (연 3회: NA/EU/APAC) |
-| SREcon | USENIX | SRE 실무와 운영 철학 |
-| Open Source Summit | Linux Foundation | OSS 생태계 전반 |
-| PromCon | Prometheus 커뮤니티 | 관측 성능·확장 |
-| ArgoCon | Argo 커뮤니티 | GitOps 심화 |
-| HashiConf | HashiCorp | IaC와 인프라 자동화 |
-| DockerCon | Docker | 컨테이너 |
-| FOSDEM | 유럽 OSS 커뮤니티 | 중립적·기술적 |
-| DevOpsDays | 지역별 | 현장 실무 사례 |
-| AWS re:Invent / Google Cloud Next / MS Ignite | CSP | 클라우드 서비스 |
-
-### 4순위: 정전(Canon) 도서
-
-| 도서 | 저자 | 위상 |
-|------|------|------|
-| Google SRE Book (3권 시리즈) | Google | sre.google 무료 공개. SRE의 성경 |
-| The DevOps Handbook | Gene Kim 외 | DevOps 기본 텍스트 |
-| Accelerate | Nicole Forsgren | DORA 메트릭의 근거 |
-| The Phoenix Project | Gene Kim | 조직 관점 고전 |
-| Kubernetes Patterns | Bilgin Ibryam | K8s 아키텍처 패턴 |
-| Production Kubernetes | Josh Rosso 외 | 프로덕션 운영 심화 |
-| Database Reliability Engineering | Laine Campbell | 데이터 SRE |
-
-### 5순위: 보안·컴플라이언스 표준
-
-| 표준 | 내용 |
-|------|------|
-| CIS Benchmarks | Kubernetes, Docker, Linux 하드닝 기준 |
-| NSA Kubernetes Hardening Guide | K8s 보안 국가 기관 표준 |
-| NIST Cybersecurity Framework | 보안 프레임워크 |
-| OWASP Top 10 / ASVS | 애플리케이션 보안 |
-| SLSA | 공급망 보안 레벨 |
-| OpenSSF Best Practices | OSS 보안 |
-
-### 6순위: 글로벌 탑티어 엔지니어링 블로그
-
-| 회사 | 특징 |
-|------|------|
-| Google Cloud Blog | 대규모 K8s, Borg 기반 철학 |
-| Netflix Tech Blog | 카오스, 마이크로서비스 |
-| Cloudflare Blog | 네트워크, eBPF, 보안 |
-| Stripe Engineering | API·결제 시스템 SRE |
-| Uber Engineering | 대규모 인프라, M3 메트릭 |
-| Airbnb Engineering | 데이터·플랫폼 |
-| Spotify Engineering | Backstage, 플랫폼 엔지니어링 |
-| GitHub Engineering | Git·Actions 내부 |
-| Datadog / Grafana Labs | 관측성 |
-| HashiCorp Blog | IaC·보안 |
-
-### 7순위: 연구·지표
-
-| 소스 | 내용 |
-|------|------|
-| DORA State of DevOps Report | 연간 DevOps 성숙도 조사 (DORA 메트릭 출처) |
-| ThoughtWorks Technology Radar | 분기별 기술 트렌드 (Adopt/Trial/Assess/Hold) |
-| CNCF Annual Survey | 클라우드 네이티브 채택 현황 |
-| RedMonk Programming Language Rankings | 언어 동향 |
-| StackOverflow Developer Survey | 개발자 도구 사용 |
-
-### 8순위: 뉴스레터·미디어
-
-| 소스 | 특징 |
-|------|------|
-| KubeWeekly | CNCF 공식 주간 뉴스 |
-| The New Stack | 클라우드 네이티브 심층 기사 |
-| DevOps Weekly | DevOps 전반 큐레이션 |
-| SRE Weekly | SRE 특화 |
-| Kubernetes Podcast by Google | K8s 심층 |
-| Software Engineering Daily | 폭넓은 주제 팟캐스트 |
-
-### 학습 로드맵 참고
-
-- roadmap.sh/devops
-- awesome-devops, awesome-kubernetes, awesome-sre (GitHub)
-
----
-
-## 작성 우선순위
-
-로드맵 순서(01→12)를 기본으로 하되, 아래 기준으로 조정한다:
-
-1. **기반 지식 우선** — linux, network, container
-2. **핵심 운영 기술** — kubernetes, iac, cicd, gitops
-3. **운영 성숙도** — observability, security, sre
-4. **진화** — platform-engineering, finops
+→ [REFERENCES.md](./REFERENCES.md) 참고.
+글 작성·검수 시 해당 파일의 우선순위 기준을 따른다.
