@@ -725,8 +725,8 @@ sudo memleak-bpfcc -p 1234 --top 10
 # TCP RTT 히스토그램 (커널 내부 측정)
 bpftrace -e '
 kprobe:tcp_rcv_established {
-    $sk = (struct sock *)arg0;
-    $rtt = $sk->tcp_sk.srtt_us >> 3;  # 평활화된 RTT (µs)
+    $tcp = (struct tcp_sock *)arg0;
+    $rtt = $tcp->srtt_us >> 3;  # 평활화된 RTT (µs)
     if ($rtt > 0) {
         @rtt_us = hist($rtt);
     }
