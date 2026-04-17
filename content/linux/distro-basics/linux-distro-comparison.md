@@ -263,35 +263,21 @@ Debian 12 "Bookworm" 릴리즈: 2023-06-10  EOL: 2028-06
 
 ## EOL 타임라인
 
-```mermaid
-gantt
-    title 배포판 EOL 타임라인
-    dateFormat  YYYY-MM
-    axisFormat  %Y
-
-    section Alpine
-    Alpine 3.20 (이미 종료)   :done,    2024-05, 2026-04
-    Alpine 3.21               :active,  2024-11, 2026-11
-    Alpine 3.22               :         2025-05, 2027-05
-    Alpine 3.23               :         2025-12, 2027-11
-
-    section Amazon Linux
-    AL2 (마이그레이션 필요)   :crit, done, 2018-06, 2026-07
-    AL2023                    :active,  2023-03, 2029-07
-
-    section Debian
-    Debian 12 Bookworm        :active,  2023-06, 2028-06
-    Debian 13 Trixie          :         2025-08, 2030-08
-
-    section Ubuntu LTS
-    Ubuntu 24.04 LTS          :active,  2024-04, 2029-04
-    Ubuntu 24.04 LTS Pro(ESM) :         2029-04, 2034-04
-    Ubuntu 26.04 LTS          :         2026-04, 2031-04
-
-    section RHEL 계열
-    RHEL/Rocky/AlmaLinux 9    :active,  2022-05, 2032-05
-    RHEL/Rocky/AlmaLinux 10   :         2025-05, 2035-05
-```
+| 배포판 | 버전 | EOL | 상태 |
+|--------|------|-----|------|
+| **Alpine** | 3.20 | 2026-04 | 종료 |
+| | 3.21 | 2026-11 | 지원 중 |
+| | 3.22 | 2027-05 | 지원 중 |
+| | 3.23 | 2027-11 | 지원 중 |
+| **Amazon Linux** | AL2 | 2026-07 | ⚠️ 마이그레이션 필요 |
+| | AL2023 | 2029-07 | 지원 중 |
+| **Debian** | 12 Bookworm | 2028-06 | 지원 중 |
+| | 13 Trixie | 2030-08 | 지원 중 |
+| **Ubuntu LTS** | 24.04 LTS | 2029-04 | 지원 중 |
+| | 24.04 LTS Pro (ESM) | 2034-04 | 유료 확장 |
+| | 26.04 LTS | 2031-04 | 지원 중 |
+| **RHEL 계열** | RHEL/Rocky/AlmaLinux 9 | 2032-05 | 지원 중 |
+| | RHEL/Rocky/AlmaLinux 10 | 2035-05 | 지원 중 |
 
 ---
 
