@@ -302,11 +302,14 @@ btt -i /tmp/trace -l /tmp/d2c_latency
 ### 3.5 btrecord / btreplay — I/O 재현
 
 ```bash
-# 기록된 I/O 패턴을 파일로 저장
-btrecord -d /dev/nvme0n1 -o /tmp/recorded_io -w 60
+# 1단계: blktrace로 trace 파일 생성
+sudo blktrace -d /dev/nvme0n1 -o /tmp/trace -w 60
 
-# 다른 환경에서 재현 (성능 테스트용)
-btreplay -d /dev/nvme0n1 /tmp/recorded_io.rec.0
+# 2단계: trace 파일로 I/O 패턴 기록
+btrecord -d /tmp/trace -o /tmp/recorded_io
+
+# 3단계: 다른 환경에서 재현 (성능 테스트용)
+btreplay -d /tmp/recorded_io /dev/nvme0n1
 ```
 
 ---
@@ -350,8 +353,7 @@ D2C(장치 처리)를 비교하면 구분된다.
 # D2C가 높다 → 장치 자체가 느리거나 포화
 # I2D가 높다 → 스케줄러 큐 병목
 
-# 빠른 진단: svctm (deprecated이나 여전히 참고 가능)
-# await >> svctm 이면 큐 대기 시간이 큰 것
+# svctm은 sysstat 12.1.2에서 제거됨 — await/I2D/D2C로 분석
 iostat -xz 1 | grep -A2 "Device"
 
 # blktrace로 정밀 분석
@@ -421,12 +423,13 @@ apt install fio            # Ubuntu/Debian
 dnf install fio            # RHEL/Fedora
 
 # ─── 순차 읽기 처리량 (대역폭) ───────────────────
+# --direct=1: page cache 우회, --bs=1M: 1MB 블록(순차)
 fio \
   --name=seq-read \
   --filename=/dev/nvme0n1 \
-  --direct=1 \          # page cache 우회, 실제 디스크 측정
+  --direct=1 \
   --rw=read \
-  --bs=1M \             # 1MB 블록 (순차)
+  --bs=1M \
   --ioengine=libaio \
   --iodepth=32 \
   --numjobs=1 \
@@ -435,15 +438,16 @@ fio \
   --readonly
 
 # ─── 랜덤 4K 읽기 IOPS ────────────────────────────
+# --bs=4k: DB 워크로드, --iodepth=32: DB 서버 전형, --numjobs=4: 병렬
 fio \
   --name=rand-read-4k \
   --filename=/dev/nvme0n1 \
   --direct=1 \
   --rw=randread \
-  --bs=4k \             # 4KB 블록 (DB 워크로드)
+  --bs=4k \
   --ioengine=libaio \
-  --iodepth=32 \        # 큐 깊이 32 (DB 서버 전형)
-  --numjobs=4 \         # 4개 병렬 잡
+  --iodepth=32 \
+  --numjobs=4 \
   --runtime=60 \
   --time_based \
   --group_reporting \
@@ -465,13 +469,14 @@ fio \
   --group_reporting
 
 # ─── 혼합 읽기/쓰기 (DB 리얼 워크로드) ─────────────
+# --rwmixread=70: 읽기 70% / 쓰기 30%
 fio \
   --name=mixed-rw \
   --filename=/tmp/fio-test \
   --size=10G \
   --direct=1 \
   --rw=randrw \
-  --rwmixread=70 \      # 읽기 70% / 쓰기 30%
+  --rwmixread=70 \
   --bs=4k \
   --ioengine=libaio \
   --iodepth=32 \
@@ -565,8 +570,8 @@ media_errors|num_err_log_entries"
 nvme error-log /dev/nvme0
 
 # NVMe 큐 깊이 확인
-cat /sys/class/nvme/nvme0/queue/nr_hw_queues
-cat /sys/class/nvme/nvme0/queue/nr_requests
+cat /sys/block/nvme0n1/queue/nr_hw_queues
+cat /sys/block/nvme0n1/queue/nr_requests
 
 # NVMe 펌웨어 버전 확인 (최신 여부)
 nvme id-ctrl /dev/nvme0 | grep -E "fr|mn|sn"
@@ -755,19 +760,17 @@ parameters:
   pool: replicapool
   imageFormat: "2"
   imageFeatures: layering
-  # QoS 파라미터 (Ceph 16.x Quincy 이상)
-  # 초당 최대 읽기 IOPS
-  blockdevIOPSLimit: "5000"
-  # 초당 최대 읽기/쓰기 처리량 (bytes)
-  blockdevBandwidthLimit: "209715200"   # 200MiB/s
+  # QoS 파라미터 (ceph-csi librbd 설정키, Ceph 16.x+)
+  rbd_qos_iops_limit: "5000"
+  rbd_qos_bps_limit: "209715200"        # 200MiB/s
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 ```
 
 ```yaml
 # csi-driver-host-path 예시 (generic CSI)
-# Kubernetes 1.27+ VolumeAttributesClass (beta)
-apiVersion: storage.k8s.io/v1beta1
+# Kubernetes 1.34+ VolumeAttributesClass (GA)
+apiVersion: storage.k8s.io/v1
 kind: VolumeAttributesClass
 metadata:
   name: silver
