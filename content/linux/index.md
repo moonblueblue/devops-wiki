@@ -99,7 +99,7 @@ sidebar_label: "Linux"
 
 ### 가상화와 경량 격리
 
-- [ ] [KVM과 QEMU 개념](virtualization/kvm-qemu.md)
+- [x] [KVM과 QEMU 개념](virtualization/kvm-qemu.md)
 - [ ] [libvirt와 virsh](virtualization/libvirt.md)
 - [ ] [systemd-nspawn (경량 격리)](virtualization/systemd-nspawn.md)
 
