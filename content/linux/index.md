@@ -40,7 +40,7 @@ sidebar_label: "Linux"
 - [x] [리소스 제한 (ulimit, PAM limits)](process-isolation/resource-limits.md)
 - [x] [cgroups v1 vs v2](process-isolation/cgroups.md)
 - [x] [Linux Namespaces 전종 (PID, Mount, Net, UTS, IPC, User, Cgroup, Time)](process-isolation/namespaces.md)
-- [ ] [IPC 메커니즘 (pipe, socket, shared memory)](process-isolation/ipc-mechanisms.md)
+- [x] [IPC 메커니즘 (pipe, socket, shared memory)](process-isolation/ipc-mechanisms.md)
 
 ### Linux 보안
 
