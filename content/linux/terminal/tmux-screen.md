@@ -219,7 +219,7 @@ run '~/.tmux/plugins/tpm/tpm'
 | 플러그인 | 용도 |
 |----------|------|
 | `tmux-sensible` | 모두가 동의하는 기본 설정 묶음 |
-| `tmux-resurrect` | 재시작 후 세션/패널 복원 |
+| `tmux-resurrect` | 재시작 후 세션/패널 복원 (단, 실행 중이던 프로세스 자체는 복원 안 됨) |
 | `tmux-continuum` | 환경 자동 저장 + 부팅 시 자동 복원 |
 | `tmux-yank` | 시스템 클립보드 통합 |
 | `tmux-fzf` | fzf로 세션/패널 퍼지 검색 |
@@ -252,7 +252,7 @@ tmux new-session -s deploy \; \
   send-keys 'cd /opt/app && vim' Enter
 ```
 
-### Popup 윈도우 (3.3+)
+### Popup 윈도우 (3.2+)
 
 ```bash
 # lazygit 팝업
@@ -267,16 +267,24 @@ bind f display-popup -E \
 ### 페어 프로그래밍
 
 ```bash
+# ── 완전 공유 모드 (동일 화면) ──────────────────────
 # 호스트: 세션 생성
 tmux new -s pair
 
-# 게스트: 동일 세션 접속 (동일 화면 공유)
+# 게스트: 동일 세션 attach → 동일 화면 공유
 tmux attach -t pair
 
-# 독립 뷰 허용 (각자 다른 윈도우)
-# ~/.tmux.conf
-set -g window-size smallest
-setw -g aggressive-resize on
+# ── 독립 뷰 모드 (각자 다른 윈도우) ─────────────────
+# 세션 그룹(session group) 패턴을 사용해야 한다.
+# 같은 윈도우 풀을 공유하되, 각자 독립적으로 포커스를 이동할 수 있다.
+
+# 호스트: 세션 생성
+tmux new -s pair-host
+
+# 게스트: 기존 세션과 연결된 새 세션 생성
+tmux new-session -t pair-host -s pair-guest
+# 이제 두 사람이 서로 다른 윈도우를 독립적으로 볼 수 있다.
+# attach와 달리 화면이 분리된다.
 ```
 
 ### 중첩 세션 (로컬 + 원격)
@@ -292,7 +300,33 @@ mosh user@server -- tmux attach -t main
 
 ---
 
-## 8. GNU Screen 기본 사용법
+## 8. 소켓 보안
+
+tmux 서버는 유닉스 소켓(`/tmp/tmux-$UID/default`)으로 통신한다.
+공유 서버·점프 서버에서 소켓 권한이 잘못 설정되면
+같은 호스트의 다른 사용자가 세션에 attach해 명령을 실행할 수 있다.
+
+```bash
+# 소켓 경로와 권한 확인
+ls -la /tmp/tmux-$(id -u)/
+
+# 소켓 경로를 명시적으로 지정 (다른 사용자와 공유 금지)
+tmux -S ~/.tmux.sock new -s main
+chmod 600 ~/.tmux.sock
+
+# root 세션을 열어두지 않는다
+# 공유 서버에서 sudo tmux 후 detach하면 누구나 그 세션에 접근 가능
+```
+
+| 위험 | 설명 |
+|------|------|
+| 기본 소켓 권한 | `srwxrwx---` — 같은 그룹 구성원이 접근 가능 |
+| root 세션 노출 | `sudo tmux`로 root 세션 생성 후 detach 시 위험 |
+| 소켓 경로 예측 | `/tmp/tmux-0/default` 등 경로가 예측 가능 |
+
+---
+
+## 9. GNU Screen 기본 사용법
 
 레거시 환경에서 GNU Screen이 이미 설치된 경우 기본 명령어:
 
