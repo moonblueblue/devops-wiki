@@ -18,12 +18,11 @@ tags:
 트레이드오프를 직접 제어한다. 잘못 설정하면 크래시 후 데이터 손상,
 혹은 불필요한 I/O 병목이 발생한다.
 
-```
-성능  ←—————————————————————→  안전성
-noatime  relatime  lazytime  strictatime
-nobarrier(위험!)  barrier=1(기본)
-data=writeback  data=ordered  data=journal
-```
+| 구분 | 성능 우선 | 균형 | 안전성 우선 |
+|------|---------|------|-----------|
+| atime | `noatime` | `relatime` / `lazytime` | `strictatime` |
+| barrier | `nobarrier` ⚠️ | - | `barrier=1` |
+| data 모드 | `data=writeback` | `data=ordered` | `data=journal` |
 
 ---
 
@@ -50,15 +49,17 @@ SSD/NVMe에서도 불필요한 write amplification과 수명 단축을 야기한
 
 ### relatime 상세 동작
 
+```mermaid
+graph TD
+    A["파일 읽기"]
+    A --> B{"atime 오래됨?"}
+    B -->|"YES"| C["atime 갱신"]
+    B -->|"NO"| D{"24시간 경과?"}
+    D -->|"YES"| C
+    D -->|"NO"| E["atime 유지"]
 ```
-파일 읽기 발생
-    ↓
-atime < mtime 또는 atime < ctime?  →  YES → atime 갱신
-    ↓ NO
-마지막 atime 갱신 후 24시간 경과?  →  YES → atime 갱신
-    ↓ NO
-atime 갱신 안 함 (I/O 절약)
-```
+
+> **atime 오래됨?** = `atime < mtime` 또는 `atime < ctime`인 경우
 
 ### lazytime 동작 원리
 
@@ -78,12 +79,12 @@ atime 기록이 전혀 필요 없다면 `noatime`을 단독으로 쓴다.
 
 ### 실무 권장
 
-```
-일반 서버 / DB 서버     → noatime
-SSD/NVMe 범용          → lazytime  (또는 noatime)
-메일 서버 (atime 의존)  → relatime  (기본값 유지)
-감사·컴플라이언스 환경  → strictatime
-```
+| 워크로드 | 권장 옵션 |
+|---------|---------|
+| 일반 서버 / DB 서버 | `noatime` |
+| SSD/NVMe 범용 | `lazytime` 또는 `noatime` |
+| 메일 서버 (atime 의존) | `relatime` (기본값 유지) |
+| 감사·컴플라이언스 환경 | `strictatime` |
 
 ---
 
@@ -95,12 +96,14 @@ SSD/NVMe 범용          → lazytime  (또는 noatime)
 휘발성(volatile) 쓰기 캐시가 있는 디스크에서 전원이 꺼져도
 **저널 일관성**을 보장한다.
 
+```mermaid
+graph LR
+    A["쓰기 요청"] --> B["volatile cache"]
+    B --> C["실제 디스크"]
 ```
-쓰기 요청 → [volatile write cache] → 실제 디스크
-                    ↑
-            barrier가 없으면 재배열 가능
-            → 크래시 시 저널 불일치 → 데이터 손상
-```
+
+> barrier가 없으면 volatile cache에서 쓰기 순서가 재배열된다.
+> 크래시 발생 시 저널과 데이터 순서가 불일치하여 데이터 손상이 발생한다.
 
 ### barrier=1 vs barrier=0
 
@@ -116,15 +119,13 @@ SSD/NVMe 범용          → lazytime  (또는 noatime)
 
 ### 쓰기 캐시가 있는 디스크에서의 위험성
 
-```
-[위험 시나리오 - barrier=0]
+**위험 시나리오 (barrier=0)**
 
 1. ext4가 저널 메타데이터 쓰기 요청
-2. 컨트롤러 volatile cache가 재배열
+2. 컨트롤러 volatile cache가 쓰기 순서 재배열
 3. 데이터 블록이 저널보다 먼저 디스크에 도달
 4. 전원 차단
-5. 부팅 → 저널이 불완전 → fsck 또는 데이터 손상
-```
+5. 부팅 후 저널이 불완전 → fsck 실행 또는 데이터 손상
 
 ### BBU/FBWC가 있는 하드웨어 RAID에서의 예외
 
@@ -418,15 +419,10 @@ noatime (또는 lazytime) + fstrim.timer + errors=remount-ro
 
 ### inline discard vs fstrim.timer
 
-```
-[inline discard - 비권장]
-파일 삭제 → 즉시 TRIM 명령 → I/O 큐 간섭 → 지연 발생
-
-[fstrim.timer - 권장]
-파일 삭제 → 기록만 유지
-    ↓ (주기적으로)
-systemd fstrim.timer → 일괄 TRIM → I/O 영향 최소화
-```
+| 방식 | 동작 흐름 | 영향 |
+|------|---------|------|
+| inline discard (비권장) | 삭제 → 즉시 TRIM → I/O 큐 간섭 | 지연 발생 |
+| fstrim.timer (권장) | 삭제 → 기록 유지 → 주기적 일괄 TRIM | I/O 영향 최소 |
 
 ```bash
 # fstrim 지원 여부 확인

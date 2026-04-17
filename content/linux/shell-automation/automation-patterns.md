@@ -112,13 +112,13 @@ retry_with_backoff() {
 }
 ```
 
-```
-시도 1  → 즉시
-시도 2  → 1s + jitter
-시도 3  → 2s + jitter
-시도 4  → 4s + jitter
-시도 5  → 8s + jitter (상한: max_delay)
-```
+| 시도 | 대기 시간 |
+|------|---------|
+| 1 | 즉시 |
+| 2 | 1s + jitter |
+| 3 | 2s + jitter |
+| 4 | 4s + jitter |
+| 5 | 8s + jitter (최대: max_delay) |
 
 > **Jitter가 중요한 이유**: 동시에 실패한 여러 클라이언트가
 > 같은 간격으로 재시도하면 서버에 동시 부하가 집중된다.
