@@ -697,10 +697,10 @@ sudo /usr/share/bcc/tools/tcpretrans
 # 소켓 레이턴시 분포 (히스토그램)
 sudo /usr/share/bcc/tools/tcplife
 
-# bpftrace: 직접 TCP RTT 측정
+# bpftrace: 직접 TCP RTT 측정 (tcp_probe tracepoint 사용)
 sudo bpftrace -e '
-kprobe:tcp_rcv_established {
-  @rtt = hist(args->sk->sk_rcvbuf);
+tracepoint:tcp:tcp_probe {
+  @rtt_us = hist(args->srtt);
 }'
 ```
 
