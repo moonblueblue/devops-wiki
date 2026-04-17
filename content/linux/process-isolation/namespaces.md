@@ -62,12 +62,11 @@ setns(fd)      → fd가 가리키는 namespace에 합류
 프로세스 ID 공간을 격리한다.
 namespace 내 최초 프로세스는 PID 1이 된다.
 
-```
-호스트        컨테이너 A      컨테이너 B
-PID 1 (init)  PID 1 (app)    PID 1 (app)
-PID 100       PID 2          PID 2
-PID 101  →    (호스트에서는 PID 100, 101로 보임)
-```
+| 호스트 PID | 컨테이너 A 내부 | 컨테이너 B 내부 |
+|-----------|--------------|--------------|
+| PID 1 (init) | PID 1 (app) | PID 1 (app) |
+| PID 100 | PID 2 | PID 2 |
+| PID 101 | PID 3 | — |
 
 **PID 1의 의미**: namespace 내 init 역할.
 PID 1이 종료되면 namespace 내 모든 프로세스가 즉시 종료된다.
@@ -174,11 +173,10 @@ ipcs -a   # 아무것도 없음
 UID/GID를 namespace 내외부로 매핑한다.
 **루트리스 컨테이너의 핵심 기반**이다.
 
-```
-컨테이너 내부    호스트
-UID 0 (root) ←→ UID 100000 (일반 사용자)
-UID 1000     ←→ UID 101000
-```
+| 컨테이너 내부 | 호스트 |
+|-------------|--------|
+| UID 0 (root) | UID 100000 (일반 사용자) |
+| UID 1000 | UID 101000 |
 
 ```bash
 # 루트리스 namespace 생성 (root 권한 불필요)
@@ -272,17 +270,17 @@ cat /proc/<PID>/timens_offsets
 
 현대 컨테이너는 아래 namespace를 모두 조합한다.
 
-```
-docker run → clone(
-  CLONE_NEWPID |    # 프로세스 격리
-  CLONE_NEWNS  |    # 파일시스템 격리
-  CLONE_NEWNET |    # 네트워크 격리
-  CLONE_NEWUTS |    # hostname 격리
-  CLONE_NEWIPC |    # IPC 격리
-  CLONE_NEWUSER|    # UID/GID 격리 (rootless)
-  CLONE_NEWCGROUP   # cgroup 뷰 격리
-)
-```
+| 플래그 | 격리 대상 |
+|--------|---------|
+| `CLONE_NEWPID` | 프로세스 ID |
+| `CLONE_NEWNS` | 파일시스템 (마운트) |
+| `CLONE_NEWNET` | 네트워크 |
+| `CLONE_NEWUTS` | hostname |
+| `CLONE_NEWIPC` | IPC |
+| `CLONE_NEWUSER` | UID/GID (rootless) |
+| `CLONE_NEWCGROUP` | cgroup 뷰 |
+
+`docker run`은 위 플래그를 조합해 `clone()` 시스템 콜을 호출한다.
 
 ---
 

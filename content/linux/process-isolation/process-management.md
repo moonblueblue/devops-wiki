@@ -22,32 +22,16 @@ Linux에서 프로세스는 실행 중인 프로그램의 인스턴스다.
 
 ## 프로세스 상태 (Process States)
 
-```
-         fork()
- [신규] ──────→ [실행 대기 (R)]
-                      │
-              스케줄러 선택
-                      ↓
-               [실행 중 (R)]
-              ↙           ↘
-   I/O 대기              시그널/ptrace
-      ↓                      ↓
-[인터럽트 가능            [정지 (T/t)]
- 슬립 (S)]
-      │
-  I/O 완료 → [실행 대기]
-
-  커널 I/O 대기 진입
-  (인터럽트 불가 플래그)
-      ↓
-  [D 상태 (Disk Sleep)]
-  ← NFS hang, 블록 디바이스 응답 없음,
-    Ceph I/O 지연 등
-  I/O 완료 or 장치 응답 시에만 해제 →
-
-  종료 후 부모 wait() 미호출
-      ↓
-  [좀비 (Z)]
+```mermaid
+graph TD
+    START([fork]) --> RQ[실행 대기 R]
+    RQ --> RN[실행 중 R]
+    RN -->|I/O 대기| S[슬립 S]
+    S -->|I/O 완료| RQ
+    RN -->|시그널 / ptrace| T[정지 T/t]
+    RN -->|커널 I/O\n인터럽트 불가| D["Disk Sleep D\nNFS hang · Ceph I/O 지연"]
+    D -->|I/O 완료| RQ
+    RN -->|"exit() — 부모 wait() 미호출"| Z[좀비 Z]
 ```
 
 | 상태 코드 | 이름 | 설명 |
@@ -122,14 +106,12 @@ Redis, Nginx 같은 서버들이 이 방식으로 worker를 생성한다.
 
 ### SIGTERM vs SIGKILL
 
-```
-SIGTERM (15)                     SIGKILL (9)
-─────────────────────            ─────────────────────
-캐치 가능                         캐치 불가, 블록 불가
-프로세스가 cleanup 수행 가능       커널이 즉시 강제 종료
-그레이스풀 셧다운                  리소스 정리 없음
-권장 방법                         최후 수단
-```
+| 항목 | SIGTERM (15) | SIGKILL (9) |
+|------|-------------|-------------|
+| 캐치·블록 | 가능 | 불가 |
+| 정리 작업 | 프로세스가 직접 수행 | 없음 |
+| 종료 방식 | 그레이스풀 셧다운 | 커널 즉시 강제 종료 |
+| 용도 | 권장 방법 | 최후 수단 |
 
 > **실무 원칙**: 항상 SIGTERM 먼저, 반응 없으면 SIGKILL.
 > `kill -9` 남발은 파일 손상, 락 파일 잔재, 데이터 손실 위험.
@@ -171,12 +153,10 @@ signal.signal(signal.SIGINT, graceful_shutdown)
 컨테이너에서 앱이 PID 1로 실행되면 시그널 핸들링이
 기본값과 다르게 동작한다.
 
-```
-일반 프로세스             PID 1 (컨테이너 내)
-──────────────────        ──────────────────────
-SIGTERM → 종료            SIGTERM → 무시 (핸들러 없으면)
-SIGCHLD → 처리            좀비 누적 (wait() 미호출)
-```
+| 시그널 | 일반 프로세스 | PID 1 (컨테이너 내) |
+|--------|-------------|-------------------|
+| SIGTERM | 종료 | 무시 (핸들러 없으면) |
+| SIGCHLD | 처리 | 좀비 누적 (wait() 미호출) |
 
 **왜 PID 1은 SIGTERM을 무시하는가?**
 
@@ -202,21 +182,15 @@ CMD ["/app/myapp"]
 
 Kubernetes가 파드를 종료할 때의 시그널 흐름:
 
-```
-kubectl delete pod / 스케일 다운
-          │
-          ↓
-   preStop hook 실행 (있다면)
-          │
-          ↓ (preStop 완료 후)
-   SIGTERM → 컨테이너 PID 1
-          │
-          ↓ terminationGracePeriodSeconds 대기
-            (기본 30초)
-          │
-   아직 살아있으면
-          ↓
-        SIGKILL
+```mermaid
+graph TD
+    A["kubectl delete pod / 스케일 다운"]
+    A --> B["preStop hook 실행 (있다면)"]
+    B --> C["SIGTERM → 컨테이너 PID 1"]
+    C --> D["terminationGracePeriodSeconds 대기\n(기본 30초)"]
+    D --> E{"아직 살아있는가?"}
+    E -->|Yes| F[SIGKILL]
+    E -->|No| G[정상 종료]
 ```
 
 **endpoint 전파 지연 문제**: SIGTERM이 전달될 때
@@ -238,15 +212,13 @@ lifecycle:
 
 ### 좀비 프로세스 (Zombie)
 
-```
-자식 프로세스 exit() 호출
-       │
-       ↓
-  프로세스 테이블 엔트리 유지 (종료 코드 보존)
-       │
-  부모가 wait() 호출 안 하면
-       ↓
-  좀비 상태 유지 → PID 슬롯 점유 → PID 고갈 위험
+```mermaid
+graph TD
+    A["자식 프로세스 exit() 호출"]
+    A --> B["프로세스 테이블 엔트리 유지\n(종료 코드 보존)"]
+    B --> C{"부모가 wait() 호출?"}
+    C -->|Yes| D[정상 정리]
+    C -->|No| E["좀비 상태 유지\nPID 슬롯 점유 → PID 고갈 위험"]
 ```
 
 ```bash
@@ -356,10 +328,8 @@ ls /proc/$(pgrep -o nginx)/fd | wc -l
 
 ## 프로세스 우선순위: nice / renice
 
-```
-nice 범위: -20 (최고 우선순위) ←────────→ +19 (최저)
-                              0 (기본값)
-```
+nice 범위는 **-20**(최고 우선순위)에서 **+19**(최저 우선순위),
+기본값은 **0**이다.
 
 ```bash
 # 낮은 우선순위로 실행 (백그라운드 배치 작업)

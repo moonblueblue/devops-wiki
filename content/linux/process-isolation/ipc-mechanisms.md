@@ -58,9 +58,9 @@ kill -USR1 <PID>    # 앱 정의 이벤트
 부모-자식 프로세스 간 단방향 데이터 스트림.
 `fork()` 이전에 생성한 fd를 상속해 사용한다.
 
-```
-프로세스 A                    프로세스 B
-write(fd[1]) ──→ [커널 버퍼] ──→ read(fd[0])
+```mermaid
+graph LR
+    A["프로세스 A\nwrite(fd[1])"] -->|커널 버퍼| B["프로세스 B\nread(fd[0])"]
 ```
 
 ```c
@@ -324,18 +324,16 @@ nsenter -t <container-PID> --ipc ipcs -a
 
 ## 메커니즘 선택 가이드
 
-```
-데이터 양이 많고 속도가 중요한가?
-    YES → Shared Memory (+ 세마포어 동기화)
-    NO  ↓
-단방향이고 스트리밍인가?
-    YES → Pipe (관련 프로세스) / Named Pipe (무관)
-    NO  ↓
-양방향 요청-응답이 필요한가?
-    YES → Unix Domain Socket
-    NO  ↓
-비동기 메시지가 필요한가?
-    YES → POSIX Message Queue
+```mermaid
+graph TD
+    A{"데이터 양이 많고\n속도가 중요한가?"}
+    A -->|YES| B["Shared Memory\n+ 세마포어 동기화"]
+    A -->|NO| C{"단방향이고\n스트리밍인가?"}
+    C -->|YES| D["Pipe (관련 프로세스)\nNamed Pipe (무관)"]
+    C -->|NO| E{"양방향 요청-응답이\n필요한가?"}
+    E -->|YES| F[Unix Domain Socket]
+    E -->|NO| G{"비동기 메시지가\n필요한가?"}
+    G -->|YES| H[POSIX Message Queue]
 ```
 
 ---
