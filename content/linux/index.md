@@ -36,7 +36,7 @@ sidebar_label: "Linux"
 
 ### 프로세스와 리소스 격리
 
-- [ ] [프로세스 관리와 시그널](process-isolation/process-management.md)
+- [x] [프로세스 관리와 시그널](process-isolation/process-management.md)
 - [ ] [리소스 제한 (ulimit, PAM limits)](process-isolation/resource-limits.md)
 - [ ] [cgroups v1 vs v2](process-isolation/cgroups.md)
 - [ ] [Linux Namespaces 전종 (PID, Mount, Net, UTS, IPC, User, Cgroup, Time)](process-isolation/namespaces.md)
