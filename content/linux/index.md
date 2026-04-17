@@ -62,10 +62,10 @@ sidebar_label: "Linux"
 
 ### 셸과 자동화
 
-- [ ] [Bash 고급 문법 (배열, 함수, 파라미터 확장)](shell-automation/bash-advanced.md)
-- [ ] [텍스트 처리 도구 (awk, sed, grep, cut, sort, uniq)](shell-automation/text-processing.md)
-- [ ] [셸 스크립트 베스트 프랙티스 (set -euo pipefail)](shell-automation/shell-best-practices.md)
-- [ ] [실무 자동화 스크립트 패턴](shell-automation/automation-patterns.md)
+- [x] [Bash 고급 문법 (배열, 함수, 파라미터 확장)](shell-automation/bash-advanced.md)
+- [x] [텍스트 처리 도구 (awk, sed, grep, cut, sort, uniq)](shell-automation/text-processing.md)
+- [x] [셸 스크립트 베스트 프랙티스 (set -euo pipefail)](shell-automation/shell-best-practices.md)
+- [x] [실무 자동화 스크립트 패턴](shell-automation/automation-patterns.md)
 
 ### 네트워크 기초 (Linux 관점)
 
