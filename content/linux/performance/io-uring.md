@@ -559,7 +559,7 @@ io_uring은 복잡한 커널 인터페이스로 인해 다수의
 
 Docker의 기본 seccomp 프로필은 io_uring 관련
 시스콜 3개를 **허용** 상태로 관리한다.
-(Docker 4.42.0부터 선택적 차단 옵션 추가)
+필요 시 아래처럼 커스텀 seccomp 프로필로 차단할 수 있다.
 
 ```bash
 # 현재 컨테이너에서 io_uring 사용 가능 여부 확인
@@ -772,9 +772,9 @@ END { print(@overflow_count); }'
 bpftrace -e '
 tracepoint:io_uring:io_uring_submit_sqe {
     /*
-     * opcode: 0=NOP 1=READV 2=WRITEV
-     * 3=FSYNC 22=READ 23=WRITE
-     * 26=ACCEPT 27=CONNECT
+     * opcode: 0=NOP  1=READV  2=WRITEV  3=FSYNC
+     *        13=ACCEPT 16=CONNECT 22=READ 23=WRITE
+     *        26=SEND  27=RECV
      */
     @by_opcode[args->opcode] = count();
 }
