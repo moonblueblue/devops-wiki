@@ -45,7 +45,7 @@ sidebar_label: "Linux"
 ### Linux 보안
 
 - [x] [Linux Capabilities](linux-security/linux-capabilities.md)
-- [ ] [SELinux 기본과 운영](linux-security/selinux.md)
+- [x] [SELinux 기본과 운영](linux-security/selinux.md)
 - [ ] [AppArmor 기본과 운영](linux-security/apparmor.md)
 - [ ] [seccomp-bpf와 시스템콜 필터링](linux-security/seccomp.md)
 - [ ] [auditd 감사 로깅](linux-security/auditd.md)
