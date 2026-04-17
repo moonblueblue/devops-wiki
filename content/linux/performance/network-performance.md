@@ -43,45 +43,57 @@ Brendan Gregg의 USE 방법론을 네트워크 리소스에 적용한다.
 
 ### 레이어별 분석 흐름
 
+**레이턴시 높음**
+
 ```mermaid
 flowchart TD
-    A[네트워크 이상 감지] --> B{어떤 증상?}
-
-    B -->|높은 레이턴시| C[RTT 측정\npingpong, hping3]
-    B -->|낮은 처리량| D[대역폭 측정\niperf3, sar -n DEV]
-    B -->|연결 실패| E[소켓 상태 확인\nss -s, dmesg]
-    B -->|간헐적 오류| F[패킷 유실 확인\n/proc/net/dev]
-
-    C --> G{RTT 정상?}
-    G -->|비정상\n높음| H[경로 분석\ntraceroute, mtr]
-    G -->|정상인데\n느림| I[처리량 분석\nTCP 재전송?]
-
-    D --> J{대역폭 포화?}
-    J -->|Yes| K[인터페이스 포화\nethernet 업그레이드\nor QoS 적용]
-    J -->|No| L[TCP 흐름 제어\nウィンドウ 스케일링\nBufferbloat?]
-
-    E --> M{연결 큐 상태}
-    M -->|SYN Backlog\n포화| N[tcp_max_syn_backlog\n증가 또는 SYN 공격]
-    M -->|CLOSE_WAIT\n과다| O[애플리케이션\nclose 누락]
-    M -->|TIME_WAIT\n과다| P[연결 재사용\nSO_REUSEADDR\ntcp_tw_reuse]
-
-    F --> Q[ethtool -S eth0\ndrop 카운터 확인]
-    Q -->|Ring Buffer\nDrop| R[ring buffer 증가\nethtool -G]
-    Q -->|NIC Queue\n불균형| S[RSS/RPS 설정\n멀티큐 분산]
-
-    H --> T[패킷 캡처\ntcpdump, tshark]
-    I --> T
-    L --> T
+    A[레이턴시 높음] --> B{RTT 정상?}
+    B -->|비정상| C[경로 분석]
+    B -->|정상이나 느림| D[처리량 분석]
+    C --> E[패킷 캡처]
+    D --> E
 ```
+
+**처리량 낮음**
+
+```mermaid
+flowchart TD
+    A[처리량 낮음] --> B{대역폭 포화?}
+    B -->|Yes| C[인터페이스 포화]
+    B -->|No| D[TCP 흐름 제어]
+    C --> E[패킷 캡처]
+    D --> E
+```
+
+**연결 실패 / 간헐 오류**
+
+```mermaid
+flowchart TD
+    A[연결 실패 / 간헐 오류] --> B{연결 큐 상태}
+    B -->|SYN Backlog 포화| C[syn_backlog 증가]
+    B -->|CLOSE_WAIT 과다| D[close 누락 확인]
+    B -->|TIME_WAIT 과다| E[연결 재사용 설정]
+
+    F[패킷 유실] --> G[drop 카운터 확인]
+    G -->|Ring Buffer Drop| H[ring buffer 증가]
+    G -->|NIC Queue 불균형| I[RSS/RPS 설정]
+```
+
+| 증상 | 확인 도구 | 조치 |
+|------|---------|------|
+| 높은 레이턴시 | `ping`, `hping3`, `mtr` | 경로 분석, 패킷 캡처 |
+| 낮은 처리량 | `iperf3`, `sar -n DEV` | 대역폭 포화/TCP 흐름 제어 확인 |
+| 연결 실패 | `ss -s`, `dmesg` | SYN Backlog, CLOSE_WAIT, TIME_WAIT 분류 |
+| 간헐적 오류 | `/proc/net/dev`, `ethtool -S` | Ring Buffer/NIC Queue 분산 |
 
 ### 분석 우선순위 원칙
 
-```
-Application Layer  ← 재전송, RTT 스파이크 → 소켓 레이어 확인
-Socket Layer       ← 연결 상태, 큐 포화   → TCP 파라미터 확인
-Network Layer      ← 패킷 유실, 경로 문제 → NIC/드라이버 확인
-Hardware Layer     ← 링 버퍼, NIC 에러   → ethtool 확인
-```
+| 계층 | 주요 증상 | 다음 확인 대상 |
+|------|---------|------------|
+| Application Layer | 재전송, RTT 스파이크 | 소켓 레이어 |
+| Socket Layer | 연결 상태, 큐 포화 | TCP 파라미터 |
+| Network Layer | 패킷 유실, 경로 문제 | NIC/드라이버 |
+| Hardware Layer | 링 버퍼, NIC 에러 | ethtool |
 
 ---
 
@@ -671,13 +683,20 @@ XDP(eXpress Data Path)는 NIC 드라이버에서 직접 eBPF 프로그램을
 
 ```mermaid
 graph LR
-    NIC["NIC 하드웨어"] --> XDP["XDP 후크\n(eBPF 프로그램)"]
-    XDP -->|XDP_DROP| DROP["패킷 버림\n(DDoS 방어)"]
-    XDP -->|XDP_PASS| KERNEL["커널 네트워크 스택\ntcp/ip 처리"]
-    XDP -->|XDP_TX| RETX["NIC로 재전송\n(로드밸런서)"]
-    XDP -->|XDP_REDIRECT| OTHER["다른 인터페이스\n(AF_XDP 소켓)"]
-    KERNEL --> APP["애플리케이션\nsocket API"]
+    NIC["NIC 하드웨어"] --> XDP["XDP Hook"]
+    XDP -->|XDP_DROP| DROP["패킷 버림"]
+    XDP -->|XDP_PASS| KERNEL["커널 네트워크 스택"]
+    XDP -->|XDP_TX| RETX["NIC 재전송"]
+    XDP -->|XDP_REDIRECT| OTHER["다른 인터페이스"]
+    KERNEL --> APP["애플리케이션"]
 ```
+
+| XDP 액션 | 동작 | 사용 사례 |
+|---------|------|---------|
+| XDP_DROP | 패킷 즉시 버림 | DDoS 방어 |
+| XDP_PASS | 커널 스택으로 전달 | 일반 처리 |
+| XDP_TX | NIC로 재전송 | 로드밸런서 |
+| XDP_REDIRECT | 다른 인터페이스로 전달 | AF_XDP 소켓 |
 
 **bcc/bpftrace로 네트워크 분석:**
 
@@ -819,18 +838,18 @@ kubectl -n calico-system exec -it ds/calico-node -- \
 ```mermaid
 graph TD
     subgraph NodePort
-        NP_CLIENT["클라이언트"] --> NP_NODE["NodePort:30080\n(SNAT 발생)"]
+        NP_CLIENT["클라이언트"] --> NP_NODE["NodePort"]
         NP_NODE --> NP_POD["Pod"]
     end
 
     subgraph LoadBalancer
-        LB_CLIENT["클라이언트"] --> LB_LB["외부 LB\n(L4/L7)"]
+        LB_CLIENT["클라이언트"] --> LB_LB["외부 LB"]
         LB_LB --> LB_NODE["Node"]
         LB_NODE --> LB_POD["Pod"]
     end
 
-    subgraph DirectRouting["Direct Routing (BGP/XDP)"]
-        DR_CLIENT["클라이언트"] --> DR_POD["Pod IP 직접\n(NAT 없음, DSR)"]
+    subgraph DirectRouting["Direct Routing"]
+        DR_CLIENT["클라이언트"] --> DR_POD["Pod IP 직접"]
     end
 ```
 
@@ -923,15 +942,21 @@ interval:s:5 {
 ```mermaid
 flowchart LR
     PKT["수신 패킷"] --> NIC["NIC 링 버퍼"]
-    NIC -->|링 버퍼 포화| D1["DROP 1\nrx_missed_errors"]
+    NIC -->|링 버퍼 포화| D1["DROP 1"]
     NIC --> DRIVER["드라이버 DMA"]
-    DRIVER --> NAPI["NAPI 폴링\n(SoftIRQ)"]
-    NAPI -->|CPU 처리 지연| D2["DROP 2\nnetdev_backlog 초과"]
-    NAPI --> IPSTACK["IP 스택 처리"]
-    IPSTACK -->|소켓 버퍼 포화| D3["DROP 3\nsocker rcvbuf 포화"]
+    DRIVER --> NAPI["NAPI 폴링"]
+    NAPI -->|CPU 처리 지연| D2["DROP 2"]
+    NAPI --> IPSTACK["IP 스택"]
+    IPSTACK -->|소켓 버퍼 포화| D3["DROP 3"]
     IPSTACK --> SOCKET["소켓 수신 큐"]
     SOCKET --> APP["애플리케이션"]
 ```
+
+| DROP 위치 | 원인 | 확인 지표 |
+|---------|------|---------|
+| DROP 1 | NIC 링 버퍼 포화 | `rx_missed_errors` |
+| DROP 2 | CPU 처리 지연으로 netdev 백로그 초과 | `netdev_backlog` |
+| DROP 3 | 소켓 rcvbuf 포화 | `rcvbuf 포화` |
 
 ### 시나리오 3: 연결 설정 실패
 

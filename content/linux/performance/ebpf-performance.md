@@ -30,40 +30,37 @@ Netflix, Google, Meta, Cloudflare가 프로덕션 관측성과 성능 분석의
 
 ### 전체 실행 흐름
 
+**컴파일 및 로드 흐름**
+
+```mermaid
+flowchart LR
+    A["소스 코드"] --> B["LLVM/Clang"]
+    B --> C["바이트코드"]
+    C --> L["로더"]
+    L -->|"bpf() syscall"| D["Verifier"]
+    D -->|"통과"| E["JIT 컴파일"]
+    E --> F["Native 코드"]
+```
+
+**실행 및 데이터 흐름**
+
 ```mermaid
 flowchart TD
-    subgraph UserSpace["사용자 공간"]
-        A["eBPF 소스 코드\n(C / bpftrace)"]
-        B["LLVM/Clang 컴파일러"]
-        C["eBPF 바이트코드\n(ELF 오브젝트)"]
-        L["사용자 공간 로더\n(libbpf / BCC / bpftrace)"]
-        O["출력 / 집계\n(Maps 읽기)"]
-    end
-
-    subgraph KernelSpace["커널 공간"]
-        D["Verifier\n(안전성 검증)"]
-        E["JIT 컴파일러\n(x86_64 / ARM64)"]
-        F["Native 머신코드"]
-
-        subgraph Hooks["Hook 포인트"]
-            G["kprobe / kretprobe\n(커널 함수)"]
-            H["uprobe / uretprobe\n(사용자 공간 함수)"]
-            I["Tracepoint / USDT\n(정적 트레이스)"]
-            J["XDP\n(네트워크 패킷)"]
-            K["TC / sk_filter\n(소켓/트래픽 제어)"]
-            M["LSM\n(보안 훅)"]
-        end
-
-        N["eBPF Maps\n(Hash, Array, Ring Buffer\nPerfEvent, LRU, ...)"]
-    end
-
-    A --> B --> C --> L
-    L -->|"bpf() syscall"| D
-    D -->|"검증 통과"| E --> F
-    F --> Hooks
-    Hooks <-->|"읽기/쓰기"| N
-    N -->|"perf_event / ring_buf"| O
+    F["Native 코드"] --> Hooks["Hook 포인트"]
+    Hooks <-->|"읽기/쓰기"| N["eBPF Maps"]
+    N -->|"ring_buf"| O["출력 집계"]
 ```
+
+Hook 포인트 상세:
+
+| Hook | 대상 |
+|------|------|
+| kprobe / kretprobe | 커널 함수 |
+| uprobe / uretprobe | 사용자 공간 함수 |
+| Tracepoint / USDT | 정적 트레이스 |
+| XDP | 네트워크 패킷 |
+| TC / sk_filter | 소켓/트래픽 제어 |
+| LSM | 보안 훅 |
 
 ### Hook 타입 상세
 
@@ -82,26 +79,12 @@ flowchart TD
 
 ### eBPF Map 타입
 
-```mermaid
-mindmap
-  root((eBPF Maps))
-    기본
-      BPF_MAP_TYPE_HASH
-      BPF_MAP_TYPE_ARRAY
-      BPF_MAP_TYPE_PERCPU_HASH
-      BPF_MAP_TYPE_PERCPU_ARRAY
-    큐/스택
-      BPF_MAP_TYPE_QUEUE
-      BPF_MAP_TYPE_STACK
-    이벤트 출력
-      BPF_MAP_TYPE_PERF_EVENT_ARRAY
-      BPF_MAP_TYPE_RINGBUF
-    고급
-      BPF_MAP_TYPE_LRU_HASH
-      BPF_MAP_TYPE_LPM_TRIE
-      BPF_MAP_TYPE_SOCKHASH
-      BPF_MAP_TYPE_PROG_ARRAY
-```
+| 분류 | Map 타입 |
+|------|---------|
+| 기본 | `BPF_MAP_TYPE_HASH`, `BPF_MAP_TYPE_ARRAY`, `BPF_MAP_TYPE_PERCPU_HASH`, `BPF_MAP_TYPE_PERCPU_ARRAY` |
+| 큐/스택 | `BPF_MAP_TYPE_QUEUE`, `BPF_MAP_TYPE_STACK` |
+| 이벤트 출력 | `BPF_MAP_TYPE_PERF_EVENT_ARRAY`, `BPF_MAP_TYPE_RINGBUF` |
+| 고급 | `BPF_MAP_TYPE_LRU_HASH`, `BPF_MAP_TYPE_LPM_TRIE`, `BPF_MAP_TYPE_SOCKHASH`, `BPF_MAP_TYPE_PROG_ARRAY` |
 
 > **Ring Buffer vs Perf Event Array**
 > Linux 5.8+에서 도입된 `BPF_MAP_TYPE_RINGBUF`는 CPU당
@@ -132,16 +115,23 @@ mindmap
 flowchart TD
     A[eBPF 작업 시작] --> B{목적은?}
 
-    B -->|"빠른 임시 분석\n(원라이너, 디버깅)"| C[bpftrace]
-    B -->|"기존 BCC 도구 사용\n(biolatency, execsnoop 등)"| D[BCC tools]
-    B -->|"프로덕션 배포\n(바이너리 배포 필요)"| E[libbpf + CO-RE]
-    B -->|"K8s 클러스터 전체 관측"| F[Pixie / Tetragon]
+    B -->|"임시 분석"| C[bpftrace]
+    B -->|"기존 BCC 도구"| D[BCC tools]
+    B -->|"프로덕션 배포"| E[libbpf + CO-RE]
+    B -->|"K8s 전체 관측"| F[Pixie / Tetragon]
 
     C --> G["bpftrace -e 'program'"]
     D --> H["python tool.py"]
     E --> I["사전 컴파일 바이너리"]
     F --> J["Helm 배포, eBPF 자동화"]
 ```
+
+| 목적 | 도구 | 사용 예 |
+|------|------|---------|
+| 빠른 임시 분석 | bpftrace | 원라이너, 디버깅 |
+| 기존 BCC 도구 활용 | BCC tools | `biolatency`, `execsnoop` 등 |
+| 프로덕션 배포 | libbpf + CO-RE | 바이너리 배포, 커널 헤더 불필요 |
+| K8s 클러스터 전체 관측 | Pixie / Tetragon | Helm 배포, eBPF 자동화 |
 
 ### 2024-2025 트렌드
 
@@ -541,16 +531,16 @@ sudo tcpretrans-bpfcc
 ```mermaid
 flowchart LR
     subgraph 빌드타임
-        A["eBPF C 소스\n(vmlinux.h + libbpf)"]
-        B["clang -target bpf 컴파일"]
-        C["BTF 메타데이터 포함\n.bpf.o 오브젝트"]
+        A["eBPF C 소스"]
+        B["clang 컴파일"]
+        C["bpf.o 오브젝트"]
     end
 
-    subgraph 런타임["런타임 (어느 커널이든)"]
+    subgraph 런타임
         D["libbpf 로더"]
-        E["커널 BTF\n/sys/kernel/btf/vmlinux"]
-        F["구조체 필드 오프셋 재배치\n(CO-RE Relocation)"]
-        G["eBPF 프로그램 로드"]
+        E["커널 BTF"]
+        F["오프셋 재배치"]
+        G["프로그램 로드"]
     end
 
     A --> B --> C
@@ -832,16 +822,21 @@ O(n) 규칙 탐색 오버헤드를 없앤다.
 
 ```mermaid
 flowchart LR
-    subgraph 기존["기존 (iptables)""]
-        A["Pod A"] -->|"패킷"| B["iptables 체인\n(O(n) 규칙 탐색)"]
+    subgraph 기존
+        A["Pod A"] -->|"패킷"| B["iptables 체인"]
         B --> C["Pod B"]
     end
 
-    subgraph cilium["Cilium (eBPF)"]
-        D["Pod A"] -->|"패킷"| E["XDP/TC eBPF Hook\nHash Map O(1) 조회"]
+    subgraph cilium["Cilium eBPF"]
+        D["Pod A"] -->|"패킷"| E["XDP/TC Hook"]
         E --> F["Pod B"]
     end
 ```
+
+| 방식 | 규칙 조회 | 성능 |
+|------|---------|------|
+| iptables | O(n) 선형 탐색 | 규칙 수에 비례해 저하 |
+| Cilium eBPF | O(1) Hash Map | 규칙 수 무관하게 일정 |
 
 ```bash
 # Cilium eBPF 상태 확인
@@ -920,17 +915,17 @@ eBPF Verifier는 모든 프로그램이 커널에 로드되기 전
 
 ```mermaid
 flowchart TD
-    A["eBPF 바이트코드"] --> B{"무한 루프\n가능성?"}
-    B -->|"있음"| FAIL["❌ 로드 거부"]
-    B -->|"없음"| C{"역참조 전\nnull 체크?"}
+    A["eBPF 바이트코드"] --> B{"무한 루프?"}
+    B -->|"있음"| FAIL["로드 거부"]
+    B -->|"없음"| C{"null 체크?"}
     C -->|"누락"| FAIL
-    C -->|"완료"| D{"스택 크기\n512B 초과?"}
+    C -->|"완료"| D{"스택 512B?"}
     D -->|"초과"| FAIL
-    D -->|"이내"| E{"명령어 수\n100만 초과?"}
+    D -->|"이내"| E{"명령어 100만?"}
     E -->|"초과"| FAIL
-    E -->|"이내"| F{"허용된 헬퍼\n함수만 사용?"}
+    E -->|"이내"| F{"허용 헬퍼?"}
     F -->|"위반"| FAIL
-    F -->|"통과"| OK["✓ 로드 허가"]
+    F -->|"통과"| OK["로드 허가"]
 ```
 
 | 제약 | 한계 | 설명 |

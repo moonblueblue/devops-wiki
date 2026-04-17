@@ -34,33 +34,32 @@ I/O가 어디서 느려지는지 알려면 요청이 흐르는 경로를 먼저 
 
 ```mermaid
 graph TD
-    APP["애플리케이션<br/>read() / write() / io_uring / mmap()"]
-    SYSCALL["System Call Interface<br/>(sys_read, sys_write, sys_pread64)"]
-    VFS["VFS (Virtual File System)<br/>파일시스템 추상화 레이어"]
-    PCACHE["Page Cache (커널 메모리)<br/>읽기 캐시 + write-back 버퍼"]
-    FS["파일시스템 드라이버<br/>ext4 / XFS / Btrfs / tmpfs"]
-    GENERIC["Generic Block Layer (bio)<br/>bio 생성, 병합, 분할, I/O 통계"]
-    BLKMQ["blk-mq (Multi-Queue)<br/>CPU당 Software Queue (SQ)"]
-    SCHED["I/O Scheduler<br/>none / mq-deadline / bfq / kyber"]
-    HCTX["Hardware Dispatch Queue (hctx)<br/>디바이스 큐 수만큼"]
-    DRIVER["스토리지 드라이버<br/>NVMe / SCSI / VirtIO-blk"]
-    HW["물리 장치 (Disk/SSD/NVMe)<br/>내부 컨트롤러 큐 (NCQ/NVMe Queues)"]
-
-    APP -->|"유저 → 커널 컨텍스트 전환"| SYSCALL
-    SYSCALL --> VFS
-    VFS <-->|"캐시 히트 시 여기서 반환"| PCACHE
-    PCACHE -->|"캐시 미스 / dirty page flush"| FS
-    FS --> GENERIC
-    GENERIC --> BLKMQ
-    BLKMQ --> SCHED
-    SCHED --> HCTX
-    HCTX --> DRIVER
-    DRIVER --> HW
+    APP["애플리케이션"] --> VFS["VFS"]
+    VFS <-->|"캐시 히트시 반환"| PCACHE["Page Cache"]
+    PCACHE -->|"캐시 미스/flush"| FS["파일시스템"]
+    FS --> BLKMQ["blk-mq"]
+    BLKMQ --> SCHED["I/O 스케줄러"]
+    SCHED --> DRIVER["스토리지 드라이버"]
+    DRIVER --> HW["물리 장치"]
 
     style PCACHE fill:#fff3cd,stroke:#ffc107
     style SCHED fill:#d1ecf1,stroke:#17a2b8
     style HW fill:#d4edda,stroke:#28a745
 ```
+
+| 계층 | 역할 |
+|------|------|
+| 애플리케이션 | `read()` / `write()` / `io_uring` / `mmap()` |
+| 시스템 콜 | `sys_read`, `sys_write`, `sys_pread64` |
+| VFS | 파일시스템 추상화 레이어 |
+| Page Cache | 읽기 캐시 + write-back 버퍼 |
+| 파일시스템 | ext4 / XFS / Btrfs / tmpfs |
+| Block Layer | bio 생성, 병합, 분할, I/O 통계 |
+| blk-mq | CPU당 Software Queue |
+| I/O 스케줄러 | none / mq-deadline / bfq / kyber |
+| Hardware Queue | 디바이스 큐 (hctx) |
+| 스토리지 드라이버 | NVMe / SCSI / VirtIO-blk |
+| 물리 장치 | 내부 컨트롤러 큐 (NCQ/NVMe Queues) |
 
 ### 계층별 병목 위치
 
@@ -205,18 +204,20 @@ lsof +L1 | awk '{print $7, $NF}' | sort -rn | head -10
 
 ```mermaid
 graph LR
-    Q["Q: Queue<br/>bio가 블록 레이어에 제출됨"]
-    G["G: Get Request<br/>bio에서 request 객체 생성"]
-    I["I: Insert<br/>request가 스케줄러 큐에 삽입"]
-    D["D: Issue<br/>request가 드라이버에 전달됨"]
-    C["C: Complete<br/>디바이스가 요청 완료 신호 반환"]
-
-    Q --> G --> I --> D --> C
+    Q["Q: Queue"] --> G["G: Get Request"] --> I["I: Insert"] --> D["D: Issue"] --> C["C: Complete"]
 
     style Q fill:#fff3cd
     style D fill:#cce5ff
     style C fill:#d4edda
 ```
+
+| 이벤트 | 의미 |
+|--------|------|
+| Q | bio가 블록 레이어에 제출됨 |
+| G | bio에서 request 객체 생성 |
+| I | request가 스케줄러 큐에 삽입 |
+| D | request가 드라이버에 전달됨 |
+| C | 디바이스가 요청 완료 신호 반환 |
 
 | 이벤트 코드 | 의미 | 측정 구간 |
 |----------|------|---------|
@@ -318,30 +319,47 @@ btreplay -d /tmp/recorded_io /dev/nvme0n1
 
 ### 4.1 병목 유형 분류
 
+**1단계: %util 기준 분류**
+
 ```mermaid
 flowchart TD
-    START["iostat -xz 1 실행"] --> UTIL{"%util > 85%?"}
-    UTIL -->|"Yes"| AQU{"aqu-sz > 1?"}
-    UTIL -->|"No"| AWAIT{"await 비정상적으로 높음?"}
+    START["iostat -xz 1"] --> UTIL{"%util > 85%?"}
+    UTIL -->|Yes| AQU{"aqu-sz > 1?"}
+    UTIL -->|No| AWAIT{"await 비정상?"}
 
-    AQU -->|"Yes"| SAT["포화 상태<br/>디바이스 처리 한계 도달<br/>→ 업그레이드 or 샤딩 고려"]
-    AQU -->|"No"| SVCTM["단일 대용량 I/O<br/>→ 요청 크기 최적화 검토"]
+    AQU -->|Yes| SAT["디바이스 포화"]
+    AQU -->|No| SVCTM["요청 크기 최적화"]
 
-    AWAIT -->|"Yes"| IOWAIT{"CPU I/O wait 높음?<br/>(vmstat wa > 20%)"}
-    AWAIT -->|"No"| CACHE["페이지 캐시 확인<br/>→ vmtouch, sar -B"]
-
-    IOWAIT -->|"Yes"| BLKTRACE["blktrace로<br/>I2D vs D2C 비율 분석"]
-    IOWAIT -->|"No"| PROCESS["iotop -o로<br/>I/O 집중 프로세스 찾기"]
-
-    BLKTRACE --> SCHED_ISSUE{"I2D >> D2C?"}
-    SCHED_ISSUE -->|"Yes"| SCHED_FIX["스케줄러 큐 병목<br/>→ 스케줄러 변경 or nr_requests 조정"]
-    SCHED_ISSUE -->|"No"| DEV_FIX["디바이스 자체 느림<br/>→ 장치 교체, firmware 확인"]
+    AWAIT -->|Yes| IOWAIT["CPU wa 확인"]
+    AWAIT -->|No| CACHE["페이지 캐시 확인"]
 
     style SAT fill:#f8d7da
-    style SCHED_FIX fill:#fff3cd
-    style DEV_FIX fill:#fff3cd
     style CACHE fill:#d1ecf1
 ```
+
+**2단계: await 높음 + CPU wa > 20% 케이스 정밀 분석**
+
+```mermaid
+flowchart TD
+    IOWAIT{"CPU wa > 20%?"} -->|Yes| BLKTRACE["blktrace 분석"]
+    IOWAIT -->|No| PROCESS["iotop -o 분석"]
+
+    BLKTRACE --> SCHED_ISSUE{"I2D >> D2C?"}
+    SCHED_ISSUE -->|Yes| SCHED_FIX["스케줄러 병목"]
+    SCHED_ISSUE -->|No| DEV_FIX["디바이스 교체 검토"]
+
+    style SCHED_FIX fill:#fff3cd
+    style DEV_FIX fill:#fff3cd
+```
+
+| 판단 기준 | 조치 |
+|---------|------|
+| `%util > 85%` + `aqu-sz > 1` | 디바이스 포화 → 업그레이드 또는 샤딩 고려 |
+| `%util > 85%` + `aqu-sz` 낮음 | 단일 대용량 I/O → 요청 크기 최적화 |
+| `await` 높음 + CPU `wa > 20%` + `I2D >> D2C` | 스케줄러 큐 병목 → 스케줄러 변경 또는 `nr_requests` 조정 |
+| `await` 높음 + CPU `wa > 20%` + `D2C` 높음 | 디바이스 자체 느림 → 장치 교체, 펌웨어 확인 |
+| `await` 높음 + CPU `wa` 낮음 | I/O 집중 프로세스 → `iotop -o` 분석 |
+| `await` 정상 | 페이지 캐시 확인 → `vmtouch`, `sar -B` |
 
 ### 4.2 높은 `await`: 큐 대기 vs 실제 서비스 시간
 

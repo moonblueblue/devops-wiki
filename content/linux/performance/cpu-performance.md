@@ -36,26 +36,43 @@ CPU 분석에서 가장 먼저 적용하는 구조화 프레임워크다.
 
 ### 분석 흐름
 
+**1단계: Load/CPU 지표로 원인 분류**
+
 ```mermaid
 flowchart TD
-    A[CPU 이상 감지] --> B{Load Average\nvs CPU 수}
-    B -->|높음| C[vmstat: r 컬럼 확인]
+    A[CPU 이상 감지] --> B{Load vs CPU 수}
+    B -->|높음| C[vmstat r 컬럼]
     B -->|정상| D[wa/si/st 확인]
 
-    C -->|r 높음| E[CPU 포화\nRunqueue 경합]
-    C -->|r 낮음| F[I/O 대기\n또는 Sleep]
+    C -->|r 높음| E[CPU 포화]
+    C -->|r 낮음| F[I/O 대기]
 
     D -->|wa 높음| G[I/O 병목]
-    D -->|si 높음| H[네트워크 인터럽트\nSoftIRQ 과다]
-    D -->|st 높음| I[VM CPU 경합\nSteal Time]
+    D -->|si 높음| H[SoftIRQ 과다]
+    D -->|st 높음| I[VM Steal Time]
+```
 
-    E --> J[top/pidstat로 범인 프로세스 특정]
-    J --> K{us 높음 vs sy 높음}
-    K -->|us| L[perf top/record\n사용자 공간 핫스팟]
-    K -->|sy| M[perf trace\n시스템콜 과다\n또는 Lock 경합]
-    L --> N[플레임그래프 생성]
+**2단계: CPU 포화 확정 후 핫스팟 탐색**
+
+```mermaid
+flowchart TD
+    E[CPU 포화 확정] --> J[pidstat 확인]
+    J --> K{us vs sy}
+    K -->|us| L[perf top/record]
+    K -->|sy| M[perf trace]
+    L --> N[플레임그래프]
     M --> N
 ```
+
+| 지표 | 의미 | 다음 단계 |
+|------|------|---------|
+| `Load > CPU 수` + `r 높음` | CPU 포화, Runqueue 경합 | `top`/`pidstat`로 프로세스 특정 |
+| `Load > CPU 수` + `r 낮음` | I/O 대기 또는 Sleep | `vmstat b`, `iostat` |
+| `wa 높음` | 디스크 I/O 병목 | `iostat`, `iotop` |
+| `si 높음` | 네트워크 인터럽트, SoftIRQ 과다 | `mpstat -I`, `sar -I` |
+| `st 높음` | VM CPU 경합, Steal Time | 호스트 리소스 확인 |
+| `us 높음` | 사용자 공간 핫스팟 | `perf top/record`, 플레임그래프 |
+| `sy 높음` | 시스템콜 과다 또는 Lock 경합 | `perf trace`, `bpftrace` |
 
 ---
 
@@ -296,11 +313,12 @@ sudo perf script | \
 
 **플레임그래프 읽는 법:**
 
-```mermaid
-graph LR
-    A["X축: CPU 시간 비율\n(넓을수록 많이 소비)"] --- B["Y축: 콜스택 깊이\n(위로 갈수록 호출자)"]
-    C["가장 넓은 박스 = 핫스팟\n최적화 우선 대상"] --- D["평평한 상단 = tail recursion\n또는 spinloop"]
-```
+| 축 | 의미 |
+|----|----|
+| X축 | CPU 시간 비율 (넓을수록 많이 소비) |
+| Y축 | 콜스택 깊이 (위로 갈수록 호출자) |
+| 가장 넓은 박스 | 핫스팟, 최적화 우선 대상 |
+| 평평한 상단 | tail recursion 또는 spinloop |
 
 ---
 
@@ -591,7 +609,7 @@ CPU limits를 구현한다.
 sequenceDiagram
     participant App as 애플리케이션
     participant CFS as CFS 스케줄러
-    participant Quota as CPU Quota<br/>(100ms 주기)
+    participant Quota as CPU Quota
 
     App->>CFS: CPU 사용 요청
     CFS->>Quota: 쿼터 확인

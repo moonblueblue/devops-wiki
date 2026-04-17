@@ -32,41 +32,19 @@ last_verified: 2026-04-17
 
 ```mermaid
 flowchart LR
-    subgraph Sources["로그 소스"]
-        A1[컨테이너 stdout/stderr]
-        A2[systemd journald]
-        A3[파일 테일]
-        A4[애플리케이션 SDK]
-    end
-
-    subgraph Collectors["수집 계층"]
-        B1[Fluent Bit\nDaemonSet]
-        B2[OTel Collector\nSidecar/Agent]
-    end
-
-    subgraph Buffer["버퍼 / 메시지 큐"]
-        C1[Kafka]
-        C2[Kinesis]
-    end
-
-    subgraph Storage["저장 계층"]
-        D1[Loki\n라벨 기반 인덱스]
-        D2[Elasticsearch\n전문 검색]
-        D3[S3 / GCS\n장기 보관]
-        D4[ClickHouse\n분석 쿼리]
-    end
-
-    subgraph Query["조회 / 알람"]
-        E1[Grafana]
-        E2[Kibana / OpenSearch Dashboards]
-        E3[AlertManager]
-    end
-
-    Sources --> Collectors
-    Collectors --> Buffer
-    Buffer --> Storage
-    Storage --> Query
+    Sources[로그 소스] --> Collectors[수집 계층]
+    Collectors --> Buffer[버퍼 큐]
+    Buffer --> Storage[저장 계층]
+    Storage --> Query[조회 알람]
 ```
+
+| 계층 | 구성 요소 |
+|------|---------|
+| 로그 소스 | 컨테이너 stdout/stderr, systemd journald, 파일 테일, 앱 SDK |
+| 수집 계층 | Fluent Bit DaemonSet, OTel Collector Sidecar/Agent |
+| 버퍼 큐 | Kafka, Kinesis |
+| 저장 계층 | Loki (라벨 인덱스), Elasticsearch (전문 검색), S3/GCS (장기 보관), ClickHouse (분석) |
+| 조회 알람 | Grafana, Kibana/OpenSearch Dashboards, AlertManager |
 
 대용량 환경에서는 수집기가 직접 저장소에 쓰지 않고,
 Kafka 같은 메시지 큐를 사이에 두어 back pressure를 흡수한다.
@@ -100,7 +78,7 @@ Kafka 같은 메시지 큐를 사이에 두어 back pressure를 흡수한다.
 | 플러그인 수 | ~100+ | ~1,000+ | ~400+ | ~100+ |
 | 변환 언어 | Lua / WASM | Ruby | Ruby DSL | VRL (Rust) |
 | K8s 친화성 | ✅ 최우선 | ✅ 양호 | ⚠️ 무거움 | ✅ 양호 |
-| CNCF 등록 | ✅ Graduated | ✅ Graduated | ❌ | ❌ (Datadog OSS) |
+| CNCF 등록 | ✅ Graduated (Fluentd 산하) | ✅ Graduated | ❌ | ❌ (Datadog OSS) |
 
 > EPS = Events Per Second
 
@@ -126,10 +104,17 @@ Kafka 같은 메시지 큐를 사이에 두어 back pressure를 흡수한다.
 
 ```mermaid
 flowchart LR
-    IN[Input\ntail / systemd / forward] --> PARSER[Parser\nJSON / regex / multiline]
-    PARSER --> FILTER[Filter\nlua / grep / kubernetes]
-    FILTER --> OUTPUT[Output\nes / loki / s3 / kafka]
+    IN[Input] --> PARSER[Parser]
+    PARSER --> FILTER[Filter]
+    FILTER --> OUTPUT[Output]
 ```
+
+| 단계 | 플러그인 예시 |
+|------|------------|
+| Input | `tail`, `systemd`, `forward` |
+| Parser | `json`, `regex`, `multiline` |
+| Filter | `lua`, `grep`, `kubernetes` |
+| Output | `es`, `loki`, `s3`, `kafka` |
 
 ### 입력(INPUT) 플러그인
 
@@ -373,18 +358,24 @@ end
 
 ```mermaid
 flowchart TD
-    A[이벤트 수신] --> B{버퍼 용량\n확인}
-    B -- 여유 있음 --> C[청크에 기록]
+    A[이벤트 수신] --> B{버퍼 용량}
+    B -- 여유 있음 --> C[청크 기록]
     B -- 한계 도달 --> D{overflow_action}
-    D -- block --> E[입력 일시 중단\nback pressure]
-    D -- drop_oldest_chunk --> F[오래된 청크 삭제\n데이터 손실 가능]
-    D -- throw_exception --> G[예외 발생\n재시도]
+    D -- block --> E[입력 중단]
+    D -- drop_oldest_chunk --> F[오래된 청크 삭제]
+    D -- throw_exception --> G[예외 발생]
     C --> H{flush 조건}
-    H -- 크기/시간 초과 --> I[청크 flush]
-    I --> J{전송 성공?}
+    H -- 크기 시간 초과 --> I[청크 flush]
+    I --> J{전송 성공}
     J -- 성공 --> K[청크 삭제]
-    J -- 실패 --> L[retry_backoff 대기\n재시도]
+    J -- 실패 --> L[retry 대기]
 ```
+
+| overflow_action | 동작 | 데이터 유실 |
+|----------------|------|-----------|
+| `block` | 입력 일시 중단 (back pressure) | 없음 (권장) |
+| `drop_oldest_chunk` | 오래된 청크 삭제 | 발생 가능 |
+| `throw_exception` | 예외 발생 후 재시도 | 재시도 횟수 초과 시 |
 
 ```ruby
 # 실무 권장 버퍼 설정
@@ -480,20 +471,20 @@ spec:
 | 압축률 | ~3:1 | ~10:1 | ~15:1 | ~3:1 |
 | 운영 복잡도 | 높음 | 낮음–중간 | 중간 | 높음 |
 | OTel 네이티브 | ⚠️ 별도 설정 | ✅ 3.0+ 네이티브 | ⚠️ 별도 설정 | ⚠️ 별도 설정 |
-| 라이선스 | SSPL + AGPL-3.0 (v8.14+ 이중 라이선스) | AGPL-3.0 | Apache 2.0 | Apache 2.0 |
+| 라이선스 | SSPL + ELv2 + AGPL-3.0 (v8.16+, 2024.09 삼중 라이선스) | AGPL-3.0 | Apache 2.0 | Apache 2.0 |
 | 비용 사례 | 100GB/일 → ~500GB 저장 | 100GB/일 → ~30GB 저장 | 100GB/일 → ~7GB 저장 | ~Elasticsearch 수준 |
 
 ### 선택 기준
 
 ```mermaid
 flowchart TD
-    A[로그 저장소 선택] --> B{주요 요구사항}
-    B -- "전문 검색\n(grep 수준)" --> C{비용 제약}
-    C -- 높음 --> D[Loki + LogQL]
+    A[저장소 선택] --> B{주요 요구사항}
+    B -- 전문 검색 --> C{비용 제약}
+    C -- 높음 --> D[Loki]
     C -- 낮음 --> E[Elasticsearch]
-    B -- "분석·집계\n(SQL 쿼리)" --> F[ClickHouse]
-    B -- "OTel 통합\n저비용" --> D
-    B -- "기존 Elastic\n생태계" --> G{라이선스 민감?}
+    B -- 분석 집계 --> F[ClickHouse]
+    B -- OTel 저비용 --> D
+    B -- Elastic 생태계 --> G{라이선스 민감}
     G -- 예 --> H[OpenSearch]
     G -- 아니오 --> E
 ```
@@ -521,20 +512,20 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Write["쓰기 경로"]
-        W1[Distributor\n해시 링 라우팅] --> W2[Ingester\nWAL + 메모리 청크]
-        W2 --> W3[Object Storage\nS3 / GCS / MinIO]
-        W2 --> W4[Compactor\n청크 병합·중복 제거]
+        W1[Distributor] --> W2[Ingester]
+        W2 --> W3[Object Storage]
+        W2 --> W4[Compactor]
     end
 
     subgraph Read["읽기 경로"]
-        R1[Query Frontend\n캐시·분산 쿼리] --> R2[Querier\n스토리지 조회]
+        R1[Query Frontend] --> R2[Querier]
         R2 --> W3
         R2 --> W2
     end
 
     subgraph Index["인덱스"]
-        I1[TSDB Index\n라벨 → 청크 매핑]
-        I2[Bloom Filter\n청크 내 토큰 존재 여부]
+        I1[TSDB Index]
+        I2[Bloom Filter]
     end
 
     W2 --> I1
@@ -542,6 +533,17 @@ flowchart TD
     R2 --> I1
     R2 --> I2
 ```
+
+| 컴포넌트 | 역할 |
+|---------|------|
+| Distributor | 해시 링 기반 라우팅 |
+| Ingester | WAL + 메모리 청크 관리 |
+| Object Storage | S3 / GCS / MinIO 장기 저장 |
+| Compactor | 청크 병합 및 중복 제거 |
+| Query Frontend | 캐시 및 분산 쿼리 처리 |
+| Querier | 스토리지 조회 |
+| TSDB Index | 라벨-청크 매핑 인덱스 |
+| Bloom Filter | 청크 내 토큰 존재 여부 검색 |
 
 ### LogQL 쿼리 예시
 
@@ -573,29 +575,16 @@ rate({namespace="production"} |= "ERROR" [5m])
 
 ### 레이블 설계 원칙 (카디널리티 관리)
 
-```mermaid
-flowchart LR
-    subgraph Good["✅ 좋은 레이블 (저 카디널리티)"]
-        G1["namespace\n(수십 개)"]
-        G2["app\n(수백 개)"]
-        G3["env\n(prod/staging/dev)"]
-        G4["cluster\n(수 개)"]
-    end
-
-    subgraph Bad["❌ 나쁜 레이블 (고 카디널리티)"]
-        B1["pod_name\n(수만 개)"]
-        B2["trace_id\n(무한대)"]
-        B3["user_id\n(무한대)"]
-        B4["request_id\n(무한대)"]
-    end
-
-    subgraph Alternative["✅ 대안: Structured Metadata"]
-        S1["trace_id → 구조화 메타데이터"]
-        S2["pod_name → 구조화 메타데이터"]
-    end
-
-    Bad --> Alternative
-```
+| 구분 | 레이블 | 카디널리티 | 비고 |
+|------|--------|-----------|------|
+| ✅ 권장 | `namespace` | 수십 개 | 저 카디널리티 |
+| ✅ 권장 | `app` | 수백 개 | 저 카디널리티 |
+| ✅ 권장 | `env` | 3개 내외 (prod/staging/dev) | 저 카디널리티 |
+| ✅ 권장 | `cluster` | 수 개 | 저 카디널리티 |
+| ❌ 금지 | `pod_name` | 수만 개 | Structured Metadata 사용 |
+| ❌ 금지 | `trace_id` | 무한대 | Structured Metadata 사용 |
+| ❌ 금지 | `user_id` | 무한대 | Structured Metadata 사용 |
+| ❌ 금지 | `request_id` | 무한대 | Structured Metadata 사용 |
 
 > **카디널리티 폭발** 징후: 활성 스트림 급증, Ingester 메모리
 > 증가, 쿼리 지연. `loki_ingester_streams_created_total` 메트릭
@@ -771,17 +760,17 @@ service:
 
 ```mermaid
 sequenceDiagram
-    participant FB as Fluent Bit\n(DaemonSet)
-    participant OC as OTel Collector\n(Deployment)
+    participant FB as Fluent Bit
+    participant OC as OTel Collector
     participant L as Loki
     participant G as Grafana
 
     FB->>FB: 컨테이너 로그 수집
     FB->>FB: K8s 메타데이터 주입
-    FB->>OC: Forward (port 8006)
-    OC->>OC: 배치 처리\n속성 변환\n메모리 제한
-    OC->>L: OTLP HTTP /otlp
-    L->>L: Structured Metadata\n저장 (v13 스키마)
+    FB->>OC: Forward
+    OC->>OC: 배치 처리 및 속성 변환
+    OC->>L: OTLP HTTP
+    L->>L: Structured Metadata 저장
     G->>L: LogQL 쿼리
     L-->>G: 로그 스트림 반환
 ```
@@ -795,17 +784,17 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     subgraph DS["DaemonSet 패턴"]
-        N1[Node] --> P1[Pod A\n앱 컨테이너]
-        N1 --> P2[Pod B\n앱 컨테이너]
-        N1 --> FB[Fluent Bit\nDaemonSet Pod]
-        P1 -- stdout/stderr\n/var/log/pods --> FB
-        P2 -- stdout/stderr\n/var/log/pods --> FB
+        N1[Node] --> P1[Pod A]
+        N1 --> P2[Pod B]
+        N1 --> FB[Fluent Bit]
+        P1 -- stdout --> FB
+        P2 -- stdout --> FB
     end
 
     subgraph SC["Sidecar 패턴"]
         P3[Pod C] --> A3[앱 컨테이너]
-        P3 --> S3[Fluent Bit\nSidecar]
-        A3 -- shared volume --> S3
+        P3 --> S3[Fluent Bit]
+        A3 -- shared vol --> S3
     end
 
     FB --> LOKI[Loki]
@@ -828,17 +817,11 @@ flowchart TD
 
 ### Pod 로그 경로 매핑
 
-```
-/var/log/pods/
-└── <namespace>_<pod-name>_<pod-uid>/
-    └── <container-name>/
-        ├── 0.log        ← 현재 로그
-        └── 0.log.gz     ← 로테이션된 로그
-
-/var/log/containers/
-└── <pod-name>_<namespace>_<container-name>-<container-id>.log
-    → symlink → /var/log/pods/...
-```
+| 경로 | 설명 |
+|------|------|
+| `/var/log/pods/<ns>_<pod>_<uid>/<container>/0.log` | 현재 로그 파일 |
+| `/var/log/pods/<ns>_<pod>_<uid>/<container>/0.log.gz` | 로테이션된 로그 |
+| `/var/log/containers/<pod>_<ns>_<container>-<id>.log` | 심링크 (`/var/log/pods/`를 가리킴) |
 
 ### 멀티 테넌시 로그 분리
 
@@ -878,16 +861,24 @@ flowchart LR
     A[전체 로그] --> B{로그 레벨}
     B -- ERROR/FATAL --> C[100% 유지]
     B -- WARN --> D[100% 유지]
-    B -- INFO --> E[10–30% 샘플링]
-    B -- DEBUG --> F[1–5% 샘플링\n또는 삭제]
-    B -- 헬스체크/핑 --> G[완전 삭제]
+    B -- INFO --> E[10~30% 샘플링]
+    B -- DEBUG --> F[1~5% 샘플링]
+    B -- 헬스체크 --> G[완전 삭제]
 
-    C --> H[핫 스토리지\nES / Loki]
+    C --> H[핫 스토리지]
     D --> H
     E --> H
-    F --> I[삭제 / 무시]
+    F --> I[삭제]
     G --> I
 ```
+
+| 레벨 | 정책 | 저장 위치 |
+|------|------|---------|
+| ERROR / FATAL | 100% 유지 | 핫 스토리지 |
+| WARN | 100% 유지 | 핫 스토리지 |
+| INFO | 10–30% 샘플링 | 핫 스토리지 |
+| DEBUG | 1–5% 샘플링 또는 삭제 | 삭제 처리 |
+| 헬스체크 / 핑 | 완전 삭제 | - |
 
 ```ini
 # Fluent Bit: 샘플링 필터
@@ -927,20 +918,20 @@ end
 
 ```mermaid
 flowchart LR
-    subgraph Hot["핫 티어 (0–7일)"]
-        H1[Loki / ES\n고속 NVMe\n즉시 쿼리]
+    subgraph Hot["핫 티어"]
+        H1[Loki ES]
     end
 
-    subgraph Warm["웜 티어 (7–90일)"]
-        W1[S3 Standard-IA\n+ Parquet 변환\nAthena 쿼리]
+    subgraph Warm["웜 티어"]
+        W1[S3 Standard-IA]
     end
 
-    subgraph Cold["콜드 티어 (90일+)"]
-        C1[S3 Glacier IR\n또는 Deep Archive\n규정 준수 보관]
+    subgraph Cold["콜드 티어"]
+        C1[S3 Glacier]
     end
 
-    Hot -- 7일 경과\nLifecycle Rule --> Warm
-    Warm -- 90일 경과\nLifecycle Rule --> Cold
+    Hot -- 7일 경과 --> Warm
+    Warm -- 90일 경과 --> Cold
 ```
 
 | 티어 | 저장소 | 비용 (GB/월) | 쿼리 지연 |
@@ -971,16 +962,16 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    A[로그 지연 감지] --> B{수집기 지연?}
-    B -- Yes --> C[Fluent Bit 메트릭 확인\nlocalhost:2020/api/v1/metrics]
-    C --> D{Input buffer\n꽉 찼는가?}
-    D -- Yes --> E[Mem_Buf_Limit 증가\n또는 storage.path 설정]
-    D -- No --> F{Output 실패\n재시도 중?}
-    F -- Yes --> G[저장소 상태 확인\nBack pressure 처리]
-    B -- No --> H{메시지 큐 지연?}
-    H -- Yes --> I[Kafka consumer lag\n모니터링]
-    H -- No --> J{저장소 쓰기 지연?}
-    J -- Yes --> K[ES/Loki ingestion\n속도 제한 확인]
+    A[로그 지연 감지] --> B{수집기 지연}
+    B -- Yes --> C[Fluent Bit 메트릭]
+    C --> D{Input buffer 포화}
+    D -- Yes --> E[Mem_Buf_Limit 증가]
+    D -- No --> F{Output 실패 재시도}
+    F -- Yes --> G[Back pressure 처리]
+    B -- No --> H{메시지 큐 지연}
+    H -- Yes --> I[Kafka lag 확인]
+    H -- No --> J{저장소 쓰기 지연}
+    J -- Yes --> K[ingestion 제한 확인]
 ```
 
 ```bash
@@ -1007,19 +998,18 @@ curl -s http://loki:3100/metrics \
 sequenceDiagram
     participant App as 애플리케이션
     participant FB as Fluent Bit
-    participant Q as Kafka
     participant ES as Elasticsearch
 
-    ES->>ES: 디스크 풀 / 과부하
-    FB->>ES: 로그 전송 시도
-    ES-->>FB: 429 Too Many Requests
+    ES->>ES: 과부하 발생
+    FB->>ES: 로그 전송
+    ES-->>FB: 429 응답
     FB->>FB: retry_backoff 시작
-    FB->>FB: 청크를 디스크에 spill\n(storage.path 사용)
-    Note over FB: Mem_Buf_Limit 도달 시\n새 이벤트 일시 정지
-    App->>FB: 로그 생성 (계속)
-    Note over FB: pause_on_chunks_overlimit=on\n이면 입력 일시 중단
-    ES->>ES: 복구됨
-    FB->>ES: 버퍼에서 재전송
+    FB->>FB: 청크 디스크 spill
+    Note over FB: Mem_Buf_Limit 도달 시 일시 정지
+    App->>FB: 로그 생성 지속
+    Note over FB: pause_on_chunks_overlimit 적용
+    ES->>ES: 복구
+    FB->>ES: 버퍼 재전송
 ```
 
 ```ini

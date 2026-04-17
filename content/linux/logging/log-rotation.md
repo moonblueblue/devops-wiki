@@ -36,10 +36,10 @@ last_verified: 2026-04-17
 
 ### 로테이션이 없을 때 벌어지는 일
 
-```
+```bash
 # 로테이션 없이 30일 후 Nginx 로그 예시
 $ du -sh /var/log/nginx/access.log
-47G     /var/log/nginx/access.log   ← 단일 파일 47 GB
+47G     /var/log/nginx/access.log   # 단일 파일 47 GB
 
 # 디스크 포화 → DB 트랜잭션 실패
 $ df -h /
@@ -60,20 +60,28 @@ Filesystem  Size  Used  Avail  Use%
 
 ### 전체 실행 흐름
 
+**실행 트리거 및 조건 확인**
+
 ```mermaid
 flowchart TD
-    A[systemd-timer\n또는 cron.daily] -->|매일 실행| B[logrotate 바이너리]
-    B --> C{/var/lib/logrotate/status\n마지막 실행 시각 확인}
-    C -->|로테이션 조건 충족| D[설정 파일 파싱]
-    C -->|아직 이른 경우| E[종료 - 아무것도 안 함]
-    D --> F[/etc/logrotate.conf\n글로벌 설정]
-    D --> G[/etc/logrotate.d/\n애플리케이션별 설정]
-    F & G --> H{rotate 방식}
-    H -->|create 방식| I[파일명 변경 rename\n새 파일 생성\nHUP 시그널 전송]
-    H -->|copytruncate 방식| J[파일 복사 cp\n원본 파일 truncate]
-    I & J --> K[압축 gzip/bzip2/zstd]
-    K --> L[오래된 파일 삭제\nrotate N 초과분]
-    L --> M[postrotate 스크립트 실행]
+    A[systemd-timer] -->|매일 실행| B[logrotate]
+    B --> C{status 파일 확인}
+    C -->|조건 충족| D[설정 파싱]
+    C -->|이른 경우| E[종료]
+    D --> F[logrotate.conf]
+    D --> G[logrotate.d]
+```
+
+**로테이션 실행 흐름**
+
+```mermaid
+flowchart TD
+    H{rotate 방식}
+    H -->|create| I[rename 후 신규 생성]
+    H -->|copytruncate| J[복사 후 truncate]
+    I & J --> K[압축]
+    K --> L[오래된 파일 삭제]
+    L --> M[postrotate 실행]
 ```
 
 ### create vs copytruncate 동작 비교
@@ -87,7 +95,7 @@ sequenceDiagram
     rect rgb(220, 240, 255)
         note over App,LR: create 방식 (권장)
         App->>FS: app.log에 쓰기 (FD 유지)
-        LR->>FS: app.log → app.log.1 (rename)
+        LR->>FS: rename app.log to app.log.1
         LR->>FS: 새 app.log 생성
         LR->>App: SIGHUP 전송
         App->>FS: 새 app.log에 쓰기 재개
@@ -96,7 +104,7 @@ sequenceDiagram
     rect rgb(255, 240, 220)
         note over App,LR: copytruncate 방식
         App->>FS: app.log에 쓰기 (FD 유지)
-        LR->>FS: app.log → app.log.1 복사
+        LR->>FS: app.log 복사 to app.log.1
         note over LR,FS: ⚠ 이 사이 로그 유실 가능
         LR->>FS: app.log truncate (크기 0)
         App->>FS: 기존 FD로 계속 쓰기
@@ -627,22 +635,28 @@ sudo logrotate -f /etc/logrotate.conf
 
 ### `size` vs `maxsize` vs `minsize` 혼동 정리
 
+| 지시어 | 조건 | 비고 |
+|--------|------|------|
+| `size N` | 크기 초과 시 로테이션 (주기 무관, 실행 시점 판정) | 크기 조건만 |
+| `maxsize N` | 주기 도달 OR 크기 초과 시 로테이션 | 느슨한 조건 |
+| `minsize N` | 주기 도달 AND 크기 충족 시 로테이션 | 엄격한 조건 |
+
 ```mermaid
-flowchart LR
-    A[로그 파일] --> B{size 지시어?}
-    B -->|설정됨| C{파일 크기 > size?}
-    C -->|YES| D[로테이션\n주기 무관·실행 시점 판정]
-    C -->|NO| E[로테이션 안 함]
+flowchart TD
+    subgraph size["size 지시어"]
+        S1{크기 초과?} -->|YES| S2[로테이션]
+        S1 -->|NO| S3[생략]
+    end
 
-    A --> F{maxsize 지시어?}
-    F -->|설정됨| G{주기 도달\nOR 크기 초과?}
-    G -->|YES| H[로테이션]
-    G -->|NO| I[로테이션 안 함]
+    subgraph maxsize["maxsize 지시어"]
+        M1{주기 OR 크기?} -->|YES| M2[로테이션]
+        M1 -->|NO| M3[생략]
+    end
 
-    A --> J{minsize 지시어?}
-    J -->|설정됨| K{주기 도달\nAND 크기 >= minsize?}
-    K -->|YES| L[로테이션]
-    K -->|NO| M[로테이션 안 함]
+    subgraph minsize["minsize 지시어"]
+        N1{주기 AND 크기?} -->|YES| N2[로테이션]
+        N1 -->|NO| N3[생략]
+    end
 ```
 
 ---

@@ -36,43 +36,43 @@ BCC(BPF Compiler Collection)는 eBPF를 대중화시켰지만,
 
 ```mermaid
 flowchart TD
-    subgraph BCC["BCC 방식 (런타임 컴파일)"]
+    subgraph BCC["BCC 방식"]
         A[eBPF C 소스] -->|런타임| B[Clang/LLVM]
-        B --> C[커널 헤더 필요]
+        B --> C[커널 헤더]
         C --> D[BPF 바이트코드]
         D --> E[커널 로드]
     end
-
-    subgraph Problems["문제점"]
-        P1["📦 배포 패키지 크기 증가\n(LLVM ~100MB+)"]
-        P2["⏱️ 컨테이너 기동 시\n수 초~수십 초 지연"]
-        P3["🔒 커널 헤더 의존\n(일부 배포판 미포함)"]
-        P4["🔄 커널 업그레이드마다\n재컴파일 필요"]
-    end
-
-    BCC --> Problems
 ```
+
+BCC 방식의 문제점:
+
+| 문제 | 내용 |
+|------|------|
+| 패키지 크기 증가 | LLVM ~100MB+ 의존 |
+| 기동 지연 | 컨테이너 시작 시 수 초~수십 초 |
+| 커널 헤더 의존 | 일부 배포판 미포함 |
+| 재컴파일 필요 | 커널 업그레이드마다 |
 
 ```mermaid
 flowchart TD
-    subgraph CORE["CO-RE 방식 (사전 컴파일)"]
+    subgraph CORE["CO-RE 방식"]
         A[eBPF C 소스] -->|빌드 머신| B[Clang + BTF]
-        B --> C["BPF 오브젝트\n(.o 파일)"]
-        C --> D["BPF CO-RE 재배치\n메타데이터 포함"]
+        B --> C[BPF 오브젝트]
+        C --> D[재배치 메타데이터]
         D -->|배포| E[타겟 시스템]
-        E --> F["libbpf가 BTF로\n오프셋 패치"]
+        E --> F[libbpf 오프셋 패치]
         F --> G[커널 로드]
     end
-
-    subgraph Benefits["장점"]
-        B1["✅ 단일 바이너리 배포"]
-        B2["✅ 런타임 Clang 불필요"]
-        B3["✅ 커널 헤더 불필요"]
-        B4["✅ 즉시 로드"]
-    end
-
-    CORE --> Benefits
 ```
+
+CO-RE 방식의 장점:
+
+| 장점 | 내용 |
+|------|------|
+| 단일 바이너리 배포 | 런타임 컴파일 불필요 |
+| 런타임 Clang 불필요 | 빌드 타임에만 필요 |
+| 커널 헤더 불필요 | BTF로 대체 |
+| 즉시 로드 | 밀리초 수준 |
 
 ### BCC vs CO-RE 비교
 
@@ -159,18 +159,11 @@ ls /sys/kernel/btf/
 
 CO-RE는 세 가지 재배치 타입을 지원한다.
 
-```mermaid
-graph LR
-    subgraph Relocs["CO-RE Relocation 타입"]
-        R1["Field Offset\n필드 바이트 오프셋"]
-        R2["Type Existence\n타입/필드 존재 여부"]
-        R3["Enum Value\n열거형 값"]
-    end
-
-    R1 --> E1["BPF_CORE_READ()\ncore_read_str()"]
-    R2 --> E2["bpf_core_field_exists()\nbpf_core_type_exists()"]
-    R3 --> E3["bpf_core_enum_value_exists()\nbpf_core_enum_value()"]
-```
+| Relocation 타입 | 설명 | 주요 API |
+|----------------|------|---------|
+| Field Offset | 필드 바이트 오프셋 재배치 | `BPF_CORE_READ()` |
+| Type Existence | 타입/필드 존재 여부 확인 | `bpf_core_field_exists()`, `bpf_core_type_exists()` |
+| Enum Value | 열거형 값 재배치 | `bpf_core_enum_value_exists()`, `bpf_core_enum_value()` |
 
 ### BPF_CORE_READ() 매크로
 
@@ -276,13 +269,12 @@ bpftool version        # libbpf 버전 포함 출력
 
 ### 프로젝트 구조
 
-```
-myebpf/
-├── Makefile
-├── myebpf.bpf.c       # BPF 커널 사이드 코드
-├── myebpf.c           # 유저스페이스 로더
-└── vmlinux.h          # bpftool으로 생성
-```
+| 파일 | 역할 |
+|------|------|
+| `Makefile` | 빌드 스크립트 |
+| `myebpf.bpf.c` | BPF 커널 사이드 코드 |
+| `myebpf.c` | 유저스페이스 로더 |
+| `vmlinux.h` | bpftool으로 생성한 커널 타입 정의 |
 
 ### Makefile 구성
 
@@ -639,24 +631,31 @@ if (btf_supported) {
 
 ### 프로덕션 배포 고려사항
 
+**1단계: 커널 버전 확인**
+
 ```mermaid
 flowchart TD
-    A[BPF 프로그램 배포] --> B{커널 버전 확인}
-    B -->|5.8+| C[Ring Buffer + CO-RE 풀 기능]
-    B -->|5.2~5.7| D[CO-RE 지원, Perf Buffer 사용]
-    B -->|4.18~5.1| E[BTFHub에서 BTF 파일 로드]
-    B -->|< 4.18| F[BCC 폴백 또는 미지원]
+    A[BPF 프로그램 배포] --> B{커널 버전}
+    B -->|5.8+| C[Ring Buffer + CO-RE]
+    B -->|5.2~5.7| D[CO-RE + Perf Buffer]
+    B -->|4.18~5.1| E[BTFHub BTF 로드]
+    B -->|4.18 미만| F[BCC 폴백]
 
     C --> G{권한 확인}
     D --> G
     E --> G
+```
 
-    G -->|CAP_BPF + CAP_PERFMON| H[✅ 최소 권한으로 로드]
-    G -->|CAP_SYS_ADMIN| I[레거시 방식 (넓은 권한)]
+**2단계: 권한 및 Verifier 확인**
 
-    H --> J[Verifier 통과 확인]
+```mermaid
+flowchart TD
+    G{권한 확인} -->|CAP_BPF + CAP_PERFMON| H[최소 권한 로드]
+    G -->|CAP_SYS_ADMIN| I[레거시 방식]
+
+    H --> J[Verifier 확인]
     J -->|통과| K[프로그램 실행]
-    J -->|실패| L[로그 확인 후 수정]
+    J -->|실패| L[로그 수정]
 ```
 
 **체크리스트**

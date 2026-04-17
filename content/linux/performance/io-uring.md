@@ -84,16 +84,13 @@ io_uring은 커널과 유저스페이스가 **공유 메모리**로
 graph TB
     subgraph Userspace
         App["애플리케이션"]
-        SQA["SQ Array<br/>(인덱스 배열)"]
-        SQEs["SQE Ring Buffer<br/>(Submission Queue Entries)"]
-        CQEs["CQ Ring Buffer<br/>(Completion Queue Entries)"]
+        SQEs["SQE Ring Buffer"]
+        CQEs["CQ Ring Buffer"]
     end
 
     subgraph SharedMemory["공유 메모리 (mmap)"]
-        SQ_Head["SQ Head"]
-        SQ_Tail["SQ Tail"]
-        CQ_Head["CQ Head"]
-        CQ_Tail["CQ Tail"]
+        SQ_Head["SQ Head/Tail"]
+        CQ_Head["CQ Head/Tail"]
     end
 
     subgraph Kernel
@@ -101,12 +98,12 @@ graph TB
         IO["Block / Network I/O"]
     end
 
-    App -->|"SQE 작성<br/>(시스콜 없음)"| SQEs
-    App -->|"io_uring_enter()<br/>(배치 제출)"| KWorker
+    App -->|"SQE 작성"| SQEs
+    App -->|"io_uring_enter 제출"| KWorker
     KWorker -->|"SQE 소비"| SQEs
     KWorker -->|"I/O 실행"| IO
     IO -->|"완료"| KWorker
-    KWorker -->|"CQE 생성<br/>(시스콜 없음)"| CQEs
+    KWorker -->|"CQE 생성"| CQEs
     App -->|"CQE 폴링"| CQEs
 
     style SharedMemory fill:#f0f4ff,stroke:#6366f1
@@ -160,7 +157,7 @@ sequenceDiagram
 
     App->>SQ: SQE 작성 (시스콜 없음)
     App->>SQ: SQE 작성 (배치 가능)
-    App->>Kernel: io_uring_enter(submit=2)<br/>시스콜 1회로 2개 제출
+    App->>Kernel: io_uring_enter (2개 배치 제출)
     Kernel->>SQ: SQE 소비
     Kernel->>IO: 비동기 I/O 요청
     IO-->>Kernel: 완료 콜백
@@ -455,8 +452,8 @@ for (int i = 0; i < NUM_REQUESTS; i++) {
 
 ### 5.2 PostgreSQL 18: 비동기 I/O 혁명
 
-2025년 3월 PostgreSQL은 io_uring 기반 비동기 I/O를
-메인라인에 머지했다. 이는 PostgreSQL 역사상 가장 큰
+PostgreSQL 18(2025년 9월 GA)은 io_uring 기반 비동기 I/O를
+도입했다. 이는 PostgreSQL 역사상 가장 큰
 I/O 아키텍처 변경으로 평가받는다.
 
 ```bash
@@ -631,20 +628,27 @@ sysctl --system
 
 ```mermaid
 graph TD
-    Q1{"io_uring 필요한가?"}
-    Q1 -->|"예"| Q2{"신뢰할 수 있는<br/>환경인가?"}
-    Q1 -->|"아니오"| A1["io_uring_disabled=2<br/>완전 비활성화"]
+    Q1{"io_uring 필요?"}
+    Q1 -->|예| Q2{"신뢰 환경?"}
+    Q1 -->|아니오| A1["완전 비활성화"]
 
-    Q2 -->|"컨테이너/멀티테넌트"| A2["seccomp 프로필로<br/>명시적 차단<br/>+ 최신 커널 유지"]
-    Q2 -->|"단독 서버/신뢰 환경"| A3["io_uring_disabled=0<br/>+ 커널 업데이트 관리"]
+    Q2 -->|컨테이너| A2["seccomp 적용"]
+    Q2 -->|단독 서버| A3["최신 커널 유지"]
 
-    A2 --> A4["정기 CVE 모니터링<br/>linux-cve-announce"]
+    A2 --> A4["CVE 모니터링"]
     A3 --> A4
 
     style A1 fill:#fecaca
     style A2 fill:#fef3c7
     style A3 fill:#d1fae5
 ```
+
+| 환경 | 권장 설정 | 조치 |
+|------|---------|------|
+| io_uring 불필요 | `io_uring_disabled=2` | 완전 비활성화 |
+| 컨테이너/멀티테넌트 | seccomp 프로필 | io_uring 시스콜 명시적 차단 + 최신 커널 유지 |
+| 단독 서버/신뢰 환경 | `io_uring_disabled=0` | 커널 업데이트 관리 |
+| 공통 | linux-cve-announce | 정기 CVE 모니터링 |
 
 ---
 
@@ -789,12 +793,12 @@ interval:s:10 {
 
 ```mermaid
 flowchart LR
-    App["애플리케이션\n(io_uring 사용)"]
-    Kernel["커널 io_uring\n서브시스템"]
-    TP["트레이스포인트\n(io_uring:*)"]
-    BPF["eBPF 프로그램\n(bpftrace/BCC)"]
-    Map["BPF Maps\n(히스토그램/카운터)"]
-    Out["분석 결과\n(레이턴시/처리량/오류)"]
+    App["애플리케이션"]
+    Kernel["커널 io_uring"]
+    TP["트레이스포인트"]
+    BPF["eBPF 프로그램"]
+    Map["BPF Maps"]
+    Out["분석 결과"]
 
     App -->|SQE 제출| Kernel
     Kernel -->|완료 이벤트| App
@@ -806,6 +810,15 @@ flowchart LR
     style BPF fill:#6366f1,color:#fff
     style TP fill:#f0f4ff,stroke:#6366f1
 ```
+
+| 구성 요소 | 설명 |
+|---------|------|
+| 애플리케이션 | io_uring을 사용하는 유저스페이스 프로세스 |
+| 커널 io_uring | 요청 처리 서브시스템 (SQE 소비, CQE 생성) |
+| 트레이스포인트 | `io_uring:*` 네임스페이스 이벤트 훅 |
+| eBPF 프로그램 | bpftrace/BCC로 작성한 분석 코드 |
+| BPF Maps | 히스토그램/카운터 집계 구조체 |
+| 분석 결과 | 레이턴시, 처리량, 오류율 출력 |
 
 ---
 

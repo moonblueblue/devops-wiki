@@ -27,19 +27,16 @@ Huge Pages, 컨테이너 환경까지 시니어 SRE 수준으로 다룬다.
 
 ```mermaid
 graph TD
-    PROC["프로세스 (Virtual Address Space)"]
-    PROC -->|mmap / malloc| VA["가상 주소 공간 (VAS)<br/>Anonymous + File-backed"]
+    PROC["프로세스"] -->|mmap/malloc| VA["가상 주소 공간"]
+    VA -->|페이지 폴트 발생시| PM["물리 메모리"]
 
-    VA -->|페이지 폴트 발생 시<br/>커널이 매핑| PM["물리 메모리 (Physical RAM)"]
+    PM --> ANON["Anonymous Memory"]
+    PM --> FILE["File-backed Memory"]
+    PM --> PC["Page Cache"]
+    PM --> SLAB["Slab Cache"]
+    PM -->|kswapd 회수| SWAP["Swap"]
 
-    PM --> ANON["Anonymous Memory<br/>heap, stack, mmap(MAP_ANON)"]
-    PM --> FILE["File-backed Memory<br/>mmap(파일), 실행 파일 텍스트"]
-    PM --> PC["Page Cache<br/>read/write I/O 버퍼"]
-    PM --> SLAB["Slab Cache<br/>커널 자체 자료구조"]
-
-    PM -->|메모리 부족 시<br/>kswapd 또는 직접 회수| SWAP["Swap (디스크/zram/zswap)"]
-
-    PC -->|회수 가능 (Reclaimable)| RECLAIM["SReclaimable"]
+    PC -->|회수 가능| RECLAIM["SReclaimable"]
     SLAB -->|회수 가능| RECLAIM
     ANON -->|swap-out| SWAP
 ```
@@ -134,12 +131,8 @@ smem -P nginx -k
 
 ```mermaid
 graph LR
-    VSZ["VSZ (Virtual Size)<br/>전체 가상 주소 공간<br/>공유 라이브러리 포함<br/>할당됐지만 미사용도 포함"]
-    RSS["RSS (Resident Set Size)<br/>실제 물리 메모리 점유<br/>공유 라이브러리 중복 계산"]
-    PSS["PSS (Proportional Set Size)<br/>공유 메모리를 n분의 1로<br/>배분한 실제 사용량"]
-
-    VSZ -->|과대 측정| RSS
-    RSS -->|여전히 과대| PSS
+    VSZ["VSZ"] -->|과대 측정| RSS["RSS"]
+    RSS -->|여전히 과대| PSS["PSS"]
 ```
 
 | 지표 | 공유 라이브러리 처리 | 신뢰도 |
@@ -263,7 +256,7 @@ sequenceDiagram
             Kernel-->>App: 할당 성공
         else 회수 실패 (메모리 고갈)
             Kernel->>OOM: OOM 상황 선언
-            OOM->>OOM: oom_score 계산<br/>(메모리 사용량 + adj 적용)
+            OOM->>OOM: oom_score 계산
             OOM->>App: SIGKILL 전송
             OOM-->>Kernel: 메모리 반환 후 재시도
         end
@@ -465,13 +458,17 @@ grep "definitely lost\|indirectly lost" valgrind.log
 
 ```mermaid
 graph LR
-    PF["Page Fault 발생<br/>(가상 주소 접근)"]
-    PF --> CHECK{물리 메모리에<br/>페이지 존재?}
-    CHECK -->|존재| MINOR["Minor Fault<br/>(Page Table만 업데이트)<br/>수십 ns"]
-    CHECK -->|없음| CHECK2{Swap/디스크에<br/>있는가?}
-    CHECK2 -->|없음 (새 페이지)| MINOR
-    CHECK2 -->|있음 (swap 복구 필요)| MAJOR["Major Fault<br/>(디스크 I/O 발생)<br/>수 ms ~ 수십 ms"]
+    PF["Page Fault"] --> CHECK{물리 메모리?}
+    CHECK -->|존재| MINOR["Minor Fault"]
+    CHECK -->|없음| CHECK2{Swap 존재?}
+    CHECK2 -->|없음| MINOR
+    CHECK2 -->|있음| MAJOR["Major Fault"]
 ```
+
+| Fault 유형 | 원인 | 소요 시간 |
+|-----------|------|----------|
+| Minor Fault | 물리 페이지는 있으나 Page Table 미매핑 | 수십 ns |
+| Major Fault | 디스크 swap에서 복구 필요 | 수 ms ~ 수십 ms |
 
 ```bash
 # 프로세스별 page fault 통계
@@ -568,11 +565,10 @@ cat /sys/kernel/mm/transparent_hugepage/enabled
 
 ```mermaid
 graph TD
-    THP["THP enabled (always)"]
-    THP --> COMPACTION["khugepaged가 주기적으로<br/>페이지 병합 (compaction)"]
-    COMPACTION --> LATENCY["불규칙한 레이턴시 스파이크<br/>(수십~수백 ms 지연)"]
-    THP --> FRAG["2MB 단위로 메모리 할당<br/>→ 내부 단편화 증가"]
-    FRAG --> WASTE["실제 필요보다 더 많은<br/>메모리 사용"]
+    THP["THP always"] --> COMPACTION["페이지 병합"]
+    COMPACTION --> LATENCY["레이턴시 스파이크"]
+    THP --> FRAG["2MB 단위 할당"]
+    FRAG --> WASTE["메모리 낭비"]
 ```
 
 - **MongoDB**, **Redis**, **PostgreSQL**, **Cassandra** 공식 문서:
@@ -761,14 +757,21 @@ EOF
 
 ```mermaid
 graph TD
-    A["OOM Kill 감지<br/>(alert or 재시작 확인)"] --> B["1. dmesg에서 OOM 로그 확인<br/>killed 프로세스, score, 메모리 맵"]
-    B --> C["2. /proc/meminfo 현재 상태 확인<br/>MemAvailable, SwapFree"]
-    C --> D{"OOM 원인 분류"}
-    D -->|메모리 누수| E["RSS 증가 추적<br/>smaps / pmap 분석<br/>valgrind (개발 환경)"]
-    D -->|순간 급증 (spike)| F["vmstat si/so 확인<br/>메모리 limit 상향 or<br/>JVM Heap 조정"]
-    D -->|limit 설정 오류| G["cgroup memory.events 확인<br/>K8s limits 조정<br/>QoS 클래스 확인"]
-    D -->|slab 과다| H["slabtop 분석<br/>echo 2 > drop_caches<br/>(임시 완화)"]
+    A["OOM Kill 감지"] --> B["dmesg 확인"]
+    B --> C["meminfo 확인"]
+    C --> D{"원인 분류"}
+    D -->|메모리 누수| E["RSS 추적"]
+    D -->|순간 급증| F["vmstat si/so"]
+    D -->|limit 오류| G["cgroup events"]
+    D -->|slab 과다| H["slabtop 분석"]
 ```
+
+| 원인 | 확인 방법 | 조치 |
+|------|---------|------|
+| 메모리 누수 | `smaps` / `pmap` 분석, RSS 증가 추적 | valgrind (개발 환경) |
+| 순간 급증 | `vmstat si/so` 확인 | 메모리 limit 상향 또는 JVM Heap 조정 |
+| limit 설정 오류 | `cgroup memory.events` 확인 | K8s limits 조정, QoS 클래스 변경 |
+| slab 과다 | `slabtop` 분석 | `echo 2 > drop_caches` (임시 완화) |
 
 ```bash
 # OOM Kill 직후 신속 진단 스크립트

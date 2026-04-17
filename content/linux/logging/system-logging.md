@@ -34,46 +34,42 @@ rsyslog 데몬, systemd-journald를 깊이 있게 다룬다.
 
 ### 1.1 전체 로그 흐름
 
+**수집 경로 (커널 → journald)**
+
 ```mermaid
-graph TD
+flowchart TD
     subgraph kernel["커널 공간"]
-        K1["프로세스 → printk()"]
-        K2["/dev/kmsg (커널 링 버퍼)"]
-        K1 --> K2
+        K1[프로세스] --> K2[dev/kmsg]
     end
 
-    subgraph userspace["사용자 공간"]
-        US1["/dev/log (UNIX 소켓)"]
-        US2["/run/systemd/journal/socket"]
-
-        subgraph journald["systemd-journald"]
-            JD["바이너리 저장소\n/var/log/journal/"]
-            JF["ForwardToSyslog=\n/run/systemd/journal/syslog"]
-        end
-
-        subgraph rsyslog["rsyslog"]
-            IM1["imuxsock\n(/dev/log 수신)"]
-            IM2["imjournal\n(저널 DB 직접 읽기)"]
-            IM3["imtcp / imrelp\n(네트워크 수신)"]
-            QUEUE["내부 큐\nLinkedList / DA"]
-            FILTER["Ruleset / 필터"]
-            OUT1["파일 출력\nomfile"]
-            OUT2["원격 전송\nomfwd / omrelp"]
-            OUT3["OTLP 출력\nomotlp (v8.2510+)"]
-        end
+    subgraph journald["systemd-journald"]
+        JD[저널 DB]
+        JF[syslog 소켓]
     end
 
-    subgraph remote["원격 로그 서버"]
-        CENTRAL["중앙 rsyslog\n/ SIEM / Loki"]
-    end
-
-    K2 --> US1
-    K2 --> US2
-    US1 --> JD
-    US2 --> JD
+    K2 --> JD
     JD --> JF
-    JF --> IM1
-    JD --> IM2
+```
+
+**처리 경로 (journald → rsyslog → 출력)**
+
+```mermaid
+flowchart TD
+    subgraph input["rsyslog 입력"]
+        IM1[imuxsock]
+        IM2[imjournal]
+        IM3[imtcp imrelp]
+    end
+
+    QUEUE[내부 큐]
+    FILTER[Ruleset 필터]
+
+    subgraph output["출력"]
+        OUT1[omfile]
+        OUT2[omfwd omrelp]
+        OUT3[omotlp]
+    end
+
     IM1 --> QUEUE
     IM2 --> QUEUE
     IM3 --> QUEUE
@@ -81,9 +77,20 @@ graph TD
     FILTER --> OUT1
     FILTER --> OUT2
     FILTER --> OUT3
-    OUT2 --> CENTRAL
-    OUT3 --> CENTRAL
 ```
+
+| 컴포넌트 | 경로 / 역할 |
+|---------|-----------|
+| `printk()` | 커널 메시지 출력 함수 |
+| `/dev/kmsg` | 커널 링 버퍼 |
+| `journald` 저널 DB | `/var/log/journal/` 바이너리 저장소 |
+| syslog 소켓 | `/run/systemd/journal/syslog` (ForwardToSyslog 경로) |
+| `imuxsock` | `/dev/log` UNIX 소켓 수신 |
+| `imjournal` | 저널 DB 직접 읽기 (구조화 데이터 포함) |
+| `imtcp / imrelp` | 네트워크 수신 |
+| `omfile` | 파일 출력 |
+| `omfwd / omrelp` | 원격 전송 |
+| `omotlp` | OTLP 출력 (v8.2510+) |
 
 ### 1.2 전통 syslog vs systemd-journald 비교
 
@@ -374,19 +381,27 @@ auth,authpriv.* action(type="omfile" file="/var/log/auth.log")
 ### 3.6 성능 튜닝 — 큐 설정
 
 ```mermaid
-graph LR
-    INPUT["입력\nimuxsock/imtcp"]
-    MAINQ["메인 큐\nLinkedList"]
-    WORKER["워커 스레드\n(queue.workerThreads)"]
-    DISKQ["디스크 스풀\n(DA 모드 활성화 시)"]
-    OUTPUT["출력 액션\nomfile/omfwd"]
+flowchart LR
+    INPUT[입력]
+    MAINQ[메인 큐]
+    WORKER[워커 스레드]
+    DISKQ[디스크 스풀]
+    OUTPUT[출력 액션]
 
     INPUT --> MAINQ
     MAINQ --> WORKER
-    MAINQ -- "highwatermark 초과" --> DISKQ
-    DISKQ -- "lowwatermark 미만" --> MAINQ
+    MAINQ -- highwatermark 초과 --> DISKQ
+    DISKQ -- lowwatermark 미만 --> MAINQ
     WORKER --> OUTPUT
 ```
+
+| 컴포넌트 | 설명 |
+|---------|------|
+| 입력 | `imuxsock` / `imtcp` |
+| 메인 큐 | LinkedList 타입 인메모리 큐 |
+| 워커 스레드 | `queue.workerThreads` 설정값으로 병렬 처리 |
+| 디스크 스풀 | DA 모드: highwatermark 초과 시 활성화 |
+| 출력 액션 | `omfile` / `omfwd` |
 
 ```bash
 # /etc/rsyslog.d/00-performance.conf
@@ -423,27 +438,20 @@ action(type="omfile"
 ### 4.1 저장 구조
 
 ```mermaid
-graph TD
-    CONF["/etc/systemd/journald.conf"]
-    CONF --> STORAGE{"Storage= 설정"}
-    STORAGE -- "auto (기본)\n/var/log/journal/ 존재 시" --> PERSIST
-    STORAGE -- "persistent" --> PERSIST
-    STORAGE -- "volatile" --> RUNTIME
-    STORAGE -- "none" --> NULL
-
-    subgraph PERSIST["영구 저장 (persistent)"]
-        P1["/var/log/journal/<machine-id>/"]
-        P2["system.journal"]
-        P3["user-1000.journal"]
-    end
-
-    subgraph RUNTIME["휘발성 저장 (volatile)"]
-        R1["/run/log/journal/<machine-id>/"]
-        R2["재부팅 시 초기화"]
-    end
-
-    NULL["로그 폐기\n(컨테이너 등)"]
+flowchart TD
+    CONF[journald.conf]
+    CONF --> STORAGE{Storage 설정}
+    STORAGE -- auto/persistent --> PERSIST[영구 저장]
+    STORAGE -- volatile --> RUNTIME[휘발성 저장]
+    STORAGE -- none --> NULL[로그 폐기]
 ```
+
+| Storage 값 | 저장 위치 | 특징 |
+|-----------|---------|------|
+| `auto` (기본) | `/var/log/journal/` (디렉토리 존재 시) | 없으면 volatile로 동작 |
+| `persistent` | `/var/log/journal/<machine-id>/` | 재부팅 후에도 유지 |
+| `volatile` | `/run/log/journal/<machine-id>/` | 재부팅 시 초기화 |
+| `none` | 저장 안 함 | 로그 폐기 (컨테이너 등) |
 
 ### 4.2 journald.conf 주요 설정
 
@@ -605,20 +613,20 @@ journalctl --verify
 ### 5.1 연동 방식 비교
 
 ```mermaid
-graph LR
+flowchart LR
     subgraph j["systemd-journald"]
-        JDB["바이너리 저널 DB"]
-        JSOCK["syslog 소켓\n/run/systemd/journal/syslog"]
+        JDB[저널 DB]
+        JSOCK[syslog 소켓]
     end
 
     subgraph r["rsyslog"]
-        IMUXSOCK["imuxsock\n(/dev/log)"]
-        IMJOURNAL["imjournal\n(저널 DB 직접 읽기)"]
+        IMUXSOCK[imuxsock]
+        IMJOURNAL[imjournal]
     end
 
-    JDB -- "ForwardToSyslog=yes" --> JSOCK
-    JSOCK -- "빠름, 텍스트만" --> IMUXSOCK
-    JDB -- "느림, 구조화 데이터 포함" --> IMJOURNAL
+    JDB -- ForwardToSyslog on --> JSOCK
+    JSOCK -- 텍스트만 --> IMUXSOCK
+    JDB -- 구조화 데이터 --> IMJOURNAL
 ```
 
 | 방식 | 성능 | 구조화 데이터 | 권장 시나리오 |
@@ -645,17 +653,19 @@ module(load="imjournal"
 
 ### 5.3 권장 구성 결정 트리
 
+```mermaid
+flowchart TD
+    Q{저널 메타데이터 필요}
+    Q -- 예 --> A[imjournal 사용]
+    Q -- 아니오 --> B[imuxsock 사용]
+    A --> A2[ForwardToSyslog off]
+    B --> B2[ForwardToSyslog on]
 ```
-구조화된 저널 메타데이터가 필요한가?
-    │
-    ├── 예 (K8s 메타데이터, 컨테이너 정보 등)
-    │       → imjournal 사용
-    │       journald.conf: ForwardToSyslog=no
-    │
-    └── 아니오 (단순 텍스트 전달)
-            → imuxsock 사용
-            journald.conf: ForwardToSyslog=yes
-```
+
+| 조건 | 모듈 | journald.conf |
+|------|------|---------------|
+| K8s 메타데이터, 컨테이너 정보 필요 | `imjournal` | `ForwardToSyslog=no` |
+| 단순 텍스트 전달, 고성능 우선 | `imuxsock` | `ForwardToSyslog=yes` |
 
 > **주의**: `imjournal`과 `ForwardToSyslog=yes`를 동시에 활성화하면
 > 모든 로그가 rsyslog에 **두 번** 처리된다.
@@ -706,34 +716,34 @@ if $msg contains "CONTAINER_NAME" then {
 > 환경 참고용으로 제공한다.
 
 ```mermaid
-graph TD
+flowchart TD
     subgraph pod["Pod"]
-        APP["애플리케이션\nstdout/stderr"]
+        APP[앱 컨테이너]
     end
 
     subgraph node["노드"]
-        CRI["CRI (containerd/CRI-O)\n/var/log/pods/"]
-        KUBELET["kubelet"]
-        JOURNALD["systemd-journald"]
-        SYMLINK["/var/log/containers/*.log\n(심링크)"]
+        CRI[CRI]
+        JOURNALD[journald]
+        SYMLINK[컨테이너 심링크]
     end
 
-    subgraph daemonset["DaemonSet"]
-        AGENT["로그 수집 에이전트\n(Fluent Bit / Vector / rsyslog)"]
-    end
+    AGENT[수집 에이전트]
+    LOKI[중앙 저장소]
 
-    subgraph central["중앙 로그 저장소"]
-        LOKI["Loki / Elasticsearch\n/ rsyslog 서버"]
-    end
-
-    APP -- "CRI 로깅 포맷" --> CRI
+    APP -- stdout/stderr --> CRI
     CRI --> SYMLINK
     CRI --> JOURNALD
-    KUBELET -- "kubectl logs" --> CRI
     SYMLINK --> AGENT
     JOURNALD --> AGENT
     AGENT --> LOKI
 ```
+
+| 컴포넌트 | 설명 |
+|---------|------|
+| CRI | containerd / CRI-O, `/var/log/pods/`에 기록 |
+| 컨테이너 심링크 | `/var/log/containers/*.log` (레거시 경로) |
+| 수집 에이전트 | Fluent Bit / Vector / rsyslog DaemonSet |
+| 중앙 저장소 | Loki / Elasticsearch / rsyslog 서버 |
 
 **Kubernetes 로그 경로**:
 
@@ -807,17 +817,25 @@ if $syslogseverity <= 3 then {
 
 ```mermaid
 flowchart TD
-    LOSS["로그 유실 확인"]
-    LOSS --> Q1{"rsyslog 큐\n오버플로우?"}
-    Q1 -- 예 --> FIX1["큐 크기 증가\nqueue.size 조정\nDA 큐 활성화"]
-    Q1 -- 아니오 --> Q2{"저널 rate limit\n발동?"}
-    Q2 -- 예 --> FIX2["RateLimitBurst 증가\nRateLimitIntervalSec 조정"]
-    Q2 -- 아니오 --> Q3{"원격 서버\n연결 불가?"}
-    Q3 -- 예 --> FIX3["omrelp + DA 큐\naction.resumeRetryCount=-1"]
-    Q3 -- 아니오 --> Q4{"디스크 공간\n부족?"}
-    Q4 -- 예 --> FIX4["journal vacuum\nlogrotate 강제 실행"]
-    Q4 -- 아니오 --> FIX5["rsyslog 통계 확인\nimpstats 모듈 활성화"]
+    LOSS[로그 유실 확인]
+    LOSS --> Q1{큐 오버플로우}
+    Q1 -- 예 --> FIX1[큐 크기 증가]
+    Q1 -- 아니오 --> Q2{rate limit 발동}
+    Q2 -- 예 --> FIX2[Burst 값 증가]
+    Q2 -- 아니오 --> Q3{원격 서버 불가}
+    Q3 -- 예 --> FIX3[DA 큐 활성화]
+    Q3 -- 아니오 --> Q4{디스크 부족}
+    Q4 -- 예 --> FIX4[vacuum 실행]
+    Q4 -- 아니오 --> FIX5[impstats 확인]
 ```
+
+| 원인 | 조치 |
+|------|------|
+| rsyslog 큐 오버플로우 | `queue.size` 증가, DA 큐 (`queue.filename`) 활성화 |
+| journald rate limit 발동 | `RateLimitBurst` / `RateLimitIntervalSec` 조정 |
+| 원격 서버 연결 불가 | `omrelp` + DA 큐, `action.resumeRetryCount=-1` |
+| 디스크 공간 부족 | `journalctl --vacuum-*`, `logrotate -f` |
+| 원인 불명 | `impstats` 모듈로 dropped 카운트 확인 |
 
 ```bash
 # 1. rsyslog 내부 통계 확인

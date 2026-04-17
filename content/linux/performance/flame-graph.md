@@ -44,20 +44,18 @@ Google·Meta·Cloudflare 등 모든 탑티어 팀의 표준 도구다.
 
 ```mermaid
 graph BT
-    A["main()"] --> B["http_handler()"]
-    A --> C["config_load()"]
-    B --> D["db_query()"]
-    B --> E["render_template()"]
-    D --> F["socket_write()"]
-    D --> G["json_parse()"]
-    E --> H["compress()"]
-    F --> I["syscall: write"]
+    A["main"] --> B["http_handler"]
+    B --> D["db_query"]
+    B --> E["render_template"]
+    D --> F["socket_write"]
+    D --> G["json_parse"]
+    E --> H["compress"]
+    F --> I["syscall write"]
     G --> J["malloc"]
     H --> K["zlib_deflate"]
 
     style A fill:#e05c00,color:#fff
     style B fill:#e07000,color:#fff
-    style C fill:#e08800,color:#fff
     style D fill:#e09500,color:#fff
     style E fill:#e06500,color:#fff
     style F fill:#e04000,color:#fff
@@ -110,14 +108,14 @@ flamegraph.pl --color=java --title="JVM CPU Profile" \
 
 ```mermaid
 flowchart LR
-    A[어떤 문제?] --> B{CPU 사용률\n높음?}
-    B -->|예| C[On-CPU\n플레임 그래프]
-    B -->|아니오| D{응답은 느린데\nCPU는 낮음?}
-    D -->|예| E[Off-CPU\n플레임 그래프]
+    A[어떤 문제?] --> B{CPU 높음?}
+    B -->|예| C[On-CPU]
+    B -->|아니오| D{CPU 낮고 느림?}
+    D -->|예| E[Off-CPU]
     D -->|아니오| F{메모리 증가?}
-    F -->|예| G[Memory\n플레임 그래프]
-    F -->|아니오| H{배포 후 성능 저하?}
-    H -->|예| I[Differential\n플레임 그래프]
+    F -->|예| G[Memory]
+    F -->|아니오| H{배포 후 저하?}
+    H -->|예| I[Differential]
 ```
 
 | 종류 | 수집 대상 | 언제 사용 | 수집 도구 |
@@ -195,11 +193,11 @@ Java는 JVM 내부 콜 스택을 수집해야 한다.
 **Safepoint bias** 없이 정확한 스택을 수집한다.
 
 ```bash
-# 다운로드 (최신: v3.0, 2024)
+# 다운로드 (최신: v4.0, 2025)
 wget https://github.com/async-profiler/async-profiler/releases/\
-latest/download/async-profiler-3.0-linux-x64.tar.gz
-tar xzf async-profiler-3.0-linux-x64.tar.gz
-cd async-profiler-3.0-linux-x64
+latest/download/async-profiler-4.0-linux-x64.tar.gz
+tar xzf async-profiler-4.0-linux-x64.tar.gz
+cd async-profiler-4.0-linux-x64
 
 # 실행 중인 JVM에 어태치 (30초, 플레임 그래프 SVG 직접 출력)
 ./bin/asprof -d 30 -f flamegraph.html <JVM_PID>
@@ -536,14 +534,13 @@ sudo perf script | stackcollapse-perf.pl | \
 ```mermaid
 flowchart LR
     subgraph "전통적 프로파일링"
-        A1[문제 발생] --> A2[수동으로\n프로파일 수집]
-        A2 --> A3[분석]
+        A1[문제 발생] --> A2[수동 수집] --> A3[분석]
     end
 
     subgraph "지속적 프로파일링"
-        B1[프로덕션에서\n항상 샘플링] --> B2[프로파일\n스토리지 저장]
-        B2 --> B3[문제 발생 시\n과거 프로파일 비교]
-        B3 --> B4[배포 전후 자동\n회귀 탐지]
+        B1[항상 샘플링] --> B2[스토리지 저장]
+        B2 --> B3[과거 프로파일 비교]
+        B3 --> B4[배포 전후 회귀 탐지]
     end
 ```
 
@@ -559,15 +556,23 @@ CNCF 생태계 전반으로 확산됐다.
 ```mermaid
 graph TD
     subgraph "K8s 클러스터"
-        DS[Pyroscope Agent\nDaemonSet] -->|perf/eBPF\n스택 수집| PODS[각 Pod]
-        APP[애플리케이션\n내장 SDK] -->|push| PYRO
+        DS[Pyroscope Agent] -->|perf/eBPF 수집| PODS[각 Pod]
+        APP[애플리케이션 SDK] -->|push| PYRO
     end
 
-    DS -->|push| PYRO[Pyroscope\nServer]
-    PYRO --> STORE[(오브젝트 스토리지\nS3/GCS/MinIO)]
-    PYRO --> GRAFANA[Grafana\n플레임 그래프 패널]
-    GRAFANA --> PROM[Prometheus\n메트릭 연동]
+    DS -->|push| PYRO[Pyroscope Server]
+    PYRO --> STORE[(오브젝트 스토리지)]
+    PYRO --> GRAFANA[Grafana]
+    GRAFANA --> PROM[Prometheus]
 ```
+
+| 구성 요소 | 역할 |
+|---------|------|
+| Pyroscope Agent DaemonSet | perf/eBPF 기반 스택 수집 |
+| 애플리케이션 내장 SDK | 언어별 프로파일 직접 push |
+| Pyroscope Server | 프로파일 집계 및 저장 |
+| 오브젝트 스토리지 | S3 / GCS / MinIO |
+| Grafana | 플레임 그래프 패널, Prometheus 메트릭 연동 |
 
 ```yaml
 # pyroscope-agent DaemonSet 예시
@@ -640,13 +645,19 @@ helm install parca-agent parca/parca-agent \
 ```mermaid
 flowchart TD
     A[플레임 그래프 열기] --> B[폭 넓은 프레임 탐색]
-    B --> C{지붕이 평평한가?}
+    B --> C{지붕이 평평?}
     C -->|예| D[병목 함수 확인]
-    C -->|아니오| E[더 위쪽 자식 프레임 확인]
-    D --> F{커널 프레임인가?}
-    F -->|예| G[시스템콜 과다\n또는 드라이버 문제]
-    F -->|아니오| H[애플리케이션 로직 최적화\n알고리즘·캐시 검토]
+    C -->|아니오| E[위쪽 자식 확인]
+    D --> F{커널 프레임?}
+    F -->|예| G[시스템콜 과다]
+    F -->|아니오| H[앱 로직 최적화]
 ```
+
+| 판단 | 의미 | 조치 |
+|------|------|------|
+| 지붕이 평평 + 커널 프레임 | 시스템콜 과다 또는 드라이버 문제 | 시스템콜 최소화, 드라이버 확인 |
+| 지붕이 평평 + 유저 프레임 | 애플리케이션 로직 병목 | 알고리즘 최적화, 캐시 검토 |
+| 지붕이 없음 | 자식 함수에 시간 분산 | 더 위쪽 자식 프레임 분석 |
 
 **평평한 지붕(plateau)** 을 찾는 것이 핵심이다.
 프레임 위에 자식이 없다는 것은 CPU가 그 함수 안에서
