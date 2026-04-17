@@ -48,8 +48,8 @@ sidebar_label: "Linux"
 - [x] [SELinux 기본과 운영](linux-security/selinux.md)
 - [x] [AppArmor 기본과 운영](linux-security/apparmor.md)
 - [x] [seccomp-bpf와 시스템콜 필터링](linux-security/seccomp.md)
-- [ ] [auditd 감사 로깅](linux-security/auditd.md)
-- [ ] [PAM (Pluggable Authentication Modules)](linux-security/pam.md)
+- [x] [auditd 감사 로깅](linux-security/auditd.md)
+- [x] [PAM (Pluggable Authentication Modules)](linux-security/pam.md)
 - [ ] [LUKS/dm-crypt 디스크 암호화](linux-security/luks-dm-crypt.md)
 
 ### 파일시스템과 스토리지
