@@ -57,12 +57,21 @@ setopt SHARE_HISTORY         # 멀티 세션 간 실시간 공유
 setopt EXTENDED_HISTORY      # 타임스탬프 기록
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE     # 앞에 공백을 붙이면 히스토리에 기록 안 됨
+                             # (민감한 명령어: export SECRET=... 등)
 ```
 
 ### 자동완성
 
 ```zsh
-autoload -U compinit && compinit
+# -i: world-writable 디렉토리의 파일을 무시 (공유 서버 필수)
+# 매번 재생성하면 느리므로 하루 한 번만 재생성한다
+autoload -U compinit
+if [[ $(find ~/.zcompdump -mtime +1 2>/dev/null) ]]; then
+  compinit -i
+else
+  compinit -C  # 캐시 사용 (체크 생략)
+fi
 zstyle ':completion:*' menu select
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
@@ -91,8 +100,13 @@ GitHub stars 170,000+. 300+ 플러그인, 140+ 테마.
 ### 설치
 
 ```bash
-sh -c "$(curl -fsSL \
-  https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# curl | sh 패턴은 원격 스크립트를 무결성 검증 없이 실행한다.
+# 보안이 민감한 환경에서는 스크립트를 먼저 다운로드해 확인 후 실행한다.
+curl -fsSL \
+  https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh \
+  -o install.sh
+# 내용 확인 후 실행
+sh install.sh
 ```
 
 ### DevOps 핵심 플러그인
@@ -191,18 +205,27 @@ echo 'starship init fish | source' >> ~/.config/fish/config.fish
 
 ### 설정 예시 (~/.config/starship.toml)
 
+Starship 포맷 문법:
+- `[text](style)` — text를 style로 렌더링
+- `($var)` — var이 비어 있으면 전체 생략 (조건부 출력)
+- `\(` `\)` — 출력에 리터럴 괄호 `( )` 표시
+
 ```toml
 [kubernetes]
 disabled = false
-format = 'on [⛵ $context\($namespace\)](bold blue) '
+# "⛵ context (namespace)" 형태로 표시
+# namespace가 비어 있으면 괄호째 생략
+format = '[$symbol$context( \($namespace\))](bold blue) '
 
 [aws]
 disabled = false
-format = 'on [$symbol($profile)(\($region\))](bold yellow) '
+# "profile (region)" 형태로 표시
+# profile, region 각각 비어 있으면 생략
+format = '[$symbol($profile )(\($region\))](bold yellow) '
 
 [terraform]
 disabled = false
-format = 'via [$symbol$workspace](bold purple) '
+format = '[$symbol$workspace](bold purple) '
 
 [git_status]
 modified = "📝"
@@ -330,7 +353,9 @@ alias tfa='terraform apply'
 alias gs='git status'
 alias gl='git log --oneline --graph --decorate'
 
-# ── 현대 CLI 도구 ─────────────────────────────
+# ── 현대 CLI 도구 (인터랙티브 셸 전용) ──────────
+# 주의: alias는 인터랙티브 셸에서만 적용된다.
+# 스크립트·Makefile 내부에서는 원본 명령이 그대로 실행된다.
 alias ls='eza --icons'
 alias ll='eza -la --icons --git'
 alias lt='eza --tree --level=2 --icons'
@@ -355,11 +380,17 @@ eval "$(zoxide init zsh)"
 최신 버전: **0.71.0** (2026년)
 
 ```bash
+# macOS
 brew install fzf
-$(brew --prefix)/opt/fzf/install
 
-# 셸 통합 (0.48.0+)
+# Linux (직접 설치)
+curl -fsSL https://github.com/junegunn/fzf/releases/latest/download/fzf-linux_amd64.tar.gz \
+  | tar -xz -C ~/.local/bin
+
+# 셸 통합 (0.48.0+ 권장 방식)
 echo 'source <(fzf --zsh)' >> ~/.zshrc
+# 0.48.0 이전의 $(brew --prefix)/opt/fzf/install 방식은 사용하지 않는다.
+# 두 방식을 중복 사용하면 Ctrl+R 등 키바인딩이 이중 등록된다.
 ```
 
 | 단축키 | 기능 |
@@ -383,7 +414,7 @@ export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
 |------|------|---------|------|
 | **eza** | `ls` | 0.23.4 | 아이콘, git 상태, 트리 뷰 |
 | **bat** | `cat` | 0.26.1 | 구문 강조, git diff 통합 |
-| **ripgrep** | `grep` | 15.1.0 | 5~13배 빠름, .gitignore 자동 적용 |
+| **ripgrep** | `grep` | 15.0.1 | 5~13배 빠름, .gitignore 자동 적용 |
 | **fd** | `find` | 10.4.2 | 직관적 문법, .gitignore 인식 |
 | **zoxide** | `cd` | 0.9.9 | 방문 빈도 기반 스마트 이동 |
 | **fzf** | — | 0.71.0 | 퍼지 검색 인터페이스 |
