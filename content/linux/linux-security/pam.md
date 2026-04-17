@@ -33,21 +33,23 @@ PAM 위에 구축된다.
 
 ```mermaid
 graph TD
-    APP["애플리케이션<br/>sshd │ sudo │ login │ su │ cron │ ..."]
-
-    APP -->|"libpam.so<br/>PAM API 호출"| LIB
-
-    LIB["PAM 라이브러리<br/>/etc/pam.d/&lt;service&gt; 설정 파일 읽기<br/>모듈 스택 순서대로 평가"]
-
-    LIB --> STACK["모듈 스택 평가<br/>auth → 신원 확인 (비밀번호, MFA 등)<br/>account → 계정 유효성 (만료, 잠금 등)<br/>password → 비밀번호 갱신 처리<br/>session → 세션 환경 설정/해제"]
-
+    APP["애플리케이션\nsshd · sudo · login · su · cron"]
+    APP -->|"libpam.so PAM API"| LIB
+    LIB["PAM 라이브러리\n/etc/pam.d/&lt;service&gt; 설정 파일 읽기"]
+    LIB --> STACK["모듈 스택 순서대로 평가\nauth / account / password / session"]
     STACK -->|"성공/실패 반환"| MOD
-
-    MOD["PAM 모듈 (공유 라이브러리)<br/>pam_unix.so │ pam_sss.so │ pam_google_authenticator.so<br/>pam_faillock.so │ pam_pwquality.so │ pam_limits.so<br/>pam_ldap.so │ pam_access.so │ pam_exec.so │ ..."]
+    MOD["PAM 모듈 (.so)\npam_unix · pam_sss · pam_faillock · ..."]
 ```
 
 **핵심 원칙**: 애플리케이션은 인증 로직을 모른다.
 PAM 설정 파일만 바꾸면 인증 방식을 교체·추가할 수 있다.
+
+| 모듈 타입 | 역할 |
+|----------|------|
+| `auth` | 신원 확인 (비밀번호, MFA 등) |
+| `account` | 계정 유효성 검사 (만료, 잠금 등) |
+| `password` | 비밀번호 갱신 처리 |
+| `session` | 세션 환경 설정/해제 |
 
 ---
 
