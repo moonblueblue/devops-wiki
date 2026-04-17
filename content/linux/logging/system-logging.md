@@ -93,7 +93,7 @@ graph TD
 | **구조화 데이터** | 제한적 (RFC 5424) | 네이티브 지원 (키=값) |
 | **조회 성능** | grep/awk 의존 | journalctl 인덱스 검색 |
 | **네트워크 전송** | 기본 기능 | 미지원 (rsyslog 위임) |
-| **로그 압축** | 별도 설정 필요 | 기본 zstd 압축 |
+| **로그 압축** | 별도 설정 필요 | zstd 또는 lz4 (빌드 환경에 따라 다름, systemd v246 미만은 lz4) |
 | **부팅 간 연속성** | 파일 직접 관리 | 부팅 ID로 자동 분리 |
 | **접근 제어** | 파일 권한 | systemd-journal-gatewayd |
 | **표준 준수** | RFC 3164/5424 | 독자 포맷 (syslog 전달 가능) |
@@ -461,6 +461,8 @@ Compress=yes
 
 # rsyslog로 전달 여부
 # imuxsock보다 성능 낮음, 구조화 데이터 불필요 시 off 권장
+# rsyslog과 함께 운영하는 경우 imjournal 방식 사용 시 off.
+# 단순 ForwardToSyslog 방식 사용 시 yes 필요 (5절 참고)
 ForwardToSyslog=no
 
 # kmsg로 전달 여부
@@ -630,7 +632,7 @@ graph LR
 # /etc/rsyslog.d/10-imjournal.conf
 
 module(load="imjournal"
-    UsePid="system"             # 피드 PID 설정
+    UsePid="system"             # systemd 기록 PID(_PID) 사용. 기본 동작(syslog PID)은 syslog 값 사용
     FileCreateMode="0644"
     StateFile="/var/lib/rsyslog/imjournal.state"  # 읽기 오프셋 유지
     Ratelimit.Interval="600"    # 600초 동안
@@ -697,6 +699,11 @@ if $msg contains "CONTAINER_NAME" then {
 ```
 
 ### 6.2 Kubernetes 로그 아키텍처
+
+> **참고**: Kubernetes 환경에서는 rsyslog보다 Fluent Bit,
+> Vector DaemonSet이 표준 선택지임.
+> rsyslog 직접 운영은 비주류이며, 아래 예시는 레거시
+> 환경 참고용으로 제공한다.
 
 ```mermaid
 graph TD

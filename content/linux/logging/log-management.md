@@ -116,7 +116,7 @@ Kafka 같은 메시지 큐를 사이에 두어 back pressure를 흡수한다.
 - **Logstash**: 복잡한 엔터프라이즈 파이프라인(Elastic Stack)
   에서 여전히 쓰이나 신규 도입은 감소.
 - **Grafana Alloy**: Promtail이 Alloy로 통합.
-  Loki 3.4 기준 Promtail은 사실상 EOL.
+  Promtail은 2026-03-02 공식 EOL, 현재 지원 종료됨.
 
 ---
 
@@ -293,6 +293,8 @@ end
     Retry_Limit   False
     rdkafka.queue.buffering.max.kbytes  10240
     rdkafka.request.required.acks       1
+    # ⚠ 주의: acks=1은 리더 장애 시 메시지 유실 가능.
+    #   높은 신뢰성이 필요하면 acks=-1(all) 사용
 ```
 
 ### 서비스(SERVICE) 전역 설정
@@ -478,7 +480,7 @@ spec:
 | 압축률 | ~3:1 | ~10:1 | ~15:1 | ~3:1 |
 | 운영 복잡도 | 높음 | 낮음–중간 | 중간 | 높음 |
 | OTel 네이티브 | ⚠️ 별도 설정 | ✅ 3.0+ 네이티브 | ⚠️ 별도 설정 | ⚠️ 별도 설정 |
-| 라이선스 | SSPL (비OSI) | AGPL-3.0 | Apache 2.0 | Apache 2.0 |
+| 라이선스 | SSPL + AGPL-3.0 (v8.14+ 이중 라이선스) | AGPL-3.0 | Apache 2.0 | Apache 2.0 |
 | 비용 사례 | 100GB/일 → ~500GB 저장 | 100GB/일 → ~30GB 저장 | 100GB/일 → ~7GB 저장 | ~Elasticsearch 수준 |
 
 ### 선택 기준
@@ -907,6 +909,8 @@ flowchart LR
 
 ```lua
 -- sampling.lua: DEBUG 로그 5% 샘플링
+-- 주의: 멀티 워커 환경에서 동일 seed 가능.
+--   정밀한 샘플링이 필요하면 counter 기반 방식 사용 권장
 math.randomseed(os.time())
 function sample_debug(tag, timestamp, record)
     local log = record["log"] or ""

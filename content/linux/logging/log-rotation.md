@@ -200,7 +200,7 @@ include /etc/logrotate.d
 |--------|------|------|
 | `daily` / `weekly` / `monthly` | 로테이션 주기 | `daily` |
 | `rotate N` | 보관 세대 수 | `rotate 7` |
-| `size N` | 크기 초과 시 즉시 로테이션 (주기 무시) | `size 500M` |
+| `size N` | logrotate 실행 시점에 크기 조건만으로 로테이션 여부 결정 (주기 무관, 실시간 감시 아님) | `size 500M` |
 | `maxsize N` | 주기 + 크기 동시 조건 (OR) | `maxsize 100M` |
 | `minsize N` | 최소 크기 미달 시 생략 (AND) | `minsize 1M` |
 | `compress` | gzip 압축 | - |
@@ -272,6 +272,8 @@ Docker의 기본 json-file 드라이버는 로테이션을 하지 않는다.
 ```bash
 # 설정 적용
 sudo systemctl reload docker
+# ⚠ 주의: log-driver/log-opts 등 전역 로깅 설정 변경은 reload로 적용 안 됨,
+#   restart 필요. restart 시 실행 중인 컨테이너 중단됨.
 
 # 개별 컨테이너에 오버라이드
 docker run \
@@ -297,7 +299,7 @@ docker run \
     missingok
     notifempty
     copytruncate       # FD를 닫을 수 없을 때만 사용
-    size 200M          # 크기 초과 시 즉시 로테이션
+    size 200M          # logrotate 실행 시점에 크기 조건만으로 로테이션 여부 결정
 }
 ```
 
@@ -309,7 +311,7 @@ docker run \
 ```conf
 # /etc/logrotate.d/heavy-traffic
 /var/log/app/access.log {
-    # size: 주기와 무관하게 크기 초과 시 즉시 로테이션
+    # size: logrotate 실행 시점에 크기 조건만으로 로테이션 여부 결정 (주기 무관, 실시간 감시 아님)
     size 500M
 
     rotate 10
@@ -430,9 +432,11 @@ containerLogMaxSize: "50Mi"
 containerLogMaxFiles: 5
 
 # 로그 모니터링 간격 (기본 10s)
+# K8s 1.30+ alpha 기능, ContainerLogMonitorInterval feature gate 필요
 containerLogMonitorInterval: "5s"
 
 # 동시 로테이션 워커 수 (기본 1)
+# K8s 1.30+ alpha 기능, ContainerLogMaxWorkers feature gate 필요
 containerLogMaxWorkers: 2
 ```
 
@@ -519,8 +523,9 @@ groups:
 
 PROM_FILE="/var/lib/node_exporter/textfile_collector/logrotate.prom"
 
-# logrotate 강제 실행 후 종료 코드 확인
-logrotate /etc/logrotate.conf
+# logrotate 상태 파일 타임스탬프로 마지막 실행 성공 여부 확인
+# (강제 실행 대신 status 파일로 체크해 실제 로테이션 중복 방지)
+logrotate -d /etc/logrotate.conf > /dev/null 2>&1
 EXIT_CODE=$?
 
 cat > "$PROM_FILE" <<EOF
@@ -626,7 +631,7 @@ sudo logrotate -f /etc/logrotate.conf
 flowchart LR
     A[로그 파일] --> B{size 지시어?}
     B -->|설정됨| C{파일 크기 > size?}
-    C -->|YES| D[즉시 로테이션\n주기 무시]
+    C -->|YES| D[로테이션\n주기 무관·실행 시점 판정]
     C -->|NO| E[로테이션 안 함]
 
     A --> F{maxsize 지시어?}
