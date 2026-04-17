@@ -46,6 +46,8 @@ graph TD
 
 각 드라이버를 독립 데몬으로 분리. 한 보조 데몬 장애가
 QEMU 데몬에 영향을 주지 않는다.
+Ubuntu는 22.04부터 분리 패키지를 지원하지만
+기본값은 여전히 monolithic `libvirtd`다.
 
 | 데몬 | 역할 |
 |------|------|
@@ -68,7 +70,7 @@ driver[+transport]://[user@][host][:port]/[path]
 |-----|------|------|
 | `qemu:///system` | 시스템 전체 | 서버 가상화, 모든 사용자 VM |
 | `qemu:///session` | 현재 사용자 | 데스크탑 가상화 |
-| `qemu+ssh://root@host/system` | 원격 | SSH 터널, 암호화 |
+| `qemu+ssh://user@host/system` | 원격 | SSH 터널, 암호화 (root SSH 직접 접속은 CIS 기준 비권장) |
 | `qemu+tls://host/system` | 원격 | x509 인증서, 암호화 |
 
 `qemu:///system`은 `/dev/kvm`, 블록 디바이스, PCI/USB 등
@@ -197,6 +199,8 @@ virsh domstats <vm>           # 성능 통계
 ```bash
 # 실행 중 변경
 virsh setvcpus <vm> 6 --live
+# setmem --live는 게스트에 virtio-balloon 드라이버가 있어야 동작한다.
+# maxmemory 이상으로 확장은 live로 불가 (cold 변경 필요)
 virsh setmem <vm> 8G --live
 
 # 영구 변경 (다음 부팅 적용)
@@ -222,11 +226,13 @@ virsh attach-interface <vm> bridge br1 \
 ### 마이그레이션
 
 ```bash
-# 라이브 마이그레이션 (공유 스토리지)
-virsh migrate --live --persistent --tunnelled \
+# 라이브 마이그레이션 (공유 스토리지, QEMU-native TLS 권장)
+virsh migrate --live --persistent --tls \
   <vm> qemu+ssh://host02.example.com/system
+# --tunnelled 옵션은 오버헤드가 크고 블록 마이그레이션을 지원하지 않아
+# 프로덕션에서 권장하지 않는다. --tls 방식을 사용한다.
 
-# 스토리지 복사 포함
+# 스토리지 복사 포함 (공유 스토리지 없는 환경)
 virsh migrate --live --persistent --copy-storage-all \
   <vm> qemu+ssh://host02.example.com/system --verbose
 ```
@@ -319,8 +325,8 @@ libvirt 스냅샷은 두 가지 타입이 있다.
 
 | 타입 | 저장 위치 | 특징 |
 |------|---------|------|
-| **내부 스냅샷** | qcow2 파일 내부 | 단순, VM 중지 불필요 |
-| **외부 스냅샷** | 별도 오버레이 파일 | 더 유연, 체이닝 가능 |
+| **내부 스냅샷** | qcow2 파일 내부 | 단순, VM 중지 불필요, revert 지원 |
+| **외부 스냅샷** | 별도 오버레이 파일 | 체이닝 가능, 단 `snapshot-revert` 미지원 (수동 처리 필요) |
 
 ```bash
 # 생성
@@ -347,9 +353,9 @@ import libvirt
 # 연결
 conn = libvirt.open('qemu:///system')
 
-# VM 목록
+# VM 목록 (dom.info() → [state, maxMem, mem, nCPU, cpuTime])
 for dom in conn.listAllDomains():
-    state, _, _, _, _ = dom.info()[0], *dom.info()[1:]
+    state, _, _, _, _ = dom.info()
     print(dom.name(), state)
 
 # VM 제어
