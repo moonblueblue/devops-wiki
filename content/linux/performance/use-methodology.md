@@ -146,61 +146,6 @@ Best →  두 방법을 함께 쓴다.
 
 ## 3. Brendan Gregg 도구 생태계
 
-### 리눅스 성능 관찰 도구 지도
-
-```mermaid
-graph TB
-    subgraph "애플리케이션 계층"
-        strace["strace\n(syscall trace)"]
-        ltrace["ltrace\n(library trace)"]
-        gdb["gdb/lldb\n(debugger)"]
-    end
-
-    subgraph "시스템콜 인터페이스"
-        perf["perf\n(PMC/tracing)"]
-        bpftrace["bpftrace\n(eBPF scripting)"]
-        bcc["BCC tools\n(execsnoop, opensnoop...)"]
-    end
-
-    subgraph "CPU"
-        mpstat["mpstat"]
-        pidstat["pidstat"]
-        top_cmd["top/htop"]
-        turbostat["turbostat"]
-    end
-
-    subgraph "메모리"
-        free_cmd["free"]
-        vmstat_cmd["vmstat"]
-        slabtop["slabtop"]
-        numastat["numastat"]
-    end
-
-    subgraph "디스크 I/O"
-        iostat["iostat"]
-        iotop["iotop"]
-        blktrace_cmd["blktrace"]
-        smartctl["smartctl"]
-    end
-
-    subgraph "네트워크"
-        ss_cmd["ss"]
-        sar_cmd["sar -n"]
-        tcpdump["tcpdump"]
-        ethtool["ethtool"]
-    end
-
-    subgraph "범용 추적"
-        ftrace["ftrace\n(/sys/kernel/tracing)"]
-        systemtap["SystemTap"]
-        lttng["LTTng"]
-    end
-
-    perf --> CPU & 메모리 & 디스크 I/O
-    bpftrace --> CPU & 메모리 & 디스크 I/O & 네트워크
-    bcc --> CPU & 네트워크
-```
-
 ### 도구 레이어별 분류
 
 | 레이어 | 정적 분석 | 동적 추적 | 벤치마크 |
@@ -600,8 +545,8 @@ edac-util -s 4    # 상세 레벨 4
 # 커널 메시지에서 메모리 오류
 dmesg | grep -iE "edac|ecc|memory error|uncorrectable"
 
-# MCE 메모리 관련
-mcelog --client 2>/dev/null || journalctl -k | grep mce
+# MCE 메모리 관련 (rasdaemon: 커널 4.12+, mcelog 대체)
+journalctl -u rasdaemon | grep -i "error\|mce" | tail -10
 ```
 
 ---
