@@ -46,7 +46,7 @@ sidebar_label: "Linux"
 
 - [x] [Linux Capabilities](linux-security/linux-capabilities.md)
 - [x] [SELinux 기본과 운영](linux-security/selinux.md)
-- [ ] [AppArmor 기본과 운영](linux-security/apparmor.md)
+- [x] [AppArmor 기본과 운영](linux-security/apparmor.md)
 - [ ] [seccomp-bpf와 시스템콜 필터링](linux-security/seccomp.md)
 - [ ] [auditd 감사 로깅](linux-security/auditd.md)
 - [ ] [PAM (Pluggable Authentication Modules)](linux-security/pam.md)
