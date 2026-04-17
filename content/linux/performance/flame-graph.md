@@ -678,7 +678,7 @@ sudo perf script | ./stackcollapse-perf.pl > after.folded
 ./difffolded.pl before.folded after.folded | \
     ./flamegraph.pl \
         --title "Differential: After vs Before" \
-        --colors red \
+        --color red \
         --bgcolor bgcolor2 \
     > diff.svg
 ```
