@@ -444,19 +444,14 @@ for (int i = 0; i < NUM_REQUESTS; i++) {
 
 ### 5.1 채택 현황 (2025 기준)
 
-```mermaid
-graph LR
-    io_uring["io_uring"]
-
-    io_uring --> PostgreSQL["PostgreSQL 18<br/>비동기 I/O 기반<br/>(2025.03 머지)"]
-    io_uring --> RocksDB["RocksDB<br/>코루틴 + io_uring<br/>동시성 개선"]
-    io_uring --> libuv["libuv 1.46+<br/>Node.js 기반<br/>파일 I/O 8x 향상"]
-    io_uring --> tokio["tokio-uring<br/>Rust 비동기 런타임"]
-    io_uring --> QEMU["QEMU 5.0+<br/>가상 디스크 I/O"]
-    io_uring --> ScyllaDB["ScyllaDB<br/>고성능 NoSQL"]
-
-    style io_uring fill:#6366f1,color:#fff
-```
+| 프로젝트 | 버전 | 내용 |
+|---------|------|------|
+| PostgreSQL | 18+ | 비동기 I/O 기반으로 전환 (2025.03 메인라인 머지) |
+| RocksDB | — | 코루틴 + io_uring으로 동시성 개선 |
+| libuv | 1.46+ | Node.js 기반 파일 I/O 처리량 8x 향상 |
+| tokio-uring | — | Rust 비동기 런타임 io_uring 백엔드 |
+| QEMU | 5.0+ | 가상 디스크 I/O 가속 |
+| ScyllaDB | — | 고성능 NoSQL, io_uring 네이티브 지원 |
 
 ### 5.2 PostgreSQL 18: 비동기 I/O 혁명
 

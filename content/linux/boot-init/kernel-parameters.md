@@ -357,25 +357,20 @@ CAP_BPF / CAP_SYS_ADMIN을 부여해야 한다.
 
 ### /proc/\<pid\>/ 구조
 
-```mermaid
-graph TD
-    ROOT["/proc/&lt;pid&gt;/"]
-    ROOT --> cmdline["cmdline\n실행 명령어 null 구분"]
-    ROOT --> environ["environ\n환경변수"]
-    ROOT --> exe["exe\n실행 파일 심링크"]
-    ROOT --> fd["fd/\n열린 FD 심링크"]
-    fd --> fd0["0 → /dev/null"]
-    fd --> fd5["5 → socket:[12345]"]
-    ROOT --> maps["maps\n메모리 맵 주소·권한"]
-    ROOT --> smaps["smaps\nRSS·PSS 포함 상세 버전"]
-    ROOT --> status["status\n인간 친화적 프로세스 상태"]
-    ROOT --> limits["limits\nrlimit 현황"]
-    ROOT --> cgroup["cgroup\ncgroup 소속"]
-    ROOT --> ns["ns/\n네임스페이스 심링크"]
-    ns --> nsnet["net → net:[4026531992]"]
-    ns --> nspid["pid → pid:[4026531836]"]
-    ROOT --> oom["oom_score_adj\nOOM killer 가중치"]
-```
+| 파일/디렉토리 | 설명 |
+|-------------|------|
+| `cmdline` | 프로세스 실행 인자 |
+| `status` | 상태 요약 (이름, PID, 메모리, 스레드) |
+| `stat` | 스케줄러용 원시 상태 데이터 |
+| `maps` | 가상 메모리 매핑 목록 |
+| `smaps` | maps의 상세 버전 (크기, RSS, PSS) |
+| `fd/` | 열린 파일 디스크립터 심볼릭 링크 |
+| `fdinfo/` | 파일 디스크립터 상세 정보 |
+| `io` | 읽기/쓰기 바이트 통계 |
+| `net/` | 네트워크 소켓, 라우팅 정보 |
+| `cgroup` | 속한 cgroup 경로 |
+| `oom_score` | OOM killer 점수 |
+| `oom_score_adj` | OOM 점수 조정값 (-1000~1000) |
 
 ```bash
 # 프로세스의 열린 FD 수

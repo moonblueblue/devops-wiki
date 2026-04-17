@@ -31,42 +31,48 @@ DevOps 엔지니어가 이 구조를 이해해야 하는 이유는 세 가지다
 
 ## 디렉토리 맵
 
-```mermaid
-graph TD
-    ROOT["/"]
+### 루트 디렉토리 구조
 
-    ROOT --> BIN["bin → /usr/bin\n(심볼릭 링크, usr-merge)"]
-    ROOT --> SBIN["sbin → /usr/sbin\n(심볼릭 링크)"]
-    ROOT --> LIB["lib → /usr/lib\n(심볼릭 링크)"]
-    ROOT --> BOOT["/boot\n커널, initrd, 부트로더"]
-    ROOT --> DEV["/dev\n디바이스 파일 (udev 관리)"]
-    ROOT --> ETC["/etc\n호스트 고유 설정"]
-    ROOT --> HOME["/home\n사용자 홈 디렉토리"]
-    ROOT --> MEDIA["/media\n이동식 미디어 자동 마운트"]
-    ROOT --> MNT["/mnt\n임시 수동 마운트"]
-    ROOT --> OPT["/opt\n외부(비패키지) 애플리케이션"]
-    ROOT --> PROC["/proc\n프로세스·커널 가상 FS"]
-    ROOT --> RROOT["/root\n루트 사용자 홈"]
-    ROOT --> RUN["/run\n런타임 데이터 (tmpfs)"]
-    ROOT --> SRV["/srv\n서비스 데이터"]
-    ROOT --> SYS["/sys\n커널 객체 가상 FS (sysfs)"]
-    ROOT --> TMP["/tmp\n임시 파일 (tmpfs 권장)"]
+| 디렉토리 | 설명 |
+|---------|------|
+| `/boot` | 커널, initrd, GRUB |
+| `/etc` | 호스트 고유 설정 |
+| `/home` | 사용자 홈 디렉토리 |
+| `/opt` | 외부(비패키지) 애플리케이션 |
+| `/proc` | 프로세스·커널 가상 FS (읽기 전용) |
+| `/sys` | 커널 객체 가상 FS (sysfs) |
+| `/run` | 런타임 데이터 (tmpfs, 재부팅마다 초기화) |
+| `/tmp` | 임시 파일 (tmpfs 권장) |
+| `/usr` | 읽기 전용 사용자 데이터 |
+| `/var` | 가변 데이터 |
+| `bin → /usr/bin` | usr-merge 심볼릭 링크 |
+| `sbin → /usr/sbin` | usr-merge 심볼릭 링크 |
+| `lib → /usr/lib` | usr-merge 심볼릭 링크 |
 
-    ROOT --> USR["/usr\n읽기 전용 사용자 데이터"]
-    USR --> USRBIN["/usr/bin\n모든 사용자용 명령어"]
-    USR --> USRLIB["/usr/lib\n공유 라이브러리"]
-    USR --> USRLOCAL["/usr/local\n수동 설치 소프트웨어"]
-    USR --> USRSBIN["/usr/sbin\n비필수 시스템 바이너리"]
-    USR --> USRSHARE["/usr/share\n아키텍처 독립 데이터 (man, doc)"]
+### /usr 하위 구조
 
-    ROOT --> VAR["/var\n가변 데이터"]
-    VAR --> VARCACHE["/var/cache\n재생성 가능 캐시"]
-    VAR --> VARLIB["/var/lib\n가변 상태 (DB, 패키지 상태)"]
-    VAR --> VARLOG["/var/log\n로그 파일"]
-    VAR --> VARRUN["/var/run → /run\n(심볼릭 링크)"]
-    VAR --> VARSPOOL["/var/spool\n큐 데이터 (메일, cron)"]
-    VAR --> VARTMP["/var/tmp\n재부팅 후에도 유지되는 임시 파일"]
-```
+| 경로 | 설명 |
+|------|------|
+| `/usr/bin` | 모든 사용자용 명령어 |
+| `/usr/sbin` | 시스템 관리 바이너리 |
+| `/usr/lib` | 공유 라이브러리 |
+| `/usr/local` | 수동 설치 소프트웨어 |
+| `/usr/share` | 아키텍처 독립 데이터 (man, doc, locale) |
+| `/usr/libexec` | 다른 프로그램이 내부 호출하는 바이너리 |
+| `/usr/local/bin` | 수동 설치 명령어 |
+| `/usr/local/lib` | 수동 설치 라이브러리 |
+| `/usr/local/etc` | 수동 설치 설정 |
+
+### /var 하위 구조
+
+| 경로 | 설명 |
+|------|------|
+| `/var/log` | 로그 파일 |
+| `/var/lib` | 가변 상태 (DB, 패키지 상태) |
+| `/var/cache` | 재생성 가능 캐시 |
+| `/var/spool` | 큐 데이터 (메일, cron) |
+| `/var/tmp` | 재부팅 후에도 유지되는 임시 파일 |
+| `/var/run → /run` | 심볼릭 링크 |
 
 ---
 

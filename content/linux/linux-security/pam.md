@@ -53,32 +53,39 @@ PAM 설정 파일만 바꾸면 인증 방식을 교체·추가할 수 있다.
 
 ### 주요 파일 위치
 
-```mermaid
-graph TD
-    PAMD["/etc/pam.d/<br/>서비스별 PAM 설정"]
-    PAMD --> sshd["sshd — SSH 데몬"]
-    PAMD --> sudo["sudo — sudo"]
-    PAMD --> login["login — 로컬 로그인"]
-    PAMD --> su["su — su 명령"]
-    PAMD --> cron["cron — cron 작업"]
-    PAMD --> sauth["system-auth — RHEL 공통 인증 (include)"]
-    PAMD --> pauth["password-auth — RHEL 패스워드 인증 (include)"]
-    PAMD --> cauth["common-auth — Debian/Ubuntu 공통 인증"]
-    PAMD --> cacc["common-account — Debian/Ubuntu 공통 계정"]
-    PAMD --> cpwd["common-password — Debian/Ubuntu 공통 패스워드"]
-    PAMD --> csess["common-session — Debian/Ubuntu 공통 세션"]
+**`/etc/pam.d/` — 서비스별 PAM 설정**
 
-    LIB32["/lib/security/ — PAM 모듈 (32비트)"]
-    LIB64["/lib64/security/ — PAM 모듈 (64비트)"]
-    LIBUSR["/usr/lib/security/ — 배포판에 따라 다름"]
+| 파일 | 용도 |
+|------|------|
+| `sshd` | SSH 데몬 |
+| `sudo` | sudo 명령 |
+| `login` | 로컬 로그인 |
+| `su` | su 명령 |
+| `cron` | cron 작업 |
+| `system-auth` | RHEL 공통 인증 스택 (include용) |
+| `password-auth` | RHEL 패스워드 인증 스택 (include용) |
+| `common-auth` | Debian/Ubuntu 공통 인증 |
+| `common-account` | Debian/Ubuntu 공통 계정 |
+| `common-password` | Debian/Ubuntu 공통 패스워드 |
+| `common-session` | Debian/Ubuntu 공통 세션 |
 
-    SEC["/etc/security/<br/>모듈별 설정 파일"]
-    SEC --> limits["limits.conf — pam_limits 리소스 제한"]
-    SEC --> access["access.conf — pam_access 접근 제어"]
-    SEC --> time["time.conf — pam_time 시간대 접근"]
-    SEC --> pwquality["pwquality.conf — pam_pwquality 패스워드 정책"]
-    SEC --> faillock["faillock.conf — pam_faillock 잠금 정책 (RHEL 9)"]
-```
+**`/etc/security/` — 모듈별 설정 파일**
+
+| 파일 | 담당 모듈 | 설명 |
+|------|----------|------|
+| `limits.conf` | `pam_limits` | 리소스 제한 (ulimit) |
+| `access.conf` | `pam_access` | 호스트/시간 기반 접근 제어 |
+| `time.conf` | `pam_time` | 시간대별 접근 허용 |
+| `pwquality.conf` | `pam_pwquality` | 패스워드 복잡도 정책 |
+| `faillock.conf` | `pam_faillock` | 계정 잠금 정책 (RHEL 9+) |
+
+**PAM 모듈 경로**
+
+| 경로 | 설명 |
+|------|------|
+| `/lib/security/` | PAM 모듈 (32비트, 레거시) |
+| `/lib64/security/` | PAM 모듈 (64비트) |
+| `/usr/lib/security/` | 배포판에 따라 다름 |
 
 ---
 
@@ -985,36 +992,24 @@ auth    include    system-auth     # system-auth를 include
 
 ## 운영 체크리스트
 
-```mermaid
-graph TD
-    A["초기 설정"]
-    A --> A1["[ ] 배포판 권장 방식 확인 (authselect / pam-auth-update)"]
-    A --> A2["[ ] pam_faillock 활성화 및 faillock.conf 설정"]
-    A --> A3["[ ] pam_pwquality 활성화 및 pwquality.conf 설정"]
-    A --> A4["[ ] 변경 전 /etc/pam.d/ 디렉토리 전체 백업"]
-    A --> A5["[ ] pamtester로 사전 검증"]
+**초기 설정**
+- [ ] 서비스별 PAM 스택 확인 (`cat /etc/pam.d/sshd`)
+- [ ] 기본 스택(system-auth / common-auth) 파악
 
-    B["보안 강화"]
-    B --> B1["[ ] MFA 필요 서비스 식별 (SSH, sudo, VPN 등)"]
-    B --> B2["[ ] pam_google_authenticator 또는 pam_oath 설정"]
-    B --> B3["[ ] pam_access로 접근 소스 제한"]
-    B --> B4["[ ] pam_time으로 시간대 접근 제한 (필요 시)"]
-    B --> B5["[ ] pam_tty_audit으로 관리자 세션 감사 연동"]
+**보안 강화**
+- [ ] `pam_faillock` 또는 `pam_tally2` 잠금 정책 설정
+- [ ] `pam_pwquality` 패스워드 복잡도 강화
+- [ ] `pam_access` 접근 제어 설정
 
-    C["중앙화 인증 (SSSD)"]
-    C --> C1["[ ] sssd.conf 설정 및 도메인 가입"]
-    C --> C2["[ ] authselect sssd 프로파일 적용"]
-    C --> C3["[ ] pam_mkhomedir로 홈 디렉토리 자동 생성"]
-    C --> C4["[ ] sssctl user-checks로 연동 검증"]
-    C --> C5["[ ] 오프라인 캐시 동작 확인"]
+**SSSD 연동** (LDAP/AD 환경)
+- [ ] `pam_sss` 모듈 설치 및 활성화
+- [ ] `sssd.conf` 도메인 설정
+- [ ] `authselect` 또는 `auth-config` 적용
 
-    D["정기 점검"]
-    D --> D1["[ ] faillock 잠금 상태 주기적 확인"]
-    D --> D2["[ ] /var/log/secure, auth.log 이상 징후 확인"]
-    D --> D3["[ ] 비밀번호 만료 계정 확인 (chage -l)"]
-    D --> D4["[ ] pam 모듈 버전 업데이트 확인"]
-    D --> D5["[ ] 미사용 서비스의 /etc/pam.d/ 파일 검토"]
-```
+**정기 점검**
+- [ ] PAM 설정 변경 후 `pamtester` 또는 별도 터미널에서 인증 확인
+- [ ] `auditd` 로그에서 PAM 관련 이벤트 확인
+- [ ] 모듈 경로 변조 여부 확인 (`rpm -V pam` 또는 `dpkg -V libpam`)
 
 ---
 
