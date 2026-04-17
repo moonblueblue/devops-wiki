@@ -50,7 +50,7 @@ sidebar_label: "Linux"
 - [x] [seccomp-bpf와 시스템콜 필터링](linux-security/seccomp.md)
 - [x] [auditd 감사 로깅](linux-security/auditd.md)
 - [x] [PAM (Pluggable Authentication Modules)](linux-security/pam.md)
-- [ ] [LUKS/dm-crypt 디스크 암호화](linux-security/luks-dm-crypt.md)
+- [x] [LUKS/dm-crypt 디스크 암호화](linux-security/luks-dm-crypt.md)
 
 ### 파일시스템과 스토리지
 
