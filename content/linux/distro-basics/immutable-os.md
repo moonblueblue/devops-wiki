@@ -194,26 +194,26 @@ Beta:   v1.13.0-beta.1         Clang 빌드 커널 + ThinLTO
 
 **핵심 아키텍처**:
 
-**기존 Linux 노드**
-
 ```mermaid
 graph TD
-    T1[systemd] --> T2[sshd]
-    T2 --> T3[bash]
-    T3 --> T4[패키지 관리자]
-    T2 -->|"운영자 직접 접속·수정"| T5((운영자))
+    subgraph trad["기존 Linux 노드"]
+        T1[systemd] --> T2[sshd]
+        T2 --> T3[bash]
+        T3 --> T4[패키지 관리자]
+        T2 -->|"운영자 직접 접속·수정"| T5((운영자))
+    end
 ```
 
-**Talos 노드**
-
 ```mermaid
 graph TD
-    M["machined (PID 1)"]
-    M --> AP["apid\n(gRPC 게이트웨이, 포트 50000)"]
-    M --> TR["trustd\n(인증서 배포, Root of Trust)"]
-    M --> CT["containerd\n(컨테이너 런타임)"]
-    M --> KB["kubelet\n(K8s 에이전트)"]
-    TC((talosctl)) -->|"gRPC"| AP
+    subgraph talos["Talos 노드"]
+        M["machined (PID 1)"]
+        M --> AP["apid (포트 50000)"]
+        M --> TR["trustd"]
+        M --> CT["containerd"]
+        M --> KB["kubelet"]
+        TC((talosctl)) -->|"gRPC"| AP
+    end
 ```
 
 방화벽 규칙: talosctl은 **apid**(포트 50000/TCP)와 통신한다.
@@ -352,21 +352,13 @@ RPM 패키지 추가가 필요한 환경.
 
 ## 선택 가이드
 
-```mermaid
-graph TD
-    Q["어떤 환경인가?"]
-    Q --> A["AWS EKS 전용"]
-    Q --> B["멀티클라우드 / 하이브리드"]
-    Q --> C["보안 최우선 / air-gapped"]
-    Q --> D["Red Hat / OpenShift 생태계"]
-    Q --> E["대규모 베어메탈 K8s fleet"]
-
-    A --> A1["Bottlerocket\n(EKS 최적화 AMI, BRUP)"]
-    B --> B1["Flatcar\n(CNCF, 동일 이미지 멀티환경)"]
-    C --> C1["Talos\n(SSH 없음, SBOM, 재현 가능 빌드)"]
-    D --> D1["Fedora CoreOS / RHCOS"]
-    E --> E1["Talos + Sidero Metal"]
-```
+| 환경 | 추천 Immutable OS |
+|------|-----------------|
+| AWS EKS 전용 | Bottlerocket |
+| 멀티클라우드 / 하이브리드 | Flatcar |
+| 보안 최우선 / air-gapped | Talos |
+| Red Hat / OpenShift 생태계 | Fedora CoreOS / RHCOS |
+| 대규모 베어메탈 K8s fleet | Talos + Sidero Metal |
 
 **Immutable OS를 쓰지 말아야 할 경우**:
 - 커널 모듈을 런타임에 자주 로드해야 하는 환경
