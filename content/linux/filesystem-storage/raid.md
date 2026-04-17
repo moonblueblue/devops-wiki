@@ -443,10 +443,10 @@ Azure Disk   : LRS/ZRS/GRS 옵션으로 복제
 graph TD
     subgraph cluster["Kubernetes Cluster"]
         Pod["Pod"] -- PVC --> SC["StorageClass"]
-        SC --> STORAGE["Rook-Ceph / Longhorn<br/>(복제, 자가 복구, 스냅샷)"]
-        STORAGE --> NA["Node A<br/>/dev/sdb<br/>(로컬 디스크)"]
-        STORAGE --> NB["Node B<br/>/dev/sdb<br/>(로컬 디스크)"]
-        STORAGE --> NC["Node C<br/>/dev/sdb<br/>(로컬 디스크)"]
+        SC --> STORAGE["Rook-Ceph / Longhorn"]
+        STORAGE --> NA["Node A\n(/dev/sdb)"]
+        STORAGE --> NB["Node B\n(/dev/sdb)"]
+        STORAGE --> NC["Node C\n(/dev/sdb)"]
     end
 ```
 

@@ -22,17 +22,16 @@ tags:
 
 ```mermaid
 graph TD
-    A[전원 ON] --> B[POST 하드웨어 자가진단]
-    B --> C[UEFI 펌웨어 초기화]
-    C --> D[Secure Boot 서명 검증]
-    D --> E[EFI System Partition 탐색]
-    E --> F[shim → GRUB 2 또는 systemd-boot]
-    F --> G[커널 + initramfs 로드]
-    G --> H[initramfs: 드라이버 로드 / LUKS / LVM / RAID 조립]
-    H --> I[switch_root → 실제 루트 파일시스템]
-    I --> J[systemd PID 1 기동]
-    J --> K[타겟 도달 → 서비스 병렬 시작]
-    K --> L[로그인 프롬프트]
+    A[전원 ON]
+    A --> B[POST / UEFI 초기화]
+    B --> C[Secure Boot 서명 검증 + ESP 탐색]
+    C --> D[shim → 부트로더 실행]
+    D --> E[커널 + initramfs 로드]
+    E --> F["initramfs: LUKS / LVM / RAID 조립"]
+    F --> G[switch_root]
+    G --> H[systemd PID 1]
+    H --> I[타겟 유닛 도달]
+    I --> J[로그인 프롬프트]
 ```
 
 ---
@@ -155,9 +154,9 @@ GRUB_DISABLE_RECOVERY="true"              # 복구 메뉴 숨김
 ```mermaid
 graph TD
     A[UEFI 펌웨어]
-    B[shim.efi\nMicrosoft 서명 · distro 2nd stage 서명 내장]
-    C[grubx64.efi\n배포판 서명]
-    D[vmlinuz\n배포판 서명]
+    B["shim.efi (Microsoft 서명)"]
+    C["grubx64.efi (배포판 서명)"]
+    D["vmlinuz (배포판 서명)"]
     E[initramfs]
 
     A --> B --> C --> D --> E

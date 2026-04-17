@@ -41,18 +41,14 @@ I/O, 네트워크 등의 자원을 제한·계량·격리하는 커널 기능이
 ```mermaid
 graph TD
     ROOT["/sys/fs/cgroup/"]
-
-    ROOT --> CPU["cpu/<br/>← CPU 컨트롤러 계층"]
-    ROOT --> MEM["memory/<br/>← 메모리 컨트롤러 계층"]
-    ROOT --> BLK["blkio/<br/>← 블록 I/O 컨트롤러 계층"]
-    ROOT --> ETC["...<br/>← 컨트롤러마다 독립 트리"]
-
+    ROOT --> CPU["cpu/"]
+    ROOT --> MEM["memory/"]
+    ROOT --> BLK["blkio/"]
+    ROOT --> ETC["기타 컨트롤러..."]
     CPU --> CPU_APP["myapp/"]
     CPU_APP --> CPU_PID["PID 1234, 5678"]
-
     MEM --> MEM_APP["myapp/"]
     MEM_APP --> MEM_PID["PID 1234, 5678"]
-
     BLK --> BLK_APP["myapp/"]
 ```
 
@@ -65,18 +61,16 @@ graph TD
 
 ```mermaid
 graph TD
-    ROOT["/sys/fs/cgroup/<br/>← 유일한 마운트 포인트"]
-
-    ROOT --> CC["cgroup.controllers<br/>← 사용 가능한 컨트롤러 목록"]
-    ROOT --> CSC["cgroup.subtree_control<br/>← 하위에 위임할 컨트롤러"]
+    ROOT["/sys/fs/cgroup/"]
+    ROOT --> CC["cgroup.controllers"]
+    ROOT --> CSC["cgroup.subtree_control"]
     ROOT --> SYS["system.slice/"]
     ROOT --> USR["user.slice/"]
-
     SYS --> SVC["myapp.service/"]
-    SVC --> PROCS["cgroup.procs<br/>← PID 목록"]
-    SVC --> MEMMAX["memory.max<br/>← 메모리 상한"]
-    SVC --> CPUW["cpu.weight<br/>← CPU 비중"]
-    SVC --> IOMAX["io.max<br/>← I/O 대역폭 제한"]
+    SVC --> PROCS["cgroup.procs"]
+    SVC --> MEMMAX["memory.max"]
+    SVC --> CPUW["cpu.weight"]
+    SVC --> IOMAX["io.max"]
 ```
 
 **핵심 규칙**: 내부 노드(자식이 있는 cgroup)에는
