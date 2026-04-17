@@ -86,7 +86,7 @@ sidebar_label: "Linux"
 - [x] [메모리 관리와 OOM (free, vmstat, slabtop)](performance/memory-oom.md)
 - [x] [디스크 I/O 분석 (iostat, iotop, blktrace)](performance/disk-io-performance.md)
 - [x] [io_uring과 비동기 I/O](performance/io-uring.md)
-- [ ] [네트워크 성능 분석 (ss, iftop, nethogs, sar)](performance/network-performance.md)
+- [x] [네트워크 성능 분석 (ss, iftop, nethogs, sar)](performance/network-performance.md)
 - [x] [eBPF 기반 성능 분석 (bpftrace, BCC, libbpf)](performance/ebpf-performance.md)
 - [x] [BPF CO-RE (Compile Once, Run Everywhere)](performance/bpf-co-re.md)
 - [x] [플레임 그래프 (Flame Graph)](performance/flame-graph.md)
