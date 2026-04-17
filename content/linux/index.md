@@ -95,7 +95,7 @@ sidebar_label: "Linux"
 ### 터미널 환경
 
 - [x] [tmux와 screen](terminal/tmux-screen.md)
-- [ ] [셸 환경 개선 (zsh, fish, oh-my-zsh, starship)](terminal/shell-environment.md)
+- [x] [셸 환경 개선 (zsh, fish, oh-my-zsh, starship)](terminal/shell-environment.md)
 
 ### 가상화와 경량 격리
 
