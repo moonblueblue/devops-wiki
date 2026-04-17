@@ -58,12 +58,12 @@ iptables는 **테이블 → 체인 → 규칙** 순서로 구성된다.
 ```mermaid
 graph TD
     IN["패킷 수신"]
-    --> PRE["PREROUTING<br/>(raw → mangle → nat)"]
-    PRE -->|"로컬 프로세스"| INPUT["INPUT<br/>(mangle → filter)"]
+    --> PRE[PREROUTING]
+    PRE -->|"로컬 프로세스"| INPUT[INPUT]
     INPUT --> LOCAL["로컬 프로세스"]
-    LOCAL --> OUTPUT["OUTPUT<br/>(raw → mangle → nat → filter)"]
-    OUTPUT --> POST["POSTROUTING<br/>(mangle → nat)"]
-    PRE -->|"포워딩"| FWD["FORWARD<br/>(mangle → filter)"]
+    LOCAL --> OUTPUT[OUTPUT]
+    OUTPUT --> POST[POSTROUTING]
+    PRE -->|"포워딩"| FWD[FORWARD]
     FWD --> POST
     POST --> OUT["패킷 송신"]
 ```
