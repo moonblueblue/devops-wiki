@@ -18,7 +18,7 @@ systemd-nspawn은 "namespace spawn"의 약자다.
 chroot보다 강력하고, 완전한 OS 컨테이너를 실행하는 데 최적화된
 경량 컨테이너 도구다. 중앙 데몬 없이 systemd와 직접 통합된다.
 
-systemd v258 기준 (2025-09 릴리즈).
+systemd v259 기준 (2025-12-17 릴리즈).
 
 ---
 
@@ -74,6 +74,7 @@ graph TD
 | User | UID/GID 매핑 | `--private-users`로 활성화 |
 
 systemd v258부터 **cgroup v1 완전 제거**, cgroupv2 전용.
+v259부터 NAT는 **nftables 전용**. iptables 기반 마스커레이드는 제거됐다.
 
 ---
 
@@ -169,9 +170,9 @@ sudo systemd-nspawn -xD /var/lib/machines/debian
 
 | 옵션 | 설명 |
 |------|------|
-| `-U` | `--private-users=pick --private-users-chown` 단축 |
+| `-U` | `--private-users=pick --private-users-ownership=auto` 단축 |
 | `--private-users=pick` | User namespace + 동적 UID 범위 자동 선택 |
-| `--private-users-chown` | rootfs 소유권을 매핑 UID로 변경 |
+| `--private-users-ownership=` | rootfs 소유권 처리 (`auto`·`chown`·`map`·`off`) |
 | `--no-new-privileges` | setuid/파일 capability 상승 차단 |
 | `--capability=` | 추가 Linux capability 부여 |
 | `--drop-capability=` | capability 제거 |
@@ -250,13 +251,18 @@ machinectl bind      <name> <host-path>   # 실행 중 동적 바인드
 ### veth 네트워크 + systemd-networkd 자동 구성
 
 ```
-호스트 networkd → ve-<name> IP 할당 + DHCP 서버 + IP 마스커레이드
+호스트 networkd → ve-<name> IP 할당 + DHCP 서버 + nftables 마스커레이드
 컨테이너 networkd → host0 DHCP 클라이언트
 결과: 컨테이너 → 호스트 → 외부 인터넷 자동 연결
 ```
 
 systemd-networkd가 호스트와 컨테이너 양쪽에서 실행되면
 추가 설정 없이 자동으로 구성된다.
+
+> **주의:** NetworkManager가 호스트에서 실행 중이면
+> `ve-*` 인터페이스를 가로채 networkd 자동 구성이 깨질 수 있다.
+> `/etc/NetworkManager/conf.d/nspawn.conf`에
+> `[keyfile]\nunmanaged-devices=interface-name:ve-*`를 추가한다.
 
 ---
 
@@ -269,18 +275,24 @@ systemd-networkd가 호스트와 컨테이너 양쪽에서 실행되면
 - 시스템 클럭 변경 불가
 - 디바이스 노드 생성 불가
 - 커널 모듈 로드 불가
+- seccomp 필터로 위험 syscall 차단 (`@clock`, `@module` 등)
 
 ### User Namespace (--private-users)
 
 ```bash
 # 서비스 템플릿 기본값: -U
-# = --private-users=pick --private-users-chown
+# = --private-users=pick --private-users-ownership=auto
 machinectl start debian
 ```
 
 **User namespace 미사용 시 주의:**
 컨테이너 내 root = 사실상 호스트 root다.
-신뢰할 수 없는 코드는 반드시 user namespace와 함께 실행해야 한다.
+신뢰할 수 없는 코드는 반드시 `-U` 옵션과 함께 실행해야 한다.
+
+**컨테이너 응답 없음 시:**
+`machinectl poweroff`가 먹히지 않으면
+`machinectl terminate <name>`으로 강제 종료한다.
+terminate는 cgroup 전체를 즉시 kill한다.
 
 ### v257 이후 변경사항 (보안 관련)
 
@@ -289,6 +301,8 @@ machinectl start debian
 | v257 | SSH 공개키 자동 전파 (`--bind-user=`) |
 | v258 | cgroup v1 제거, TTY 권한 제한 강화 |
 | v258 | 비특권 디렉토리 컨테이너 지원 확대 |
+| v259 | NAT 마스커레이드 nftables 전용, iptables 제거 |
+| v259 | `--private-users-chown` 제거, `--private-users-ownership=` 대체 |
 
 ---
 
@@ -342,8 +356,10 @@ CONTAINER=build-env
 IMAGE=/var/lib/machines/debian
 
 # 에페메럴 실행으로 격리된 빌드
+# -U: user namespace 활성화 (컨테이너 root ≠ 호스트 root)
 sudo systemd-nspawn \
   --ephemeral \
+  -U \
   --directory="$IMAGE" \
   --machine="$CONTAINER" \
   --bind="$(pwd):/workspace" \
@@ -365,6 +381,8 @@ sudo systemd-nspawn \
 - [systemd.nspawn(5) 매뉴얼](https://man7.org/linux/man-pages/man5/systemd.nspawn.5.html)
   — 확인: 2026-04-17
 - [machinectl(1) 매뉴얼](https://man7.org/linux/man-pages/man1/machinectl.1.html)
+  — 확인: 2026-04-17
+- [systemd v259 릴리즈 노트](https://github.com/systemd/systemd/releases/tag/v259)
   — 확인: 2026-04-17
 - [systemd v258 릴리즈 노트](https://github.com/systemd/systemd/releases/tag/v258)
   — 확인: 2026-04-17
