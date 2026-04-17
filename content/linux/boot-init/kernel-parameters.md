@@ -84,9 +84,9 @@ systemd-sysctl.service가 부팅 시 `sysctl --system`을 실행한다.
 ```mermaid
 graph TD
     A[클라이언트 SYN]
-    B["SYN Queue\ntcp_max_syn_backlog 제어\nSYN_RECV 상태"]
+    B["SYN Queue\n(tcp_max_syn_backlog)"]
     C[3-way handshake 완료]
-    D["Accept Queue\nsomaxconn 제어\nESTABLISHED"]
+    D["Accept Queue\n(somaxconn)"]
     E[애플리케이션 accept]
 
     A --> B --> C --> D --> E
@@ -159,9 +159,9 @@ graph TD
 
 ```mermaid
 graph TD
-    A[fs.file-max\n시스템 전체 상한]
-    B[fs.nr_open\n프로세스당 상한 ceiling]
-    C["ulimit -n\n프로세스당 소프트/하드 한계"]
+    A[fs.file-max]
+    B[fs.nr_open]
+    C["ulimit -n"]
 
     A --> B --> C
 ```
@@ -387,21 +387,15 @@ readlink /proc/1234/ns/net
 
 ## /sys 주요 경로
 
-```mermaid
-graph TD
-    SYS["/sys/"]
-    SYS --> block["block/&lt;dev&gt;/queue/"]
-    block --> sched["scheduler\nI/O 스케줄러"]
-    block --> rot["rotational\nHDD=1 / SSD=0"]
-    block --> ra["read_ahead_kb\nread-ahead 크기"]
-    SYS --> classnet["class/net/&lt;iface&gt;/"]
-    classnet --> speed["speed\n링크 속도 Mbps"]
-    classnet --> operstate["operstate\nup/down"]
-    SYS --> kernelmm["kernel/mm/"]
-    kernelmm --> thp["transparent_hugepage/\nTHP 설정"]
-    kernelmm --> hp["hugepages/hugepages-2048kB/"]
-    hp --> nrhp["nr_hugepages"]
-```
+| 경로 | 설명 |
+|------|------|
+| `/sys/block/<dev>/queue/scheduler` | I/O 스케줄러 설정 |
+| `/sys/block/<dev>/queue/rotational` | HDD=1 / SSD=0 |
+| `/sys/block/<dev>/queue/read_ahead_kb` | read-ahead 크기 |
+| `/sys/class/net/<iface>/speed` | 링크 속도 (Mbps) |
+| `/sys/class/net/<iface>/operstate` | 인터페이스 상태 (up/down) |
+| `/sys/kernel/mm/transparent_hugepage/` | THP 설정 |
+| `/sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages` | 2MB Hugepage 수 |
 
 ### /sys vs /proc
 

@@ -244,10 +244,10 @@ RuntimeDirectory=myapp         # /run/myapp (재부팅 시 초기화)
 ```mermaid
 graph TD
     ROOT["systemd.slice (root)"]
-    ROOT --> SYS["system.slice\n시스템 서비스 기본"]
-    ROOT --> USR["user.slice\n사용자 세션"]
-    ROOT --> MACH["machine.slice\nVM/컨테이너"]
-    ROOT --> MYAPP["myapp.slice\n커스텀 슬라이스"]
+    ROOT --> SYS["system.slice"]
+    ROOT --> USR["user.slice"]
+    ROOT --> MACH["machine.slice"]
+    ROOT --> MYAPP["myapp.slice"]
     MYAPP --> WEB["myapp-web.service"]
     MYAPP --> WORKER["myapp-worker.service"]
 ```

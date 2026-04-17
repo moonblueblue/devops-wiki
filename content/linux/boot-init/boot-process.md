@@ -65,15 +65,22 @@ fdisk -l | grep "EFI System"
 
 ```mermaid
 graph TD
-    PK[PK: Platform Key\nOEM 루트 신뢰의 기반]
-    KEK[KEK: Key Exchange Key\ndb/dbx 변경 권한 부여]
-    db[db: 허용 목록\nSHA-256 해시 또는 X.509 인증서]
-    dbx[dbx: 차단 목록\n부팅 시 가장 먼저 파싱 · 매칭 시 차단]
+    PK[PK: Platform Key]
+    KEK[KEK: Key Exchange Key]
+    db[db: 허용 목록]
+    dbx[dbx: 차단 목록]
 
     PK --> KEK
     KEK --> db
     KEK --> dbx
 ```
+
+| 키 | 역할 |
+|----|------|
+| PK | OEM 루트 신뢰의 기반 |
+| KEK | db/dbx 변경 권한 부여 |
+| db | SHA-256 해시 또는 X.509 인증서 허용 목록 |
+| dbx | 부팅 시 가장 먼저 파싱, 매칭 시 차단 |
 
 부팅 순서: UEFI가 `dbx`를 먼저 검사 → 해당 없으면 `db` 검사 →
 서명 일치 시 실행 허가.
@@ -250,13 +257,20 @@ mkinitcpio -P                      # 모든 preset
 
 ```mermaid
 graph TD
-    A[sysinit.target\n파일시스템 마운트 · swap · 커널 파라미터]
-    B[basic.target\n소켓 · 타이머 · 경로 유닛]
-    C[multi-user.target\n네트워크 · 백그라운드 서비스]
-    D[graphical.target\n디스플레이 매니저 - 선택]
+    A[sysinit.target]
+    B[basic.target]
+    C[multi-user.target]
+    D[graphical.target]
 
     A --> B --> C --> D
 ```
+
+| 타겟 | 역할 |
+|------|------|
+| sysinit.target | 파일시스템 마운트, swap, 커널 파라미터 |
+| basic.target | 소켓, 타이머, 경로 유닛 |
+| multi-user.target | 네트워크, 백그라운드 서비스 |
+| graphical.target | 디스플레이 매니저 (선택) |
 
 ```bash
 # 기본 타겟 변경
