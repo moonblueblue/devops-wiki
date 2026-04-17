@@ -62,8 +62,8 @@ graph TD
 ```mermaid
 graph TD
     ROOT["/sys/fs/cgroup/"]
-    ROOT --> CC["cgroup.controllers"]
-    ROOT --> CSC["cgroup.subtree_control"]
+    ROOT --> CC["controllers"]
+    ROOT --> CSC["subtree_control"]
     ROOT --> SYS["system.slice/"]
     ROOT --> USR["user.slice/"]
     SYS --> SVC["myapp.service/"]

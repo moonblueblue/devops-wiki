@@ -326,13 +326,13 @@ nsenter -t <container-PID> --ipc ipcs -a
 
 ```mermaid
 graph TD
-    A{"데이터 양이 많고\n속도가 중요한가?"}
-    A -->|YES| B["Shared Memory\n+ 세마포어 동기화"]
-    A -->|NO| C{"단방향이고\n스트리밍인가?"}
-    C -->|YES| D["Pipe (관련 프로세스)\nNamed Pipe (무관)"]
-    C -->|NO| E{"양방향 요청-응답이\n필요한가?"}
+    A{"데이터 많고\n속도 중요?"}
+    A -->|YES| B["Shared Memory\n세마포어 동기화"]
+    A -->|NO| C{"단방향\n스트리밍?"}
+    C -->|YES| D["Pipe\nNamed Pipe"]
+    C -->|NO| E{"양방향\n요청-응답?"}
     E -->|YES| F[Unix Domain Socket]
-    E -->|NO| G{"비동기 메시지가\n필요한가?"}
+    E -->|NO| G{"비동기 메시지?"}
     G -->|YES| H[POSIX Message Queue]
 ```
 

@@ -29,9 +29,9 @@ graph TD
     RN -->|I/O 대기| S[슬립 S]
     S -->|I/O 완료| RQ
     RN -->|시그널 / ptrace| T[정지 T/t]
-    RN -->|커널 I/O\n인터럽트 불가| D["Disk Sleep D\nNFS hang · Ceph I/O 지연"]
+    RN -->|커널 I/O\n인터럽트 불가| D["Disk Sleep D\nNFS/Ceph 지연"]
     D -->|I/O 완료| RQ
-    RN -->|"exit() — 부모 wait() 미호출"| Z[좀비 Z]
+    RN -->|"exit() 후 wait() 없음"| Z[좀비 Z]
 ```
 
 | 상태 코드 | 이름 | 설명 |
@@ -185,9 +185,9 @@ Kubernetes가 파드를 종료할 때의 시그널 흐름:
 ```mermaid
 graph TD
     A["kubectl delete pod / 스케일 다운"]
-    A --> B["preStop hook 실행 (있다면)"]
-    B --> C["SIGTERM → 컨테이너 PID 1"]
-    C --> D["terminationGracePeriodSeconds 대기\n(기본 30초)"]
+    A --> B["preStop hook"]
+    B --> C["SIGTERM 전송"]
+    C --> D["Grace Period 대기\n기본 30초"]
     D --> E{"아직 살아있는가?"}
     E -->|Yes| F[SIGKILL]
     E -->|No| G[정상 종료]
@@ -212,14 +212,12 @@ lifecycle:
 
 ### 좀비 프로세스 (Zombie)
 
-```mermaid
-graph TD
-    A["자식 프로세스 exit() 호출"]
-    A --> B["프로세스 테이블 엔트리 유지\n(종료 코드 보존)"]
-    B --> C{"부모가 wait() 호출?"}
-    C -->|Yes| D[정상 정리]
-    C -->|No| E["좀비 상태 유지\nPID 슬롯 점유 → PID 고갈 위험"]
-```
+| 단계 | 설명 |
+|------|------|
+| ① 자식 `exit()` 호출 | 프로세스 종료 요청 |
+| ② 프로세스 테이블 엔트리 유지 | 종료 코드 보존 — 부모의 `wait()` 호출 대기 |
+| ③-A 부모 `wait()` 호출 | 정상 정리, 엔트리 해제 |
+| ③-B 부모 `wait()` 없음 | **좀비 상태** 유지 — PID 슬롯 점유로 PID 고갈 위험 |
 
 ```bash
 # 좀비 프로세스 확인

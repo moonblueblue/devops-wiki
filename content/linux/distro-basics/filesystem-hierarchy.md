@@ -119,9 +119,9 @@ Fedora CoreOS 같은 Immutable OS의 원자적 업데이트가 가능해진다.
 ```
 /var/log        시스템·애플리케이션 로그
 /var/lib        영구 상태 데이터
-  /var/lib/docker    Docker 이미지·컨테이너 데이터
-  /var/lib/kubelet   Kubernetes 노드 상태
-  /var/lib/etcd      etcd 데이터 (컨트롤 플레인)
+/var/lib/docker    Docker 이미지·컨테이너 데이터
+/var/lib/kubelet   Kubernetes 노드 상태
+/var/lib/etcd      etcd 데이터 (컨트롤 플레인)
 /var/cache      재생성 가능 캐시 (apt 패키지 등)
 /var/spool      처리 대기 큐 (메일, cron, 프린터)
 /var/tmp        재부팅 후에도 유지되는 임시 파일

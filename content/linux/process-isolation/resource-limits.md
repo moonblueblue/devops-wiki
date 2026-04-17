@@ -30,9 +30,9 @@ graph TD
     A["커널 전역 제한 (sysctl)"]
     A --> B[ulimit 경로]
     A --> C[cgroups v2 경로]
-    B --> D["PAM limits.conf\n(로그인 세션)"]
+    B --> D["PAM limits.conf\n로그인 세션"]
     D --> E[ulimit]
-    E --> F["systemd Unit Limit\n(PAM 독립 경로)"]
+    E --> F["systemd Unit Limit\nPAM 독립 경로"]
 ```
 
 > `limits.conf`는 **PAM 로그인 세션**을 통해 적용된다.
