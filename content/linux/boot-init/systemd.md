@@ -158,12 +158,16 @@ After=openvpn-client.service
 서비스를 시작해 소켓 FD를 전달한다.
 부팅 시간을 줄이고 의존성을 단순화한다.
 
-```
-systemd가 소켓 열기 (서비스 미시작)
-  ↓ 클라이언트 연결
-서비스 시작 → FD 3+ 전달
-  ↓
-서비스가 accept() — 소켓 직접 생성 안 함
+```mermaid
+sequenceDiagram
+    participant S as systemd
+    participant C as 클라이언트
+    participant A as 서비스(myapp)
+
+    S->>S: 소켓 열기 (서비스 미시작)
+    C->>S: 연결 요청
+    S->>A: 서비스 시작 + FD 3+ 전달
+    A->>A: accept() — 소켓 직접 생성 안 함
 ```
 
 ### .socket 유닛
@@ -237,14 +241,15 @@ RuntimeDirectory=myapp         # /run/myapp (재부팅 시 초기화)
 
 ### Slice 계층 구조
 
-```
-systemd.slice (root)
-├── system.slice        ← 시스템 서비스 기본
-├── user.slice          ← 사용자 세션
-├── machine.slice       ← VM/컨테이너
-└── myapp.slice         ← 커스텀 슬라이스
-    ├── myapp-web.service
-    └── myapp-worker.service
+```mermaid
+graph TD
+    ROOT["systemd.slice (root)"]
+    ROOT --> SYS["system.slice\n시스템 서비스 기본"]
+    ROOT --> USR["user.slice\n사용자 세션"]
+    ROOT --> MACH["machine.slice\nVM/컨테이너"]
+    ROOT --> MYAPP["myapp.slice\n커스텀 슬라이스"]
+    MYAPP --> WEB["myapp-web.service"]
+    MYAPP --> WORKER["myapp-worker.service"]
 ```
 
 ```ini
@@ -520,11 +525,17 @@ systemd-run --on-active=10min /usr/bin/delayed-task
 
 systemd의 종료 시퀀스:
 
-```
-systemctl stop 명령
-  → SIGTERM 전송
-  → TimeoutStopSec 대기 (기본: 90초)
-  → 타임아웃 초과 시 SIGKILL 강제 종료
+```mermaid
+graph TD
+    A[systemctl stop 명령]
+    B[SIGTERM 전송]
+    C["TimeoutStopSec 대기 (기본: 90초)"]
+    D[정상 종료]
+    E[타임아웃 초과 → SIGKILL 강제 종료]
+
+    A --> B --> C
+    C -->|종료 완료| D
+    C -->|타임아웃 초과| E
 ```
 
 ```ini

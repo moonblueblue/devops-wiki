@@ -128,12 +128,13 @@ seccomp_release(ctx);
 
 ### seccomp + no_new_privs 관계
 
-```
-no_new_privs = 1 설정 효과:
-  ├─ execve() 후 setuid/CAP 상승 불가
-  ├─ seccomp 필터 설치 권한 부여 (CAP_SYS_ADMIN 없이도)
-  ├─ 자식 프로세스에 상속
-  └─ 설정 후 해제 불가 (one-way)
+```mermaid
+graph TD
+    ROOT["no_new_privs = 1 설정 효과"]
+    ROOT --> A["execve() 후 setuid/CAP 상승 불가"]
+    ROOT --> B["seccomp 필터 설치 권한 부여<br/>(CAP_SYS_ADMIN 없이도)"]
+    ROOT --> C["자식 프로세스에 상속"]
+    ROOT --> D["설정 후 해제 불가 (one-way)"]
 ```
 
 > CAP_SYS_ADMIN을 보유한 경우 no_new_privs 없이도 필터를
@@ -323,19 +324,22 @@ Podman 4.0+, LXD 4.0+가 rootless 컨테이너에서 이미 내부적으로
 처리한다. 직접 구현이 필요한 경우는 커스텀 컨테이너 런타임이나
 특수 에뮬레이션 레이어를 개발할 때다.
 
-```
-컨테이너 프로세스
-    │  mount() syscall 호출
-    ▼
-seccomp 필터 → SECCOMP_RET_USER_NOTIF 반환
-    │
-    ▼
-컨테이너 매니저 (notif_fd 수신)
-    │  SECCOMP_IOCTL_NOTIF_ID_VALID  ← race condition 방지
-    │  요청 검사 및 호스트에서 에뮬레이션
-    ▼
-SECCOMP_USER_NOTIF_FLAG_CONTINUE → 커널이 syscall 직접 실행
-또는 응답 직접 반환                → 에뮬레이션 결과 전달
+```mermaid
+sequenceDiagram
+    participant CP as 컨테이너 프로세스
+    participant SF as seccomp 필터
+    participant CM as 컨테이너 매니저 (notif_fd 수신)
+    participant K as 커널
+
+    CP->>SF: mount() syscall 호출
+    SF->>CM: SECCOMP_RET_USER_NOTIF 반환
+    CM->>CM: SECCOMP_IOCTL_NOTIF_ID_VALID<br/>(race condition 방지)<br/>요청 검사 및 호스트에서 에뮬레이션
+    alt syscall 직접 실행
+        CM->>K: SECCOMP_USER_NOTIF_FLAG_CONTINUE
+        K-->>CP: 커널이 syscall 직접 실행
+    else 에뮬레이션 결과 반환
+        CM-->>CP: 응답 직접 반환 (에뮬레이션 결과 전달)
+    end
 ```
 
 > **TOCTOU 주의**: supervisor가 응답하는 동안

@@ -314,21 +314,18 @@ mdadm --monitor --test --mail=admin@example.com /dev/md0
 
 ### 4.1 하드웨어 RAID 컨트롤러 역할
 
-```
-┌─────────────────────────────────┐
-│         Host (OS/Kernel)        │
-│    /dev/sda (단일 디스크로 인식)  │
-└──────────────┬──────────────────┘
-               │
-┌──────────────▼──────────────────┐
-│      RAID 컨트롤러 (HBA+RAID)    │
-│  ┌──────────────────────────┐   │
-│  │  Dedicated Processor     │   │
-│  │  + Write-Back Cache(BBU) │   │
-│  └──────────────────────────┘   │
-└──────┬──────┬──────┬────────────┘
-       │      │      │
-     sdb    sdc    sdd   (물리 드라이브)
+```mermaid
+graph TD
+    HOST["Host (OS/Kernel)<br/>/dev/sda (단일 디스크로 인식)"]
+    CTRL["RAID 컨트롤러 (HBA+RAID)<br/>Dedicated Processor<br/>+ Write-Back Cache (BBU)"]
+    SDB["/dev/sdb<br/>(물리 드라이브)"]
+    SDC["/dev/sdc<br/>(물리 드라이브)"]
+    SDD["/dev/sdd<br/>(물리 드라이브)"]
+
+    HOST --> CTRL
+    CTRL --> SDB
+    CTRL --> SDC
+    CTRL --> SDD
 ```
 
 OS는 RAID를 인식하지 못하고 단일 디스크로 본다.
@@ -442,21 +439,15 @@ Azure Disk   : LRS/ZRS/GRS 옵션으로 복제
 쿠버네티스 환경에서는 분산 스토리지가 RAID의 역할을
 소프트웨어 레벨에서 처리한다.
 
-```
-┌───────────────────────────────────────────┐
-│              Kubernetes Cluster            │
-│                                           │
-│  Pod ──PVC──▶  StorageClass               │
-│                    │                      │
-│        ┌──────────▼──────────┐            │
-│        │    Rook-Ceph / Longhorn          │
-│        │  (복제, 자가 복구, 스냅샷)        │
-│        └──────────┬──────────┘            │
-│                   │                       │
-│    Node A      Node B      Node C         │
-│   /dev/sdb    /dev/sdb    /dev/sdb        │
-│  (로컬 디스크)(로컬 디스크)(로컬 디스크)    │
-└───────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph cluster["Kubernetes Cluster"]
+        Pod["Pod"] -- PVC --> SC["StorageClass"]
+        SC --> STORAGE["Rook-Ceph / Longhorn<br/>(복제, 자가 복구, 스냅샷)"]
+        STORAGE --> NA["Node A<br/>/dev/sdb<br/>(로컬 디스크)"]
+        STORAGE --> NB["Node B<br/>/dev/sdb<br/>(로컬 디스크)"]
+        STORAGE --> NC["Node C<br/>/dev/sdb<br/>(로컬 디스크)"]
+    end
 ```
 
 | 솔루션 | RAID 대응 기능 | 추가 기능 |

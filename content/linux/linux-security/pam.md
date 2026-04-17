@@ -31,39 +31,19 @@ PAM 위에 구축된다.
 
 ### 전체 흐름
 
-```
-┌───────────────────────────────────────────────────────┐
-│                    애플리케이션                         │
-│                                                       │
-│   sshd  │  sudo  │  login  │  su  │  cron  │  ...    │
-└─────────────────────┬─────────────────────────────────┘
-                      │  libpam.so
-                      │  PAM API 호출
-                      ▼
-┌───────────────────────────────────────────────────────┐
-│                  PAM 라이브러리                         │
-│                                                       │
-│   /etc/pam.d/<service>  설정 파일 읽기                  │
-│   모듈 스택 순서대로 평가                               │
-│                                                       │
-│   ┌──────────────────────────────────────────────┐    │
-│   │             모듈 스택 평가                    │    │
-│   │                                              │    │
-│   │  auth      → 신원 확인 (비밀번호, MFA 등)     │    │
-│   │  account   → 계정 유효성 (만료, 잠금 등)      │    │
-│   │  password  → 비밀번호 갱신 처리               │    │
-│   │  session   → 세션 환경 설정/해제              │    │
-│   └──────────────────────────────────────────────┘    │
-└─────────────────────┬─────────────────────────────────┘
-                      │  성공/실패 반환
-                      ▼
-┌───────────────────────────────────────────────────────┐
-│                  PAM 모듈 (공유 라이브러리)               │
-│                                                       │
-│  pam_unix.so  pam_sss.so  pam_google_authenticator.so │
-│  pam_faillock.so  pam_pwquality.so  pam_limits.so     │
-│  pam_ldap.so  pam_access.so  pam_exec.so  ...         │
-└───────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    APP["애플리케이션<br/>sshd │ sudo │ login │ su │ cron │ ..."]
+
+    APP -->|"libpam.so<br/>PAM API 호출"| LIB
+
+    LIB["PAM 라이브러리<br/>/etc/pam.d/&lt;service&gt; 설정 파일 읽기<br/>모듈 스택 순서대로 평가"]
+
+    LIB --> STACK["모듈 스택 평가<br/>auth → 신원 확인 (비밀번호, MFA 등)<br/>account → 계정 유효성 (만료, 잠금 등)<br/>password → 비밀번호 갱신 처리<br/>session → 세션 환경 설정/해제"]
+
+    STACK -->|"성공/실패 반환"| MOD
+
+    MOD["PAM 모듈 (공유 라이브러리)<br/>pam_unix.so │ pam_sss.so │ pam_google_authenticator.so<br/>pam_faillock.so │ pam_pwquality.so │ pam_limits.so<br/>pam_ldap.so │ pam_access.so │ pam_exec.so │ ..."]
 ```
 
 **핵심 원칙**: 애플리케이션은 인증 로직을 모른다.
@@ -73,30 +53,31 @@ PAM 설정 파일만 바꾸면 인증 방식을 교체·추가할 수 있다.
 
 ### 주요 파일 위치
 
-```
-/etc/pam.d/                # 서비스별 PAM 설정
-├── sshd                   # SSH 데몬
-├── sudo                   # sudo
-├── login                  # 로컬 로그인
-├── su                     # su 명령
-├── cron                   # cron 작업
-├── system-auth            # RHEL: 공통 인증 (include)
-├── password-auth          # RHEL: 패스워드 인증 (include)
-├── common-auth            # Debian/Ubuntu: 공통 인증
-├── common-account         # Debian/Ubuntu: 공통 계정
-├── common-password        # Debian/Ubuntu: 공통 패스워드
-└── common-session         # Debian/Ubuntu: 공통 세션
+```mermaid
+graph TD
+    PAMD["/etc/pam.d/<br/>서비스별 PAM 설정"]
+    PAMD --> sshd["sshd — SSH 데몬"]
+    PAMD --> sudo["sudo — sudo"]
+    PAMD --> login["login — 로컬 로그인"]
+    PAMD --> su["su — su 명령"]
+    PAMD --> cron["cron — cron 작업"]
+    PAMD --> sauth["system-auth — RHEL 공통 인증 (include)"]
+    PAMD --> pauth["password-auth — RHEL 패스워드 인증 (include)"]
+    PAMD --> cauth["common-auth — Debian/Ubuntu 공통 인증"]
+    PAMD --> cacc["common-account — Debian/Ubuntu 공통 계정"]
+    PAMD --> cpwd["common-password — Debian/Ubuntu 공통 패스워드"]
+    PAMD --> csess["common-session — Debian/Ubuntu 공통 세션"]
 
-/lib/security/             # PAM 모듈 (32비트)
-/lib64/security/           # PAM 모듈 (64비트)
-/usr/lib/security/         # 배포판에 따라 다름
+    LIB32["/lib/security/ — PAM 모듈 (32비트)"]
+    LIB64["/lib64/security/ — PAM 모듈 (64비트)"]
+    LIBUSR["/usr/lib/security/ — 배포판에 따라 다름"]
 
-/etc/security/             # 모듈별 설정 파일
-├── limits.conf            # pam_limits 리소스 제한
-├── access.conf            # pam_access 접근 제어
-├── time.conf              # pam_time 시간대 접근
-├── pwquality.conf         # pam_pwquality 패스워드 정책
-└── faillock.conf          # pam_faillock 잠금 정책 (RHEL 9)
+    SEC["/etc/security/<br/>모듈별 설정 파일"]
+    SEC --> limits["limits.conf — pam_limits 리소스 제한"]
+    SEC --> access["access.conf — pam_access 접근 제어"]
+    SEC --> time["time.conf — pam_time 시간대 접근"]
+    SEC --> pwquality["pwquality.conf — pam_pwquality 패스워드 정책"]
+    SEC --> faillock["faillock.conf — pam_faillock 잠금 정책 (RHEL 9)"]
 ```
 
 ---
@@ -160,23 +141,24 @@ session    optional     pam_motd.so
 
 #### 평가 로직 흐름
 
-```
-required 실패:
-  ┌─ 스택 계속 실행 (사용자에게 이유 노출 방지)
-  └─ 최종 결과: 실패
+```mermaid
+graph TD
+    REQ["required 실패"]
+    REQ --> REQ1["스택 계속 실행<br/>(사용자에게 이유 노출 방지)"]
+    REQ --> REQ2["최종 결과: 실패"]
 
-requisite 실패:
-  └─ 즉시 반환: 실패 (이후 모듈 실행 안 함)
+    RQT["requisite 실패"]
+    RQT --> RQT1["즉시 반환: 실패<br/>(이후 모듈 실행 안 함)"]
 
-sufficient 성공:
-  ┌─ 이전 required 모듈 모두 성공했다면:
-  │    즉시 반환: 성공
-  └─ 이전 required 실패 있다면:
-       스택 계속 (sufficient 무시)
+    SUF["sufficient 성공"]
+    SUF --> SUF1{"이전 required<br/>모두 성공?"}
+    SUF1 -->|"예"| SUF2["즉시 반환: 성공"]
+    SUF1 -->|"아니오"| SUF3["스택 계속<br/>(sufficient 무시)"]
 
-optional 실패:
-  └─ 스택에 다른 모듈 있으면 무시
-     (이 모듈뿐이면 결과에 반영)
+    OPT["optional 실패"]
+    OPT --> OPT1{"다른 모듈 있음?"}
+    OPT1 -->|"예"| OPT2["무시"]
+    OPT1 -->|"이 모듈뿐이면"| OPT3["결과에 반영"]
 ```
 
 #### 확장 control 문법 (대괄호)
@@ -930,18 +912,10 @@ sssctl domain-status ad.example.com
 
 ### 치명적 실수 방지
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                   ⚠️  시스템 잠금 방지 필수               │
-│                                                          │
-│  PAM 설정 변경 전 반드시:                                  │
-│  1. 별도 root 터미널 세션 유지 (절대 닫지 말 것!)           │
-│  2. 설정 변경 후 새 세션으로 테스트                         │
-│  3. pamtester로 사전 검증                                  │
-│  4. 설정 파일 백업 (cp /etc/pam.d/sshd /tmp/sshd.bak)     │
-│                                                          │
-│  잘못된 required 모듈 추가 한 줄로 전체 SSH 차단 가능!      │
-└──────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    WARN["⚠️ 시스템 잠금 방지 필수<br/><br/>PAM 설정 변경 전 반드시:<br/>1. 별도 root 터미널 세션 유지 (절대 닫지 말 것!)<br/>2. 설정 변경 후 새 세션으로 테스트<br/>3. pamtester로 사전 검증<br/>4. 설정 파일 백업 (cp /etc/pam.d/sshd /tmp/sshd.bak)<br/><br/>잘못된 required 모듈 추가 한 줄로 전체 SSH 차단 가능!"]
+    style WARN fill:#fff3cd,stroke:#ffc107,color:#856404
 ```
 
 ---
@@ -1011,34 +985,35 @@ auth    include    system-auth     # system-auth를 include
 
 ## 운영 체크리스트
 
-```
-초기 설정
-├── [ ] 배포판 권장 방식 확인 (authselect / pam-auth-update)
-├── [ ] pam_faillock 활성화 및 faillock.conf 설정
-├── [ ] pam_pwquality 활성화 및 pwquality.conf 설정
-├── [ ] 변경 전 /etc/pam.d/ 디렉토리 전체 백업
-└── [ ] pamtester로 사전 검증
+```mermaid
+graph TD
+    A["초기 설정"]
+    A --> A1["[ ] 배포판 권장 방식 확인 (authselect / pam-auth-update)"]
+    A --> A2["[ ] pam_faillock 활성화 및 faillock.conf 설정"]
+    A --> A3["[ ] pam_pwquality 활성화 및 pwquality.conf 설정"]
+    A --> A4["[ ] 변경 전 /etc/pam.d/ 디렉토리 전체 백업"]
+    A --> A5["[ ] pamtester로 사전 검증"]
 
-보안 강화
-├── [ ] MFA 필요 서비스 식별 (SSH, sudo, VPN 등)
-├── [ ] pam_google_authenticator 또는 pam_oath 설정
-├── [ ] pam_access로 접근 소스 제한
-├── [ ] pam_time으로 시간대 접근 제한 (필요 시)
-└── [ ] pam_tty_audit으로 관리자 세션 감사 연동
+    B["보안 강화"]
+    B --> B1["[ ] MFA 필요 서비스 식별 (SSH, sudo, VPN 등)"]
+    B --> B2["[ ] pam_google_authenticator 또는 pam_oath 설정"]
+    B --> B3["[ ] pam_access로 접근 소스 제한"]
+    B --> B4["[ ] pam_time으로 시간대 접근 제한 (필요 시)"]
+    B --> B5["[ ] pam_tty_audit으로 관리자 세션 감사 연동"]
 
-중앙화 인증 (SSSD)
-├── [ ] sssd.conf 설정 및 도메인 가입
-├── [ ] authselect sssd 프로파일 적용
-├── [ ] pam_mkhomedir로 홈 디렉토리 자동 생성
-├── [ ] sssctl user-checks로 연동 검증
-└── [ ] 오프라인 캐시 동작 확인
+    C["중앙화 인증 (SSSD)"]
+    C --> C1["[ ] sssd.conf 설정 및 도메인 가입"]
+    C --> C2["[ ] authselect sssd 프로파일 적용"]
+    C --> C3["[ ] pam_mkhomedir로 홈 디렉토리 자동 생성"]
+    C --> C4["[ ] sssctl user-checks로 연동 검증"]
+    C --> C5["[ ] 오프라인 캐시 동작 확인"]
 
-정기 점검
-├── [ ] faillock 잠금 상태 주기적 확인
-├── [ ] /var/log/secure, auth.log 이상 징후 확인
-├── [ ] 비밀번호 만료 계정 확인 (chage -l)
-├── [ ] pam 모듈 버전 업데이트 확인
-└── [ ] 미사용 서비스의 /etc/pam.d/ 파일 검토
+    D["정기 점검"]
+    D --> D1["[ ] faillock 잠금 상태 주기적 확인"]
+    D --> D2["[ ] /var/log/secure, auth.log 이상 징후 확인"]
+    D --> D3["[ ] 비밀번호 만료 계정 확인 (chage -l)"]
+    D --> D4["[ ] pam 모듈 버전 업데이트 확인"]
+    D --> D5["[ ] 미사용 서비스의 /etc/pam.d/ 파일 검토"]
 ```
 
 ---

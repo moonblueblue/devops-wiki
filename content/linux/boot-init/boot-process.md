@@ -20,19 +20,19 @@ tags:
 
 ## 전체 흐름
 
-```
-전원 ON
-  → POST (하드웨어 자가진단)
-  → UEFI 펌웨어 초기화
-  → Secure Boot 서명 검증
-  → EFI System Partition 탐색
-  → shim → GRUB 2 (또는 systemd-boot)
-  → 커널 + initramfs 로드
-  → initramfs: 드라이버 로드 / LUKS / LVM / RAID 조립
-  → switch_root → 실제 루트 파일시스템
-  → systemd (PID 1) 기동
-  → 타겟 도달 → 서비스 병렬 시작
-  → 로그인 프롬프트
+```mermaid
+graph TD
+    A[전원 ON] --> B[POST 하드웨어 자가진단]
+    B --> C[UEFI 펌웨어 초기화]
+    C --> D[Secure Boot 서명 검증]
+    D --> E[EFI System Partition 탐색]
+    E --> F[shim → GRUB 2 또는 systemd-boot]
+    F --> G[커널 + initramfs 로드]
+    G --> H[initramfs: 드라이버 로드 / LUKS / LVM / RAID 조립]
+    H --> I[switch_root → 실제 루트 파일시스템]
+    I --> J[systemd PID 1 기동]
+    J --> K[타겟 도달 → 서비스 병렬 시작]
+    K --> L[로그인 프롬프트]
 ```
 
 ---
@@ -64,11 +64,16 @@ fdisk -l | grep "EFI System"
 
 ### Secure Boot 키 계층
 
-```
-PK  (Platform Key)        ← OEM 루트 신뢰의 기반
- └── KEK (Key Exchange Key) ← db/dbx 변경 권한 부여
-       ├── db  (허용 목록)  ← SHA-256 해시 또는 X.509 인증서
-       └── dbx (차단 목록)  ← 부팅 시 가장 먼저 파싱, 매칭 시 차단
+```mermaid
+graph TD
+    PK[PK: Platform Key\nOEM 루트 신뢰의 기반]
+    KEK[KEK: Key Exchange Key\ndb/dbx 변경 권한 부여]
+    db[db: 허용 목록\nSHA-256 해시 또는 X.509 인증서]
+    dbx[dbx: 차단 목록\n부팅 시 가장 먼저 파싱 · 매칭 시 차단]
+
+    PK --> KEK
+    KEK --> db
+    KEK --> dbx
 ```
 
 부팅 순서: UEFI가 `dbx`를 먼저 검사 → 해당 없으면 `db` 검사 →
@@ -147,12 +152,15 @@ GRUB_DISABLE_RECOVERY="true"              # 복구 메뉴 숨김
 
 ### Secure Boot 환경의 GRUB 체인
 
-```
-UEFI 펌웨어
-  └── shim.efi        ← Microsoft 서명 (distro 2nd stage 서명 내장)
-        └── grubx64.efi  ← 배포판 서명
-              └── vmlinuz  ← 배포판 서명
-                    └── initramfs
+```mermaid
+graph TD
+    A[UEFI 펌웨어]
+    B[shim.efi\nMicrosoft 서명 · distro 2nd stage 서명 내장]
+    C[grubx64.efi\n배포판 서명]
+    D[vmlinuz\n배포판 서명]
+    E[initramfs]
+
+    A --> B --> C --> D --> E
 ```
 
 커스텀 커널을 Secure Boot 환경에서 사용하려면
@@ -184,15 +192,18 @@ mokutil --import MOK.crt  # 다음 부팅 시 UEFI 화면에서 승인
 
 ### 역할
 
-```
-커널 로드
-  → initramfs를 tmpfs에 압축 해제
-  → init 스크립트 실행
-  → 스토리지 드라이버 로드
-  → RAID 조립 / LVM 활성화 / LUKS 복호화
-  → 실제 루트 파일시스템 마운트
-  → switch_root (tmpfs를 통해 old root 완전 대체)
-  → systemd (PID 1) 기동
+```mermaid
+graph TD
+    A[커널 로드]
+    B[initramfs를 tmpfs에 압축 해제]
+    C[init 스크립트 실행]
+    D[스토리지 드라이버 로드]
+    E[RAID 조립 / LVM 활성화 / LUKS 복호화]
+    F[실제 루트 파일시스템 마운트]
+    G[switch_root: tmpfs를 통해 old root 완전 대체]
+    H[systemd PID 1 기동]
+
+    A --> B --> C --> D --> E --> F --> G --> H
 ```
 
 ### 생성 도구 비교
@@ -238,11 +249,14 @@ mkinitcpio -P                      # 모든 preset
 
 ### 부팅 타겟 의존성 체인
 
-```
-sysinit.target          ← 파일시스템 마운트, swap, 커널 파라미터
-  └── basic.target      ← 소켓, 타이머, 경로 유닛
-        └── multi-user.target   ← 네트워크, 백그라운드 서비스
-              └── graphical.target   ← 디스플레이 매니저 (선택)
+```mermaid
+graph TD
+    A[sysinit.target\n파일시스템 마운트 · swap · 커널 파라미터]
+    B[basic.target\n소켓 · 타이머 · 경로 유닛]
+    C[multi-user.target\n네트워크 · 백그라운드 서비스]
+    D[graphical.target\n디스플레이 매니저 - 선택]
+
+    A --> B --> C --> D
 ```
 
 ```bash
@@ -263,12 +277,14 @@ systemd-analyze critical-chain     # 크리티컬 패스 (병목 파악)
 systemd-analyze plot > boot.svg    # SVG 타임라인
 ```
 
-```
-$ systemd-analyze critical-chain
-graphical.target @12.543s
-└─multi-user.target @12.543s
-  └─nginx.service @8.123s +4.201s   ← 여기가 병목
-    └─network.target @7.891s
+```mermaid
+graph TD
+    A[graphical.target @12.543s]
+    B[multi-user.target @12.543s]
+    C["nginx.service @8.123s +4.201s ← 여기가 병목"]
+    D[network.target @7.891s]
+
+    A --> B --> C --> D
 ```
 
 ---

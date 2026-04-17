@@ -33,13 +33,16 @@ Bounding(B)     — execve 시 Permitted의 최대 상한
 Ambient(A)      — 비특권 프로그램 execve 시 보존 (Linux 4.3+)
 ```
 
-```
-                  execve()
-  부모 프로세스 ─────────────→ 자식 프로세스
-  P(부모) ∩ B      →  P(자식 permitted)
-  P(부모) ∩ 파일 P →  P(자식 추가)
-  I(부모) ∩ 파일 I →  P(자식 추가)
-  A(부모)          →  P(자식), E(자식)  [ambient]
+```mermaid
+sequenceDiagram
+    participant Parent as 부모 프로세스
+    participant Child as 자식 프로세스
+
+    Parent->>Child: execve()
+    Note over Child: P(자식 permitted) ← P(부모) ∩ B
+    Note over Child: P(자식 추가) ← P(부모) ∩ 파일 P
+    Note over Child: P(자식 추가) ← I(부모) ∩ 파일 I
+    Note over Child: P(자식), E(자식) ← A(부모) [ambient]
 ```
 
 | 집합 | 역할 | 수정 권한 |
@@ -126,12 +129,16 @@ setcap cap_net_bind_service=ep /usr/sbin/nginx
 
 ### 표기법 해석
 
-```
-cap_net_bind_service=eip
-                    │││
-                    ││└─ p (Permitted)
-                    │└── i (Inheritable)
-                    └─── e (Effective)
+```mermaid
+graph LR
+    CAP["cap_net_bind_service=eip"]
+    E["e → Effective"]
+    I["i → Inheritable"]
+    P["p → Permitted"]
+
+    CAP --> E
+    CAP --> I
+    CAP --> P
 ```
 
 > **경고**: 인터프리터 바이너리(python, perl, bash, ruby 등)에

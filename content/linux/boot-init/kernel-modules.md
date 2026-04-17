@@ -233,11 +233,14 @@ journalctl -u systemd-modules-load.service --since boot
 
 ### Secure Boot와 LOCKDOWN 모드
 
-```
-UEFI Secure Boot 활성화
-  └→ shim/GRUB이 서명된 커널만 로드
-       └→ 커널 LOCKDOWN integrity 모드 자동 활성화
-            └→ 서명 없는 모듈 로드 차단
+```mermaid
+graph TD
+    A[UEFI Secure Boot 활성화]
+    B[shim/GRUB이 서명된 커널만 로드]
+    C[커널 LOCKDOWN integrity 모드 자동 활성화]
+    D[서명 없는 모듈 로드 차단]
+
+    A --> B --> C --> D
 ```
 
 서명된 `.ko` 파일 구조:
@@ -333,12 +336,15 @@ NVIDIA 드라이버, VirtualBox, WireGuard(구버전) 등이 대표적인 사례
 
 ### 동작 원리
 
-```
-커널 업데이트 (apt/dnf)
-  └→ 패키지 매니저 post-install hook
-       └→ dkms autoinstall
-            └→ linux-headers 참조하여 재컴파일
-                 └→ /lib/modules/<new-kernel>/updates/dkms/<name>.ko 설치
+```mermaid
+graph TD
+    A[커널 업데이트 apt/dnf]
+    B[패키지 매니저 post-install hook]
+    C[dkms autoinstall]
+    D[linux-headers 참조하여 재컴파일]
+    E["/lib/modules/&lt;new-kernel&gt;/updates/dkms/&lt;name&gt;.ko 설치"]
+
+    A --> B --> C --> D --> E
 ```
 
 ### dkms.conf 형식

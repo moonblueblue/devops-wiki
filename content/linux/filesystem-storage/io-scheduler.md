@@ -31,47 +31,30 @@ I/O 스케줄러는 프로세스들이 요청한 읽기/쓰기를
 Linux 5.0 이후, 단일 큐(sq) 방식은 완전히 제거되고
 **blk-mq (Multi-Queue Block I/O)** 만 남았다.
 
-```
-┌─────────────────────────────────────────────┐
-│           User Space (Application)           │
-│  read() / write() / io_uring / aio           │
-└──────────────────────┬──────────────────────┘
-                       │ VFS
-┌──────────────────────▼──────────────────────┐
-│              VFS / Page Cache                │
-└──────────────────────┬──────────────────────┘
-                       │ bio
-┌──────────────────────▼──────────────────────┐
-│          Generic Block Layer (bio)           │
-│  bio 분할, 병합, 보안 정책 적용              │
-└──────────────────────┬──────────────────────┘
-                       │ request
-┌──────────────────────▼──────────────────────┐
-│        blk-mq: Software Staging Queues       │
-│   (CPU당 1개 큐, lock-free MPSC 구조)        │
-│                                              │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
-│  │ CPU0 SQ  │ │ CPU1 SQ  │ │ CPU2 SQ  │    │
-│  └────┬─────┘ └────┬─────┘ └────┬─────┘    │
-└───────┼─────────────┼─────────────┼─────────┘
-    (CPU당 또는 NUMA 노드당 1개, lock-free)
-        │             │             │
-        └─────────────▼─────────────┘
-                      │
-┌─────────────────────▼───────────────────────┐
-│           I/O Scheduler (선택적)             │
-│   none │ mq-deadline │ bfq │ kyber           │
-│   요청 정렬·병합·우선순위화                  │
-└─────────────────────┬───────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────┐
-│     Hardware Dispatch Queues (hctx)          │
-│  (장치 큐 수만큼 존재, NVMe는 수십~수백 개)  │
-└─────────────────────┬───────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────┐
-│       Storage Driver (NVMe / SCSI / etc.)    │
-└─────────────────────────────────────────────┘
+```mermaid
+graph TD
+    APP["User Space (Application)<br/>read() / write() / io_uring / aio"]
+    VFS["VFS / Page Cache"]
+    BIO["Generic Block Layer (bio)<br/>bio 분할, 병합, 보안 정책 적용"]
+    MQ["blk-mq: Software Staging Queues<br/>(CPU당 1개 큐, lock-free MPSC 구조)"]
+    SQ0["CPU0 SQ"]
+    SQ1["CPU1 SQ"]
+    SQ2["CPU2 SQ"]
+    SCHED["I/O Scheduler (선택적)<br/>none │ mq-deadline │ bfq │ kyber<br/>요청 정렬·병합·우선순위화"]
+    HCTX["Hardware Dispatch Queues (hctx)<br/>(장치 큐 수만큼 존재, NVMe는 수십~수백 개)"]
+    DRV["Storage Driver (NVMe / SCSI / etc.)"]
+
+    APP -- "VFS" --> VFS
+    VFS -- "bio" --> BIO
+    BIO -- "request" --> MQ
+    MQ --> SQ0
+    MQ --> SQ1
+    MQ --> SQ2
+    SQ0 --> SCHED
+    SQ1 --> SCHED
+    SQ2 --> SCHED
+    SCHED --> HCTX
+    HCTX --> DRV
 ```
 
 ### blk-mq의 핵심 개념

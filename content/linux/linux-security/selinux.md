@@ -72,14 +72,16 @@ SELINUXTYPE=targeted
 
 SELinux는 모든 파일, 프로세스, 포트에 **레이블(컨텍스트)**을 부여한다.
 
-```
-user:role:type:level
- │    │    │    └── MLS/MCS 레벨
- │    │    │        targeted: s0 (단일 레벨)
- │    │    │        컨테이너/Pod: s0:c123,c456 (고유 카테고리)
- │    │    └─────── 타입 (정책의 핵심)
- │    └──────────── 역할
- └───────────────── SELinux 사용자
+```mermaid
+graph TD
+    LABEL["user : role : type : level"]
+    LABEL --> U["SELinux 사용자 (user)"]
+    LABEL --> R["역할 (role)"]
+    LABEL --> T["타입 (type)<br/>← 정책의 핵심"]
+    LABEL --> L["MLS/MCS 레벨 (level)"]
+
+    L --> L1["targeted: s0 (단일 레벨)"]
+    L --> L2["컨테이너/Pod: s0:c123,c456 (고유 카테고리)"]
 ```
 
 > **컨테이너/Kubernetes에서 MCS**: Kubernetes는 SELinux 활성화
@@ -164,19 +166,20 @@ audit2why < /var/log/audit/audit.log
 
 ## 트러블슈팅 흐름
 
-```
-AVC 거부 발생
-      │
-      ▼
-ausearch + sealert로 원인 분석
-      │
-      ├─ 레이블 오류? → restorecon
-      │
-      ├─ Boolean 필요? → setsebool
-      │
-      ├─ 포트 레이블 오류? → semanage port
-      │
-      └─ 새 정책 필요? → audit2allow (신중하게!)
+```mermaid
+graph TD
+    A["AVC 거부 발생"]
+    A --> B["ausearch + sealert로 원인 분석"]
+
+    B --> C["레이블 오류?"]
+    B --> D["Boolean 필요?"]
+    B --> E["포트 레이블 오류?"]
+    B --> F["새 정책 필요?"]
+
+    C --> C1["restorecon"]
+    D --> D1["setsebool"]
+    E --> E1["semanage port"]
+    F --> F1["audit2allow<br/>(신중하게!)"]
 ```
 
 ### 1. 레이블 복원 (restorecon)

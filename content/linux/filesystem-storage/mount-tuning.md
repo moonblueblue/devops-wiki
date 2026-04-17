@@ -464,13 +464,14 @@ Docker/containerd의 overlay2 스토리지 드라이버는 **호스트 파일시
 위**에서 동작한다. 호스트 `/var/lib/docker`의 마운트 옵션이 컨테이너
 I/O 성능에 직접 영향을 준다.
 
-```
-호스트 파일시스템 (ext4/xfs)
-    └── /var/lib/docker  ← 이 파티션의 마운트 옵션이 핵심
-          └── overlay2/
-                ├── lowerdir  (이미지 레이어)
-                ├── upperdir  (컨테이너 쓰기 레이어)
-                └── workdir
+```mermaid
+graph TD
+    HOST["호스트 파일시스템 (ext4/xfs)"]
+    --> DOCKER["/var/lib/docker<br/>이 파티션의 마운트 옵션이 핵심"]
+    --> OVL["overlay2/"]
+    OVL --> LOW["lowerdir (이미지 레이어)"]
+    OVL --> UPP["upperdir (컨테이너 쓰기 레이어)"]
+    OVL --> WORK["workdir"]
 ```
 
 ```ini

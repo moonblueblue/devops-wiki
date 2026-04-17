@@ -25,26 +25,16 @@ tags:
 
 두 가지 독립적 메커니즘이 병렬로 동작한다.
 
-```
-┌─────────────────────────────────────────────┐
-│         커널 전역 제한 (sysctl)               │
-│  fs.file-max, fs.nr_open, vm.max_map_count   │
-│     ← 모든 프로세스의 절대 상한              │
-└──────────────┬──────────────────────────────┘
-               │
-    ┌──────────┴───────────────────┐
-    │                              │
-    ▼                              ▼
-[ulimit 계열 경로]          [cgroups v2 경로]
-PAM limits.conf             systemd MemoryMax /
-(로그인 세션만)              MemoryHigh / TasksMax
-    │                          (서비스 전체 적용)
-    ↓
-ulimit (셸 세션 내 조정)
-    ↓
-systemd LimitNOFILE /
-LimitNPROC 등
-(PAM과 독립 경로로 커널에 설정)
+```mermaid
+graph TD
+    A["커널 전역 제한 (sysctl)<br/>fs.file-max / fs.nr_open / vm.max_map_count<br/>← 모든 프로세스의 절대 상한"]
+
+    A --> B["ulimit 계열 경로"]
+    A --> C["cgroups v2 경로<br/>systemd MemoryMax / MemoryHigh / TasksMax<br/>(서비스 전체 적용)"]
+
+    B --> D["PAM limits.conf<br/>(로그인 세션만)"]
+    D --> E["ulimit<br/>(셸 세션 내 조정)"]
+    E --> F["systemd LimitNOFILE / LimitNPROC 등<br/>(PAM과 독립 경로로 커널에 설정)"]
 ```
 
 > `limits.conf`는 **PAM 로그인 세션**을 통해 적용된다.

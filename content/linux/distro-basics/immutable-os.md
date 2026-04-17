@@ -44,15 +44,15 @@ $ touch /usr/bin/test
 
 ### A/B 파티션 업데이트
 
-```
-┌──────────┬──────────────┬──────────────┬──────────┐
-│ Boot/EFI │  파티션 A    │  파티션 B    │  /var    │
-│          │  (현재 활성) │  (업데이트)  │ (데이터) │
-└──────────┴──────────────┴──────────────┴──────────┘
-                                ↑
-                      새 버전을 여기에 기록
-                      → 재부팅 시 활성 전환
-                      → 실패 시 A로 자동 롤백
+```mermaid
+graph LR
+    A["Boot/EFI"] --> B["파티션 A\n(현재 활성)"]
+    A --> C["파티션 B\n(업데이트 대상)"]
+    A --> D["/var\n(데이터)"]
+
+    C -->|"새 버전 기록"| E{"재부팅"}
+    E -->|"성공"| C2["파티션 B 활성"]
+    E -->|"실패"| B2["파티션 A로 자동 롤백"]
 ```
 
 전통적인 `apt upgrade`와의 차이점:
@@ -194,17 +194,23 @@ Beta:   v1.13.0-beta.1         Clang 빌드 커널 + ThinLTO
 
 **핵심 아키텍처**:
 
-```
-기존 Linux 노드:
-  systemd → sshd → bash → 패키지 관리자
-                 ↓ 운영자가 직접 접속·수정
+```mermaid
+graph TD
+    subgraph traditional["기존 Linux 노드"]
+        T1[systemd] --> T2[sshd]
+        T2 --> T3[bash]
+        T3 --> T4[패키지 관리자]
+        T2 -->|"운영자 직접 접속·수정"| T5((운영자))
+    end
 
-Talos 노드:
-  machined(PID 1)
-    ├── apid        (gRPC 게이트웨이, 포트 50000) ← talosctl 연결
-    ├── trustd      (인증서 배포, Root of Trust)
-    ├── containerd  (컨테이너 런타임)
-    └── kubelet     (K8s 에이전트)
+    subgraph talos["Talos 노드"]
+        M["machined (PID 1)"]
+        M --> AP["apid\n(gRPC 게이트웨이, 포트 50000)"]
+        M --> TR["trustd\n(인증서 배포, Root of Trust)"]
+        M --> CT["containerd\n(컨테이너 런타임)"]
+        M --> KB["kubelet\n(K8s 에이전트)"]
+        TC((talosctl)) -->|"gRPC"| AP
+    end
 ```
 
 방화벽 규칙: talosctl은 **apid**(포트 50000/TCP)와 통신한다.
@@ -343,23 +349,20 @@ RPM 패키지 추가가 필요한 환경.
 
 ## 선택 가이드
 
-```
-어떤 환경인가?
-│
-├─ AWS EKS 전용
-│   └─ Bottlerocket (EKS 최적화 AMI, BRUP)
-│
-├─ 멀티클라우드 / 하이브리드
-│   └─ Flatcar (CNCF, 동일 이미지 멀티환경)
-│
-├─ 보안 최우선 / air-gapped
-│   └─ Talos (SSH 없음, SBOM, 재현 가능 빌드)
-│
-├─ Red Hat / OpenShift 생태계
-│   └─ Fedora CoreOS / RHCOS
-│
-└─ 대규모 베어메탈 K8s fleet
-    └─ Talos + Sidero Metal
+```mermaid
+graph TD
+    Q["어떤 환경인가?"]
+    Q --> A["AWS EKS 전용"]
+    Q --> B["멀티클라우드 / 하이브리드"]
+    Q --> C["보안 최우선 / air-gapped"]
+    Q --> D["Red Hat / OpenShift 생태계"]
+    Q --> E["대규모 베어메탈 K8s fleet"]
+
+    A --> A1["Bottlerocket\n(EKS 최적화 AMI, BRUP)"]
+    B --> B1["Flatcar\n(CNCF, 동일 이미지 멀티환경)"]
+    C --> C1["Talos\n(SSH 없음, SBOM, 재현 가능 빌드)"]
+    D --> D1["Fedora CoreOS / RHCOS"]
+    E --> E1["Talos + Sidero Metal"]
 ```
 
 **Immutable OS를 쓰지 말아야 할 경우**:

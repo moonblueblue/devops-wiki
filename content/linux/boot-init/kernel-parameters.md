@@ -81,14 +81,15 @@ systemd-sysctl.service가 부팅 시 `sysctl --system`을 실행한다.
 
 ### TCP 연결 큐
 
-```
-클라이언트 SYN
-  → [SYN Queue]        ← tcp_max_syn_backlog 제어
-     SYN_RECV 상태
-  → 3-way handshake 완료
-  → [Accept Queue]     ← somaxconn 제어
-     ESTABLISHED
-  → 애플리케이션 accept()
+```mermaid
+graph TD
+    A[클라이언트 SYN]
+    B["SYN Queue\ntcp_max_syn_backlog 제어\nSYN_RECV 상태"]
+    C[3-way handshake 완료]
+    D["Accept Queue\nsomaxconn 제어\nESTABLISHED"]
+    E[애플리케이션 accept]
+
+    A --> B --> C --> D --> E
 ```
 
 | 파라미터 | 기본값 | 고트래픽 권장 | 설명 |
@@ -156,10 +157,13 @@ systemd-sysctl.service가 부팅 시 `sysctl --system`을 실행한다.
 
 ### 파일 디스크립터
 
-```
-fs.file-max            ← 시스템 전체 상한
-  └── fs.nr_open       ← 프로세스당 상한 ceiling
-        └── ulimit -n  ← 프로세스당 소프트/하드 한계
+```mermaid
+graph TD
+    A[fs.file-max\n시스템 전체 상한]
+    B[fs.nr_open\n프로세스당 상한 ceiling]
+    C["ulimit -n\n프로세스당 소프트/하드 한계"]
+
+    A --> B --> C
 ```
 
 `ulimit`은 `fs.nr_open`을 초과할 수 없다.
@@ -188,11 +192,11 @@ fs.file-max            ← 시스템 전체 상한
 
 ### vm.dirty_ratio / vm.dirty_background_ratio
 
-```
-RAM 사용률
-  3%  ──── dirty_background_ratio: 백그라운드 flush 시작
- 10%  ──── dirty_background_ratio 기본값
- 20%  ──── dirty_ratio: 프로세스 직접 쓰기 (블로킹!)
+```mermaid
+graph LR
+    A["3%"] -->|dirty_background_ratio 설정값 예시| B["백그라운드 flush 시작"]
+    C["10%"] -->|dirty_background_ratio 기본값| D["백그라운드 flush 시작 (기본)"]
+    E["20%"] -->|dirty_ratio 기본값| F["프로세스 직접 쓰기 - 블로킹!"]
 ```
 
 | 파라미터 | 기본값 | DB 권장 | 웹서버 권장 |
@@ -353,23 +357,24 @@ CAP_BPF / CAP_SYS_ADMIN을 부여해야 한다.
 
 ### /proc/\<pid\>/ 구조
 
-```
-/proc/<pid>/
-├── cmdline       ← 실행 명령어 (null 구분)
-├── environ       ← 환경변수
-├── exe           ← 실행 파일 심링크
-├── fd/           ← 열린 FD 심링크
-│   ├── 0 → /dev/null
-│   └── 5 → socket:[12345]
-├── maps          ← 메모리 맵 (주소, 권한)
-├── smaps         ← RSS, PSS 포함 상세 버전
-├── status        ← 인간 친화적 프로세스 상태
-├── limits        ← rlimit 현황
-├── cgroup        ← cgroup 소속
-├── ns/           ← 네임스페이스 심링크
-│   ├── net → net:[4026531992]
-│   └── pid → pid:[4026531836]
-└── oom_score_adj ← OOM killer 가중치
+```mermaid
+graph TD
+    ROOT["/proc/&lt;pid&gt;/"]
+    ROOT --> cmdline["cmdline\n실행 명령어 null 구분"]
+    ROOT --> environ["environ\n환경변수"]
+    ROOT --> exe["exe\n실행 파일 심링크"]
+    ROOT --> fd["fd/\n열린 FD 심링크"]
+    fd --> fd0["0 → /dev/null"]
+    fd --> fd5["5 → socket:[12345]"]
+    ROOT --> maps["maps\n메모리 맵 주소·권한"]
+    ROOT --> smaps["smaps\nRSS·PSS 포함 상세 버전"]
+    ROOT --> status["status\n인간 친화적 프로세스 상태"]
+    ROOT --> limits["limits\nrlimit 현황"]
+    ROOT --> cgroup["cgroup\ncgroup 소속"]
+    ROOT --> ns["ns/\n네임스페이스 심링크"]
+    ns --> nsnet["net → net:[4026531992]"]
+    ns --> nspid["pid → pid:[4026531836]"]
+    ROOT --> oom["oom_score_adj\nOOM killer 가중치"]
 ```
 
 ```bash
@@ -387,19 +392,20 @@ readlink /proc/1234/ns/net
 
 ## /sys 주요 경로
 
-```
-/sys/
-├── block/<dev>/queue/
-│   ├── scheduler       ← I/O 스케줄러
-│   ├── rotational      ← HDD(1)/SSD(0)
-│   └── read_ahead_kb   ← read-ahead 크기
-├── class/net/<iface>/
-│   ├── speed           ← 링크 속도 (Mbps)
-│   └── operstate       ← up/down
-└── kernel/mm/
-    ├── transparent_hugepage/   ← THP 설정
-    └── hugepages/hugepages-2048kB/
-        └── nr_hugepages
+```mermaid
+graph TD
+    SYS["/sys/"]
+    SYS --> block["block/&lt;dev&gt;/queue/"]
+    block --> sched["scheduler\nI/O 스케줄러"]
+    block --> rot["rotational\nHDD=1 / SSD=0"]
+    block --> ra["read_ahead_kb\nread-ahead 크기"]
+    SYS --> classnet["class/net/&lt;iface&gt;/"]
+    classnet --> speed["speed\n링크 속도 Mbps"]
+    classnet --> operstate["operstate\nup/down"]
+    SYS --> kernelmm["kernel/mm/"]
+    kernelmm --> thp["transparent_hugepage/\nTHP 설정"]
+    kernelmm --> hp["hugepages/hugepages-2048kB/"]
+    hp --> nrhp["nr_hugepages"]
 ```
 
 ### /sys vs /proc

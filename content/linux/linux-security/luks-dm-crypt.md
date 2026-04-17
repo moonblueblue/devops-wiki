@@ -28,23 +28,15 @@ dm-crypt는 Linux 커널의 device mapper 서브시스템에 내장된
 
 ### 계층 구조
 
-```
-┌──────────────────────────────────────────────────────┐
-│  Application / Filesystem                            │
-│  (ext4, xfs, btrfs, LVM PV...)                       │
-├──────────────────────────────────────────────────────┤
-│  /dev/mapper/NAME                                    │
-│  (decrypted virtual block device)                    │
-├──────────────────────────────────────────────────────┤
-│  dm-crypt  (kernel device mapper)                    │
-│  Cipher: AES-XTS, ChaCha20...                        │
-├──────────────────────────────────────────────────────┤
-│  LUKS Header  (disk front area)                      │
-│  Magic | UUID | Cipher params | Keyslot 0~31         │
-├──────────────────────────────────────────────────────┤
-│  Physical Block Device                               │
-│  (/dev/sda, /dev/nvme0n1p2)                          │
-└──────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    A["Application / Filesystem<br/>(ext4, xfs, btrfs, LVM PV...)"]
+    B["/dev/mapper/NAME<br/>(decrypted virtual block device)"]
+    C["dm-crypt  (kernel device mapper)<br/>Cipher: AES-XTS, ChaCha20..."]
+    D["LUKS Header  (disk front area)<br/>Magic | UUID | Cipher params | Keyslot 0~31"]
+    E["Physical Block Device<br/>(/dev/sda, /dev/nvme0n1p2)"]
+
+    A --> B --> C --> D --> E
 ```
 
 **핵심 개념**:
@@ -461,18 +453,22 @@ mydata  /dev/sdb1  -  tpm2-device=auto,tpm2-pcrs=7
 
 ### /boot 분리 구조 (일반적)
 
-```
-┌─────────────────────────────────────────────────┐
-│  디스크 레이아웃                                  │
-│                                                 │
-│  /dev/sda1  →  /boot/efi (EFI 파티션, 평문)      │
-│  /dev/sda2  →  /boot (커널·initramfs, 평문)      │
-│  /dev/sda3  →  LUKS2 암호화                     │
-│                  └── LVM PV                     │
-│                       ├── / (루트)               │
-│                       ├── /home                 │
-│                       └── swap                  │
-└─────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph disk["디스크 레이아웃"]
+        sda1["/dev/sda1 → /boot/efi<br/>(EFI 파티션, 평문)"]
+        sda2["/dev/sda2 → /boot<br/>(커널·initramfs, 평문)"]
+        sda3["/dev/sda3 → LUKS2 암호화"]
+        lvm["LVM PV"]
+        root["/ (루트)"]
+        home["/home"]
+        swap["swap"]
+    end
+
+    sda3 --> lvm
+    lvm --> root
+    lvm --> home
+    lvm --> swap
 ```
 
 - `/boot`는 initramfs와 GRUB이 패스프레이즈 입력 전에
@@ -503,30 +499,17 @@ cryptsetup luksFormat \
 
 ### Measured Boot + LUKS (권장 FDE 패턴)
 
-```
-펌웨어 부팅
-     │
-     ▼
-Secure Boot (서명 검증)
-     │  실패 → 부팅 중단
-     ▼
-GRUB 부트로더
-     │
-     ▼
-커널 + initramfs 로드
-     │
-     ▼
-systemd-cryptsetup
-     │
-     ├─ TPM2에 PCR 값 요청
-     │    └─ 펌웨어·Secure Boot 상태가 등록 시와 다름
-     │         → TPM2 잠금 (자동 해제 실패)
-     │         → 패스프레이즈 수동 입력 fallback
-     │
-     └─ PCR 일치 → 자동 잠금 해제
-          │
-          ▼
-       루트 마운트 → 시스템 부팅
+```mermaid
+graph TD
+    A["펌웨어 부팅"] --> B["Secure Boot (서명 검증)"]
+    B -- "실패" --> HALT["부팅 중단"]
+    B -- "성공" --> C["GRUB 부트로더"]
+    C --> D["커널 + initramfs 로드"]
+    D --> E["systemd-cryptsetup"]
+    E --> F["TPM2에 PCR 값 요청"]
+    F -- "PCR 불일치<br/>(펌웨어·Secure Boot 상태 변경)" --> G["TPM2 잠금 (자동 해제 실패)<br/>→ 패스프레이즈 수동 입력 fallback"]
+    F -- "PCR 일치" --> H["자동 잠금 해제"]
+    H --> I["루트 마운트 → 시스템 부팅"]
 ```
 
 ---
@@ -683,23 +666,15 @@ dd if=/dev/mapper/mydata_recovered of=/backup/data.img bs=4M
 
 서버는 물리 접근 없이 네트워크를 통해 잠금을 해제한다.
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                                                          │
-│  서버 (암호화 디스크)        Tang 서버 (키 배포)           │
-│                                                          │
-│  Clevis 클라이언트           /usr/bin/tangd               │
-│       │                          │                       │
-│       │  1. 잠금 해제 요청        │                       │
-│       │ ─────────────────────────►                       │
-│       │  2. JWK(JSON Web Key)     │                       │
-│       │ ◄─────────────────────────                       │
-│       │                           │                       │
-│       │  3. 로컬 바인딩 데이터와   │                       │
-│       │     복합하여 Master Key 복원                       │
-│       │  4. LUKS 잠금 해제        │                       │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant C as 서버 (Clevis 클라이언트)
+    participant T as Tang 서버 (/usr/bin/tangd)
+
+    C->>T: 1. 잠금 해제 요청
+    T-->>C: 2. JWK (JSON Web Key) 응답
+    Note over C: 3. 로컬 바인딩 데이터와 복합하여<br/>Master Key 복원
+    Note over C: 4. LUKS 잠금 해제
 ```
 
 ```bash
@@ -761,20 +736,20 @@ clevis luks unbind -d /dev/sdb1 -s 1
 
 ### Kubernetes에서 암호화된 PV 활용
 
-```
-┌───────────────────────────────────────────────────────┐
-│                   Kubernetes 노드                      │
-│                                                       │
-│  Pod (앱)                                             │
-│   └── PVC → PV → StorageClass                        │
-│                    └── 암호화 옵션                     │
-│                         │                            │
-│          ┌──────────────┴──────────────┐              │
-│          │                             │              │
-│    CSI 레벨 암호화               노드 레벨 LUKS         │
-│  (rook-ceph encryption,         (PV가 암호화된         │
-│   OpenEBS cStor 등)             블록 위에 위치)         │
-└───────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph node["Kubernetes 노드"]
+        Pod["Pod (앱)"]
+        PVC["PVC"]
+        PV["PV"]
+        SC["StorageClass<br/>(암호화 옵션)"]
+        CSI["CSI 레벨 암호화<br/>(rook-ceph encryption,<br/>OpenEBS cStor 등)"]
+        LUKS["노드 레벨 LUKS<br/>(PV가 암호화된<br/>블록 위에 위치)"]
+    end
+
+    Pod --> PVC --> PV --> SC
+    SC --> CSI
+    SC --> LUKS
 ```
 
 **rook-ceph + 암호화**:

@@ -38,17 +38,22 @@ I/O, 네트워크 등의 자원을 제한·계량·격리하는 커널 기능이
 
 ## cgroups v1: 다중 계층
 
-```
-/sys/fs/cgroup/
-├── cpu/            ← CPU 컨트롤러 계층
-│   └── myapp/
-│       └── (PID 1234, 5678)
-├── memory/         ← 메모리 컨트롤러 계층
-│   └── myapp/
-│       └── (PID 1234, 5678)
-├── blkio/          ← 블록 I/O 컨트롤러 계층
-│   └── myapp/
-└── ...             ← 컨트롤러마다 독립 트리
+```mermaid
+graph TD
+    ROOT["/sys/fs/cgroup/"]
+
+    ROOT --> CPU["cpu/<br/>← CPU 컨트롤러 계층"]
+    ROOT --> MEM["memory/<br/>← 메모리 컨트롤러 계층"]
+    ROOT --> BLK["blkio/<br/>← 블록 I/O 컨트롤러 계층"]
+    ROOT --> ETC["...<br/>← 컨트롤러마다 독립 트리"]
+
+    CPU --> CPU_APP["myapp/"]
+    CPU_APP --> CPU_PID["PID 1234, 5678"]
+
+    MEM --> MEM_APP["myapp/"]
+    MEM_APP --> MEM_PID["PID 1234, 5678"]
+
+    BLK --> BLK_APP["myapp/"]
 ```
 
 **문제점**: 동일 프로세스가 각 컨트롤러 계층에 따로 존재.
@@ -58,17 +63,20 @@ I/O, 네트워크 등의 자원을 제한·계량·격리하는 커널 기능이
 
 ## cgroups v2: 단일 통합 계층
 
-```
-/sys/fs/cgroup/           ← 유일한 마운트 포인트
-├── cgroup.controllers    ← 사용 가능한 컨트롤러 목록
-├── cgroup.subtree_control ← 하위에 위임할 컨트롤러
-├── system.slice/
-│   └── myapp.service/
-│       ├── cgroup.procs  ← PID 목록
-│       ├── memory.max    ← 메모리 상한
-│       ├── cpu.weight    ← CPU 비중
-│       └── io.max        ← I/O 대역폭 제한
-└── user.slice/
+```mermaid
+graph TD
+    ROOT["/sys/fs/cgroup/<br/>← 유일한 마운트 포인트"]
+
+    ROOT --> CC["cgroup.controllers<br/>← 사용 가능한 컨트롤러 목록"]
+    ROOT --> CSC["cgroup.subtree_control<br/>← 하위에 위임할 컨트롤러"]
+    ROOT --> SYS["system.slice/"]
+    ROOT --> USR["user.slice/"]
+
+    SYS --> SVC["myapp.service/"]
+    SVC --> PROCS["cgroup.procs<br/>← PID 목록"]
+    SVC --> MEMMAX["memory.max<br/>← 메모리 상한"]
+    SVC --> CPUW["cpu.weight<br/>← CPU 비중"]
+    SVC --> IOMAX["io.max<br/>← I/O 대역폭 제한"]
 ```
 
 **핵심 규칙**: 내부 노드(자식이 있는 cgroup)에는

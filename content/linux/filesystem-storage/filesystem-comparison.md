@@ -148,17 +148,19 @@ XFS는 1993년 SGI가 IRIX용으로 개발했으며,
 2001년 Linux 커널에 포팅됐다.
 RHEL 7(2014)부터 기본 파일시스템으로 채택됐다.
 
-```
- XFS 내부 구조 (Allocation Group 기반)
- ┌─────────────────────────────────────────┐
- │  AG 0       AG 1       AG 2       AG 3  │
- │ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐│
- │ │inode  │ │inode  │ │inode  │ │inode  ││
- │ │alloc  │ │alloc  │ │alloc  │ │alloc  ││
- │ │btree  │ │btree  │ │btree  │ │btree  ││
- │ └───────┘ └───────┘ └───────┘ └───────┘│
- │   ↑ 각 AG가 독립적으로 병렬 처리        │
- └─────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph xfs["XFS 내부 구조 (Allocation Group 기반)"]
+        AG0["AG 0<br/>inode alloc<br/>btree"]
+        AG1["AG 1<br/>inode alloc<br/>btree"]
+        AG2["AG 2<br/>inode alloc<br/>btree"]
+        AG3["AG 3<br/>inode alloc<br/>btree"]
+    end
+    NOTE["각 AG가 독립적으로 병렬 처리"]
+    AG0 -.-> NOTE
+    AG1 -.-> NOTE
+    AG2 -.-> NOTE
+    AG3 -.-> NOTE
 ```
 
 ### 핵심 기능
@@ -235,16 +237,23 @@ Btrfs는 B-tree + CoW 기반으로 설계됐다.
 쓰기 시 기존 데이터를 덮어쓰지 않고 새 위치에 기록한다.
 이를 통해 스냅샷, 압축, 체크섬이 자연스럽게 구현된다.
 
-```
- Btrfs CoW 쓰기 흐름
- ┌──────────────────────────────────────────┐
- │ 기존 데이터: [Block A] [Block B] [Block C]│
- │                                          │
- │ 쓰기 발생:                               │
- │   → 새 위치에 [Block B'] 기록            │
- │   → 메타데이터 트리 업데이트             │
- │   → 기존 [Block B]는 스냅샷에서 참조     │
- └──────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph before["기존 데이터"]
+        BA["Block A"]
+        BB["Block B"]
+        BC["Block C"]
+    end
+    subgraph after["쓰기 발생 후"]
+        BA2["Block A"]
+        BB2["Block B (스냅샷 참조)"]
+        BB3["Block B' (새 위치에 기록)"]
+        BC2["Block C"]
+        META["메타데이터 트리 업데이트"]
+    end
+    BB --> BB2
+    BB --> BB3
+    BB3 --> META
 ```
 
 ### 주요 기능
@@ -364,34 +373,19 @@ OpenZFS 2.3은 세 가지 주요 기능을 추가했다:
 
 ### 스토리지 계층 구조
 
-```
- ZFS 캐시 계층 아키텍처
- ┌─────────────────────────────────────────┐
- │           Application Layer             │
- └───────────────────┬─────────────────────┘
-                     ↓ 읽기 요청
- ┌─────────────────────────────────────────┐
- │  ARC (Adaptive Replacement Cache)       │
- │  ← RAM 기반, 서브 마이크로초 레이턴시   │
- │  MRU (최근 사용) + MFU (자주 사용) 관리  │
- └───────────────┬─────────────────────────┘
-                 ↓ ARC 미스 시
- ┌─────────────────────────────────────────┐
- │  L2ARC (Layer 2 ARC)                    │
- │  ← 선택적 SSD 읽기 캐시                 │
- │  arcstat으로 히트율 확인 후 추가 결정   │
- └───────────────┬─────────────────────────┘
-                 ↓ L2ARC 미스 시
- ┌─────────────────────────────────────────┐
- │  RAIDZ / Mirror (HDD/SSD Pool)          │
- └─────────────────────────────────────────┘
+```mermaid
+graph TD
+    APP["Application Layer"]
+    ARC["ARC (Adaptive Replacement Cache)<br/>RAM 기반, 서브 마이크로초 레이턴시<br/>MRU (최근 사용) + MFU (자주 사용) 관리"]
+    L2ARC["L2ARC (Layer 2 ARC)<br/>선택적 SSD 읽기 캐시<br/>arcstat으로 히트율 확인 후 추가 결정"]
+    POOL["RAIDZ / Mirror (HDD/SSD Pool)"]
+    ZIL["ZIL (ZFS Intent Log) — 동기 쓰기 버퍼<br/>기본: pool 내 일부 공간 사용<br/>SLOG: 별도 NVMe에 ZIL 분리<br/>(DB, NFS, 가상화 환경 강력 권장)"]
 
- ┌─────────────────────────────────────────┐
- │  ZIL (ZFS Intent Log) — 동기 쓰기 버퍼  │
- │  → 기본: pool 내 일부 공간 사용         │
- │  → SLOG: 별도 NVMe에 ZIL 분리          │
- │     (DB, NFS, 가상화 환경 강력 권장)    │
- └─────────────────────────────────────────┘
+    APP -- "읽기 요청" --> ARC
+    ARC -- "ARC 미스 시" --> L2ARC
+    L2ARC -- "L2ARC 미스 시" --> POOL
+    APP -- "동기 쓰기" --> ZIL
+    ZIL --> POOL
 ```
 
 ### RAIDZ 구성 가이드
@@ -535,14 +529,18 @@ lsmod | grep zfs
 
 Linux 5.4+에서 지원. 읽기 전용 용도에 최적화됐다.
 
-```
- EROFS 주요 사용처
- ┌─────────────────────────────────────────┐
- │  컨테이너 이미지 레이어 (ComposeFS)     │
- │  Android 시스템 파티션                  │
- │  임베디드 시스템 rootfs                 │
- │  패키지 배포 (RPM, DEB 메타데이터)      │
- └─────────────────────────────────────────┘
+```mermaid
+graph TD
+    EROFS["EROFS (Enhanced Read-Only File System)"]
+    C1["컨테이너 이미지 레이어 (ComposeFS)"]
+    C2["Android 시스템 파티션"]
+    C3["임베디드 시스템 rootfs"]
+    C4["패키지 배포 (RPM, DEB 메타데이터)"]
+
+    EROFS --> C1
+    EROFS --> C2
+    EROFS --> C3
+    EROFS --> C4
 ```
 
 특징: 내장 압축, 청크 기반 데이터 중복 제거,

@@ -29,35 +29,30 @@ PCI-DSS, HIPAA, STIG, CIS Benchmark 등
 
 ### 이벤트 흐름
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                       커널 공간                          │
-│                                                         │
-│  syscall / file watch / user event                      │
-│         │                                               │
-│         ▼                                               │
-│  [kernel audit subsystem]                               │
-│   - 이벤트 생성 & 직렬화                                  │
-│   - 필터 규칙 평가 (task/exit/user/exclude/filesystem)   │
-│   - 백로그 큐에 적재                                      │
-└──────────────┬──────────────────────────────────────────┘
-               │  NETLINK_AUDIT socket
-               ▼
-┌─────────────────────────────────────────────────────────┐
-│                      사용자 공간                          │
-│                                                         │
-│  auditd (데몬)                                          │
-│   ├── 로그 파일 기록 (/var/log/audit/audit.log)           │
-│   └── audisp dispatcher                                 │
-│         ├── audisp-syslog  → syslog/journald            │
-│         ├── audisp-remote  → 원격 audit 서버             │
-│         └── laurel         → JSON 변환 → SIEM           │
-│                                                         │
-│  auditctl  ─── 규칙 로드/조회/삭제                        │
-│  ausearch  ─── 이벤트 검색                               │
-│  aureport  ─── 요약 보고서                               │
-│  augenrules ── rules.d/ 컴파일 → audit.rules            │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph kernel["커널 공간"]
+        SRC["syscall / file watch / user event"]
+        AUD["커널 audit subsystem<br/>- 이벤트 생성 &amp; 직렬화<br/>- 필터 규칙 평가 (task/exit/user/exclude/filesystem)<br/>- 백로그 큐에 적재"]
+    end
+
+    subgraph user["사용자 공간"]
+        AUDITD["auditd (데몬)"]
+        LOG["/var/log/audit/audit.log"]
+        AUDISP["audisp dispatcher"]
+        SYSLOG["audisp-syslog → syslog/journald"]
+        REMOTE["audisp-remote → 원격 audit 서버"]
+        LAUREL["laurel → JSON 변환 → SIEM"]
+        TOOLS["auditctl (규칙 로드/조회/삭제)<br/>ausearch (이벤트 검색)<br/>aureport (요약 보고서)<br/>augenrules (rules.d/ → audit.rules)"]
+    end
+
+    SRC --> AUD
+    AUD -- "NETLINK_AUDIT socket" --> AUDITD
+    AUDITD --> LOG
+    AUDITD --> AUDISP
+    AUDISP --> SYSLOG
+    AUDISP --> REMOTE
+    AUDISP --> LAUREL
 ```
 
 **핵심 특성**: auditd가 없어도 커널은 이벤트를 생성한다.
@@ -755,18 +750,22 @@ ausearch -k access_denied -ts today --raw \
 
 ### 핵심 원칙
 
-```
-┌─────────────────────────────────────────────┐
-│               호스트 커널                    │
-│                                             │
-│  audit subsystem (네임스페이스 미격리)         │
-│         │                                   │
-│         ├── 호스트 프로세스 이벤트             │
-│         ├── container-A 이벤트               │
-│         └── container-B 이벤트               │
-│                                             │
-│  호스트 auditd가 모든 이벤트를 수집            │
-└─────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph host["호스트 커널"]
+        AUD["audit subsystem<br/>(네임스페이스 미격리)"]
+        HOST_EV["호스트 프로세스 이벤트"]
+        CA["container-A 이벤트"]
+        CB["container-B 이벤트"]
+        AUDITD["호스트 auditd<br/>(모든 이벤트를 수집)"]
+    end
+
+    AUD --> HOST_EV
+    AUD --> CA
+    AUD --> CB
+    HOST_EV --> AUDITD
+    CA --> AUDITD
+    CB --> AUDITD
 ```
 
 - audit 서브시스템은 **네트워크 네임스페이스처럼 격리되지 않는다**
@@ -805,23 +804,17 @@ ausearch --containerid 123456 -i
 
 ### Kubernetes에서 Falco vs auditd 역할 분리
 
-```
-┌───────────────────────────────────────────────────────────┐
-│                    Kubernetes 클러스터                     │
-│                                                           │
-│  [API Server Audit Logs]  ←── Falco (k8s 이벤트)          │
-│  - API 오브젝트 변경 감사                                   │
-│  - RBAC 위반, namespace 변경                              │
-│                                                           │
-│  [노드 레벨]              ←── auditd (OS 이벤트)            │
-│  - syscall 감사                                           │
-│  - 파일시스템 변경                                         │
-│  - 컨테이너 프로세스 실행 추적                              │
-│                                                           │
-│  [런타임 레벨]            ←── Falco (eBPF/커널 모듈)        │
-│  - 컨테이너 이상 행동 탐지                                  │
-│  - 실시간 알림                                             │
-└───────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph cluster["Kubernetes 클러스터"]
+        API["API Server Audit Logs<br/>- API 오브젝트 변경 감사<br/>- RBAC 위반, namespace 변경"]
+        NODE["노드 레벨<br/>- syscall 감사<br/>- 파일시스템 변경<br/>- 컨테이너 프로세스 실행 추적"]
+        RT["런타임 레벨<br/>- 컨테이너 이상 행동 탐지<br/>- 실시간 알림"]
+    end
+
+    FALCO_K8S["Falco (k8s 이벤트)"] --> API
+    AUDITD["auditd (OS 이벤트)"] --> NODE
+    FALCO_RT["Falco (eBPF/커널 모듈)"] --> RT
 ```
 
 | 도구 | 강점 | 약점 |
@@ -1020,22 +1013,14 @@ auditctl -D
 
 ### SIEM 연동 아키텍처
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                   로그 파이프라인                         │
-│                                                         │
-│  auditd → laurel → /var/log/audit/audit.log.json        │
-│                          │                              │
-│               ┌──────────┴──────────┐                   │
-│               │                     │                   │
-│           Vector              Auditbeat                 │
-│    (경량, 고성능)           (Elasticsearch 공식)          │
-│               │                     │                   │
-│               └──────────┬──────────┘                   │
-│                          ▼                              │
-│                    SIEM / Elastic                       │
-│              (Splunk / OpenSearch)                      │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    AUDITD["auditd"] --> LAUREL["laurel"]
+    LAUREL --> LOG["/var/log/audit/audit.log.json"]
+    LOG --> VECTOR["Vector<br/>(경량, 고성능)"]
+    LOG --> AUDITBEAT["Auditbeat<br/>(Elasticsearch 공식)"]
+    VECTOR --> SIEM["SIEM / Elastic<br/>(Splunk / OpenSearch)"]
+    AUDITBEAT --> SIEM
 ```
 
 **Vector 설정 예시 (laurel JSON 수집)**:

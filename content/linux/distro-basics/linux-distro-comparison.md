@@ -242,26 +242,28 @@ Debian 12 "Bookworm" 릴리즈: 2023-06-10  EOL: 2028-06
 
 ## 환경별 배포판 선택 가이드
 
-```
-어떤 환경인가?
-│
-├─ AWS 클라우드
-│   ├─ AWS 네이티브 워크로드 ──────── Amazon Linux 2023
-│   └─ 범용 / 이식성 중시 ──────────── Ubuntu LTS
-│
-├─ 온프레미스 엔터프라이즈
-│   ├─ 규제·인증 필요 (FIPS, STIG) ── RHEL
-│   ├─ RHEL 호환 + 무료 (신형 HW) ─── Rocky Linux
-│   └─ RHEL 호환 + 무료 (구형 HW) ─── AlmaLinux
-│
-├─ 컨테이너 베이스 이미지
-│   ├─ Go / Rust 정적 바이너리 ──────── Alpine
-│   ├─ CVE 최소화 / 공급망 보안 ──────── Distroless / Chainguard
-│   ├─ Python / Java / Node.js ───────── Debian slim
-│   └─ 범용 (glibc 호환 최우선) ─────── Ubuntu
-│
-└─ 안정성 최우선 서버
-    └─ 데이터베이스, 장기 운영 ─────── Debian stable
+```mermaid
+graph TD
+    Q["어떤 환경인가?"]
+
+    Q --> AWS["AWS 클라우드"]
+    Q --> ONP["온프레미스 엔터프라이즈"]
+    Q --> CTR["컨테이너 베이스 이미지"]
+    Q --> STB["안정성 최우선 서버"]
+
+    AWS --> AWS1["Amazon Linux 2023\n(AWS 네이티브 워크로드)"]
+    AWS --> AWS2["Ubuntu LTS\n(범용 / 이식성 중시)"]
+
+    ONP --> ONP1["RHEL\n(규제·인증 필요, FIPS/STIG)"]
+    ONP --> ONP2["Rocky Linux\n(RHEL 호환 + 무료, 신형 HW)"]
+    ONP --> ONP3["AlmaLinux\n(RHEL 호환 + 무료, 구형 HW)"]
+
+    CTR --> CTR1["Alpine\n(Go / Rust 정적 바이너리)"]
+    CTR --> CTR2["Distroless / Chainguard\n(CVE 최소화 / 공급망 보안)"]
+    CTR --> CTR3["Debian slim\n(Python / Java / Node.js)"]
+    CTR --> CTR4["Ubuntu\n(범용, glibc 호환 최우선)"]
+
+    STB --> STB1["Debian stable\n(데이터베이스, 장기 운영)"]
 ```
 
 > Kubernetes 노드 OS로 불변 인프라를 구성할 경우
@@ -272,19 +274,34 @@ Debian 12 "Bookworm" 릴리즈: 2023-06-10  EOL: 2028-06
 
 ## EOL 타임라인
 
-```
-2026  ██ Alpine 3.20 EOL (2026-04-01, 이미 종료)
-      ██ AL2 EOL (2026-06-30) ← 마이그레이션 필요
-      ██ Alpine 3.21 EOL (2026-11-01)
-2027  ██ Alpine 3.22 EOL (2027-05-01)
-      ██ Alpine 3.23 EOL (2027-11-01)
-2028  ██ Debian 12 EOL (2028-06)
-2029  ██ AL2023 EOL (2029-06-30)
-2030  ██ Debian 13 EOL (2030-08)
-2031  ██ Ubuntu 26.04 LTS EOL (2031-04)
-2032  ██ RHEL/Rocky/AlmaLinux 9 EOL
-2034  ██ Ubuntu 24.04 LTS Pro (ESM) EOL (2034-04)
-2035  ██ RHEL/Rocky/AlmaLinux 10 EOL
+```mermaid
+gantt
+    title 배포판 EOL 타임라인
+    dateFormat  YYYY-MM
+    axisFormat  %Y
+
+    section Alpine
+    Alpine 3.20 (이미 종료)   :done,    2024-05, 2026-04
+    Alpine 3.21               :active,  2024-11, 2026-11
+    Alpine 3.22               :         2025-05, 2027-05
+    Alpine 3.23               :         2025-12, 2027-11
+
+    section Amazon Linux
+    AL2 (마이그레이션 필요)   :crit, done, 2018-06, 2026-07
+    AL2023                    :active,  2023-03, 2029-07
+
+    section Debian
+    Debian 12 Bookworm        :active,  2023-06, 2028-06
+    Debian 13 Trixie          :         2025-08, 2030-08
+
+    section Ubuntu LTS
+    Ubuntu 24.04 LTS          :active,  2024-04, 2029-04
+    Ubuntu 24.04 LTS Pro(ESM) :         2029-04, 2034-04
+    Ubuntu 26.04 LTS          :         2026-04, 2031-04
+
+    section RHEL 계열
+    RHEL/Rocky/AlmaLinux 9    :active,  2022-05, 2032-05
+    RHEL/Rocky/AlmaLinux 10   :         2025-05, 2035-05
 ```
 
 ---
