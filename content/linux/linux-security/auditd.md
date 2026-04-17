@@ -43,7 +43,6 @@ graph TD
         SYSLOG["audisp-syslog → syslog/journald"]
         REMOTE["audisp-remote → 원격 audit 서버"]
         LAUREL["laurel → JSON 변환 → SIEM"]
-        TOOLS["auditctl (규칙 로드/조회/삭제)<br/>ausearch (이벤트 검색)<br/>aureport (요약 보고서)<br/>augenrules (rules.d/ → audit.rules)"]
     end
 
     SRC --> AUD
@@ -77,26 +76,15 @@ auditd 미실행 시 이벤트는 `dmesg`에 출력된다.
 
 ### 주요 파일 위치
 
-```
-/etc/audit/
-├── auditd.conf              # 데몬 설정
-├── audit.rules              # augenrules가 컴파일한 최종 규칙
-├── audit-stop.rules         # 종료 시 로드 규칙
-└── rules.d/                 # 규칙 소스 파일 (번호순 병합)
-    ├── 10-base-config.rules
-    ├── 30-stig.rules
-    └── 99-finalize.rules
-
-/etc/audit/plugins.d/        # audisp 플러그인 설정
-├── af_unix.conf
-├── au-remote.conf
-└── syslog.conf
-
-/var/log/audit/
-└── audit.log                # 감사 로그 (기본 위치)
-
-/usr/share/audit/sample-rules/  # 배포판 제공 예시 규칙
-```
+| 경로 | 설명 |
+|------|------|
+| `/etc/audit/auditd.conf` | 데몬 설정 |
+| `/etc/audit/audit.rules` | augenrules가 컴파일한 최종 규칙 |
+| `/etc/audit/audit-stop.rules` | 종료 시 로드 규칙 |
+| `/etc/audit/rules.d/*.rules` | 규칙 소스 파일 (번호순 병합) |
+| `/etc/audit/plugins.d/*.conf` | audisp 플러그인 설정 |
+| `/var/log/audit/audit.log` | 감사 로그 (기본 위치) |
+| `/usr/share/audit/sample-rules/` | 배포판 제공 예시 규칙 |
 
 ---
 

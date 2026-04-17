@@ -518,14 +518,14 @@ graph TD
 
 ### LVM on LUKS (권장: 단일 암호화 컨테이너)
 
-```
-물리 디스크
-  └── LUKS2 암호화 컨테이너 (/dev/sda3)
-       └── LVM PV (/dev/mapper/cryptlvm)
-            └── VG (vg0)
-                 ├── LV root  → /
-                 ├── LV home  → /home
-                 └── LV swap  → swap
+```mermaid
+graph TD
+    A[물리 디스크] --> B["LUKS2 암호화 컨테이너\n(/dev/sda3)"]
+    B --> C["LVM PV\n(/dev/mapper/cryptlvm)"]
+    C --> D["VG (vg0)"]
+    D --> E["LV root → /"]
+    D --> F["LV home → /home"]
+    D --> G["LV swap → swap"]
 ```
 
 ```bash
@@ -551,12 +551,12 @@ mkswap /dev/vg0/swap
 
 ### LUKS on LVM (각 볼륨 독립 암호화)
 
-```
-물리 디스크
-  └── LVM PV (/dev/sda3)
-       └── VG (vg0)
-            ├── LV data1  → LUKS2 → /data/prod
-            └── LV data2  → LUKS2 → /data/archive
+```mermaid
+graph TD
+    A[물리 디스크] --> B["LVM PV\n(/dev/sda3)"]
+    B --> C["VG (vg0)"]
+    C --> D["LV data1 → LUKS2 → /data/prod"]
+    C --> E["LV data2 → LUKS2 → /data/archive"]
 ```
 
 ```bash
