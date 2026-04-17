@@ -243,7 +243,7 @@ RuntimeDirectory=myapp         # /run/myapp (재부팅 시 초기화)
 
 ```mermaid
 graph TD
-    ROOT["systemd.slice (root)"]
+    ROOT["systemd.slice"]
     ROOT --> SYS["system.slice"]
     ROOT --> USR["user.slice"]
     ROOT --> MACH["machine.slice"]
@@ -531,7 +531,7 @@ graph TD
     B[SIGTERM 전송]
     C["TimeoutStopSec 대기 (기본 90초)"]
     D[정상 종료]
-    E["타임아웃 초과\n→ SIGKILL 강제 종료"]
+    E["타임아웃 초과\nSIGKILL 강제 종료"]
 
     A --> B --> C
     C -->|종료 완료| D

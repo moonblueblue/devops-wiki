@@ -65,10 +65,10 @@ fdisk -l | grep "EFI System"
 
 ```mermaid
 graph TD
-    PK[PK: Platform Key]
-    KEK[KEK: Key Exchange Key]
-    db[db: 허용 목록]
-    dbx[dbx: 차단 목록]
+    PK[PK]
+    KEK[KEK]
+    db[db]
+    dbx[dbx]
 
     PK --> KEK
     KEK --> db
@@ -161,9 +161,9 @@ GRUB_DISABLE_RECOVERY="true"              # 복구 메뉴 숨김
 ```mermaid
 graph TD
     A[UEFI 펌웨어]
-    B["shim.efi (Microsoft 서명)"]
-    C["grubx64.efi (배포판 서명)"]
-    D["vmlinuz (배포판 서명)"]
+    B[shim.efi]
+    C[grubx64.efi]
+    D[vmlinuz]
     E[initramfs]
 
     A --> B --> C --> D --> E
@@ -294,7 +294,7 @@ systemd-analyze plot > boot.svg    # SVG 타임라인
 graph TD
     A[graphical.target @12.543s]
     B[multi-user.target @12.543s]
-    C["nginx.service @8.123s +4.201s ← 여기가 병목"]
+    C["nginx.service\n← 병목"]
     D[network.target @7.891s]
 
     A --> B --> C --> D
