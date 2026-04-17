@@ -14,10 +14,13 @@ tags:
 
 # KVM과 QEMU: Linux 가상화 스택 완전 가이드
 
-AWS, GCP, Azure 모두 KVM 기반으로 운영된다.
 KVM은 Linux 커널에 내장된 하이퍼바이저이고,
 QEMU는 그 위에서 장치를 에뮬레이션하는 에뮬레이터다.
 두 가지는 역할이 다르며, 함께 동작한다.
+
+GCP는 KVM+QEMU 스택을 직접 사용하고,
+AWS는 KVM에서 파생된 **Nitro** 하이퍼바이저(QEMU 미사용),
+Azure는 Hyper-V 기반으로 운영된다.
 
 ---
 
@@ -121,7 +124,9 @@ virt-install \
   --vcpus 4 \
   --memory 8192 \
   --disk path=/var/lib/libvirt/images/ubuntu-01.qcow2,\
-size=50,bus=virtio,format=qcow2,cache=writeback \
+size=50,bus=virtio,format=qcow2,cache=none \
+  # cache=none: 프로덕션 권장. 호스트 비정상 종료 시 데이터 안전
+  # cache=writeback: 성능 높지만 호스트 크래시 시 게스트 디스크 손상 위험 \
   --network network=default,model=virtio \
   --cdrom /opt/isos/ubuntu-24.04-live-server-amd64.iso \
   --graphics none \
@@ -139,8 +144,10 @@ virt-install \
   --network network=default,model=virtio \
   --os-variant ubuntu24.04 \
   --cpu host-passthrough \    # 호스트 CPU 기능 그대로 노출
-  --location http://archive.ubuntu.com/ubuntu/dists/noble/main/installer-amd64/ \
+  --cdrom /opt/isos/ubuntu-24.04-live-server-amd64.iso \
   --noautoconsole
+  # 주의: --location HTTP URL 방식은 Ubuntu 20.04(subiquity) 이후
+  # 정상 동작하지 않는 경우가 있다. --cdrom ISO 방식을 권장한다.
 ```
 
 `--cpu host-passthrough`: 게스트 VM 안에서도 KVM을 실행할 수 있게 한다.
@@ -152,10 +159,12 @@ Kubernetes 노드 테스트, Minikube 실행 등에 사용한다.
 
 | 버전 | 릴리즈 | 상태 |
 |------|--------|------|
-| 10.2.2 | 2026-03-17 | 최신 안정 |
+| 10.2.2 | 2026-03-27 | 최신 안정 |
+| 10.1.5 | 2026-03-17 | 유지보수 |
 | 10.2.0 | 2025-12-24 | 안정 |
+| 10.1.0 | 2025-08-26 | 안정 |
 | 10.0.0 | 2025-04-23 | 안정 |
-| 9.2.4 | 2025-05-26 | LTS |
+| 9.2.4 | 2025-05-26 | 유지보수 |
 
 **QEMU 10.2.0 주요 변경사항** (2025-12-24):
 - `cpr-exec` 마이그레이션 모드: 기존 연결 유지하면서 VM 업데이트
@@ -172,10 +181,10 @@ Kubernetes 노드 테스트, Minikube 실행 등에 사용한다.
 | 항목 | KVM | VMware ESXi | VirtualBox | Hyper-V |
 |------|-----|------------|-----------|---------|
 | 타입 | Type 1 (커널 내장) | Type 1 | Type 2 | Type 1 |
-| 라이선스 | 오픈소스 | 상용 | 오픈소스 | Windows 포함 |
+| 라이선스 | 오픈소스 | 상용 (2024 Broadcom 인수 후 구독 전용) | 오픈소스 | Windows 포함 |
 | CPU 오버헤드 | ~3-5% | ~5-15% | 높음 | 중간 |
 | 디스크 I/O | ~85-90% (virtio) | ~65-80% | 낮음 | 중간 |
-| 클라우드 채택 | AWS, GCP, Azure 전체 | VMware Cloud | - | Azure |
+| 클라우드 채택 | GCP (KVM+QEMU) | VMware Cloud | - | Azure |
 | 관리 도구 | virt-manager, Cockpit | vSphere | GUI 내장 | Hyper-V Manager |
 
 ---
@@ -222,11 +231,19 @@ sudo systemctl enable --now qemu-guest-agent
 백업·스냅샷 전 파일시스템을 동결해
 데이터 일관성을 보장한다.
 
-```
-스냅샷 흐름:
-libvirt → QMP(guest-fsfreeze-freeze) → virtio-serial → qemu-ga
-qemu-ga → FIFREEZE ioctl() → 파일시스템 동결
-백업 완료 → guest-fsfreeze-thaw → 해제
+```mermaid
+sequenceDiagram
+    participant LV as libvirt
+    participant GA as qemu-ga
+    participant FS as 파일시스템
+
+    LV->>GA: guest-fsfreeze-freeze (QMP)
+    GA->>FS: FIFREEZE ioctl()
+    Note over FS: 동결 (스냅샷 일관성 보장)
+    LV->>LV: 스냅샷/백업 수행
+    LV->>GA: guest-fsfreeze-thaw (QMP)
+    GA->>FS: FITHAW ioctl()
+    Note over FS: 해제 (정상 I/O 재개)
 ```
 
 | QMP 명령 | 설명 |
