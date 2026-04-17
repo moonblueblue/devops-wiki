@@ -477,8 +477,9 @@ graph LR
 # 프로세스별 page fault 통계
 ps -o pid,comm,minflt,majflt -p $(pgrep myapp)
 
-# 시스템 전체 실시간 (vmstat의 pgfault 컬럼)
-vmstat -w 1 | awk '{print $7, $8}'  # minflt, majflt
+# 시스템 전체 page fault (/proc/vmstat 기준)
+awk '/^pgfault|^pgmajfault/ {print $1, $2}' /proc/vmstat
+# vmstat 컬럼에 minflt/majflt 없음 — pidstat 또는 /proc/vmstat 사용
 ```
 
 ---
@@ -494,7 +495,7 @@ sysctl vm.swappiness
 sysctl -w vm.swappiness=10
 
 # Kubernetes 노드: 일부 배포판은 0 권장
-# (K8s 1.28+부터 swap 지원 beta, 설정에 따라 다름)
+# K8s 1.28 beta → 1.34 GA. swap 활성 시 swappiness 설정 검토 필요
 sysctl -w vm.swappiness=0
 
 # 영구 적용
@@ -822,7 +823,7 @@ cat /proc/pressure/memory
 # (rate(node_pressure_memory_stalled_seconds_total[5m]) * 100) > 5
 # → "메모리 full stall 5% 초과"
 
-# PSI 기반 proactive OOM 방지 (systemd-oomd, 커널 6.x+)
+# PSI 기반 proactive OOM 방지 (systemd-oomd, PSI 지원 커널 4.20+)
 systemctl status systemd-oomd
 cat /etc/systemd/oomd.conf
 ```
