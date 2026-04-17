@@ -341,8 +341,13 @@ ip rule show
 echo "100 isp1" >> /etc/iproute2/rt_tables
 echo "200 isp2" >> /etc/iproute2/rt_tables
 
-# 각 테이블에 기본 게이트웨이 등록
+# 각 테이블에 로컬 서브넷 경로도 반드시 추가해야
+# 패킷이 올바른 인터페이스로 나간다
+# (default route만 넣으면 응답 패킷이 엉뚱한 게이트웨이로 나갈 수 있음)
+ip route add 203.0.113.0/24 dev eth0 table isp1
 ip route add default via 203.0.113.1 table isp1
+
+ip route add 198.51.100.0/24 dev eth1 table isp2
 ip route add default via 198.51.100.1 table isp2
 
 # 소스 IP 기반 rule 추가
@@ -351,6 +356,47 @@ ip rule add from 198.51.100.2 table isp2 priority 200
 
 # fwmark 기반 (iptables와 연계)
 ip rule add fwmark 1 table isp1
+```
+
+> **주의:** `ip rule`, `ip route` 명령은 런타임에만 적용되며
+> **재부팅 후 사라진다.** 영속화 방법은 아래를 참고한다.
+
+##### 정책 라우팅 영속화
+
+**systemd-networkd 방식 (권장):**
+
+```ini
+# /etc/systemd/network/10-isp1.network
+[Match]
+Name=eth0
+
+[Network]
+Address=203.0.113.2/24
+
+[Route]
+Gateway=203.0.113.1
+Table=100
+
+[Route]
+Destination=203.0.113.0/24
+Table=100
+
+[RoutingPolicyRule]
+From=203.0.113.2
+Table=100
+Priority=100
+```
+
+**`/etc/network/interfaces` post-up 방식 (Debian/Ubuntu):**
+
+```bash
+# /etc/network/interfaces
+iface eth0 inet static
+    address 203.0.113.2/24
+    post-up ip route add 203.0.113.0/24 dev eth0 table isp1
+    post-up ip route add default via 203.0.113.1 table isp1
+    post-up ip rule add from 203.0.113.2 table isp1 priority 100
+    pre-down ip rule del from 203.0.113.2 table isp1
 ```
 
 #### rule 삭제
@@ -634,12 +680,17 @@ graph TD
 
 | qdisc | 특징 | 용도 |
 |-------|------|------|
-| `pfifo_fast` | 커널 기본값. 3밴드 FIFO | 일반 목적 |
-| `fq_codel` | AQM. 지연 최소화 | 현대적 기본값 |
+| `fq_codel` | **현대 배포판 기본값**. AQM, 지연 최소화 | RHEL 8+, Ubuntu 20.04+, Debian 10+ |
+| `pfifo_fast` | 레거시. 3밴드 FIFO | 구형 커널 / 레거시 환경 |
 | `tbf` | Token Bucket Filter. 속도 제한 | 단순 rate limit |
 | `htb` | Hierarchical Token Bucket | 계층적 대역폭 관리 |
 | `netem` | 네트워크 에뮬레이션 | 테스트/개발 환경 |
 | `sfq` | Stochastic Fair Queue | 공정 스케줄링 |
+
+> `fq_codel`은 systemd 217(2014년) 이후 `net.core.default_qdisc` 기본값으로
+> 채택되었다. RHEL 8+, Ubuntu 20.04+, Debian 10+ 등 현대 배포판에서는
+> `pfifo_fast` 대신 `fq_codel`이 적용된다.
+> 현재 기본값 확인: `sysctl net.core.default_qdisc`
 
 ### 대역폭 제한 — tbf
 
@@ -891,8 +942,17 @@ ip addr add 192.168.1.10/24 dev bond0
 
 ## 설정 영속화
 
-`ip` 명령어 변경사항은 재부팅 시 사라진다.
+`ip` 명령어(주소, 라우팅, 정책 라우팅, ECMP 등) 변경사항은
+**재부팅 시 모두 사라진다.**
 영구 적용은 배포판별로 방법이 다르다.
+
+| 대상 | 런타임 명령 | 영속화 방법 |
+|------|------------|------------|
+| 주소/인터페이스 | `ip addr`, `ip link` | NetworkManager / netplan / `.network` |
+| 정적 라우팅 | `ip route` | NetworkManager / `post-up` / `.network` `[Route]` |
+| 정책 라우팅 | `ip rule` | `post-up` 스크립트 / `.network` `[RoutingPolicyRule]` |
+| ECMP | `ip route … nexthop` | `post-up` 스크립트 / `.network` `[Route]` |
+| tc (QoS) | `tc qdisc/class/filter` | `post-up` 스크립트 또는 systemd 서비스 |
 
 | 배포판 | 방법 |
 |--------|------|
@@ -900,6 +960,9 @@ ip addr add 192.168.1.10/24 dev bond0
 | Debian/Ubuntu | `/etc/network/interfaces` 또는 netplan |
 | 모든 배포판 | `systemd-networkd` (`.network` 파일) |
 | 코드 기반 | Ansible / Terraform (권장) |
+
+> `ip rule`과 `ip route` 영속화 예시는
+> [정책 라우팅 영속화](#정책-라우팅-영속화) 섹션을 참고한다.
 
 ---
 

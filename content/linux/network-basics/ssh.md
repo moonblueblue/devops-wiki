@@ -30,7 +30,7 @@ SSH(Secure Shell)는 암호화된 채널로 원격 시스템에 접근하는
 | ECDSA | 256/384/521 bit | 높음 | 빠름 | OpenSSH 5.7+ | 조건부 |
 | RSA-4096 | 4096 bit | 높음 | 느림 | 거의 모든 클라이언트 | 레거시 호환 시 |
 | RSA-2048 | 2048 bit | 보통 | 보통 | 전체 호환 | 비권장 |
-| DSA | 1024 bit | 낮음 (deprecated) | - | - | 사용 금지 |
+| DSA | 1024 bit | 낮음 (removed) | - | - | 사용 금지 |
 
 **Ed25519를 기본 권장하는 이유:**
 - Curve25519 기반 — 백도어 의혹 없는 NIST 외 곡선
@@ -39,6 +39,7 @@ SSH(Secure Shell)는 암호화된 채널로 원격 시스템에 접근하는
 - 타이밍 공격에 구조적으로 강함 (constant-time 구현)
 
 > RSA는 레거시 장비(임베디드, 오래된 CISCO 등) 연동 시에만 사용한다.
+> DSA는 OpenSSH 10.0(2025년 4월)에서 최종 제거되었다. 사용 불가.
 
 ---
 
@@ -162,6 +163,24 @@ Host db-primary
 | 에이전트 포워딩 | 자동 처리 | 수동 관리 필요 |
 | 권장 | **현재 권장** | 레거시 환경 |
 
+> **ForwardAgent 보안 경고**
+>
+> `ForwardAgent yes`는 배스천 서버가 침해되면
+> 에이전트 소켓을 통해 연결된 모든 서버로 측면 이동이 가능하다.
+>
+> - `ProxyJump`(`-J`)로 대체 가능한 경우 `ForwardAgent`는 사용하지 않는다
+> - 불가피하게 사용할 경우 반드시 특정 호스트 블록에만 한정할 것
+>
+> ```ssh-config
+> # 나쁜 예: 전체 호스트에 ForwardAgent 활성화
+> Host *
+>     ForwardAgent yes   # 절대 비권장
+>
+> # 좋은 예: 필요한 호스트에만 한정
+> Host bastion.company.com
+>     ForwardAgent yes
+> ```
+
 ```ssh-config
 # 다중 점프 호스트
 Host deep-internal
@@ -199,6 +218,9 @@ ssh -O exit prod-web-01
 ```ssh-config
 # 특정 네트워크(VPN) 접속 시
 Match host 10.0.*
+    # ⚠️ 주의: MITM 공격 방어가 완전히 무력화됨
+    # 내부망이라도 DHCP 재할당, VM 재구성 시 자동 신뢰 위험
+    # 프로덕션 권장: SSH CA 또는 known_hosts 자동 갱신 방식 사용
     StrictHostKeyChecking no
     UserKnownHostsFile /dev/null
 
@@ -321,7 +343,8 @@ TCPKeepAlive no                 # OS TCP keepalive 비사용
 Protocol 2
 Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com
 MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com
-KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+# OpenSSH 10.0+: ML-KEM(포스트-퀀텀) 기본 활성화
+KexAlgorithms mlkem768x25519-sha256,curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512
 
 # ─── 기타 ────────────────────────────────────────
 X11Forwarding no
@@ -664,8 +687,9 @@ fail2ban-client status sshd
 
 - [OpenSSH 공식 문서](https://www.openssh.com/manual.html)
   — 확인: 2026-04-17
-- [OpenSSH 9.9 릴리즈 노트](https://www.openssh.com/releasenotes.html)
+- [OpenSSH 릴리즈 노트 (10.0 / 10.2 포함)](https://www.openssh.com/releasenotes.html)
   — 확인: 2026-04-17
+  (10.0: DSA 최종 제거, ML-KEM 키 교환 기본 활성화 / 10.2: 안정성 개선)
 - [NIST SP 800-57 키 관리 권고](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)
   — 확인: 2026-04-17
 - [Cloudflare: The Illustrated TLS Connection](https://tls13.xargs.org/)

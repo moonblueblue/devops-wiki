@@ -153,7 +153,7 @@ FallbackDNS=9.9.9.9 149.112.112.112
 Domains=example.com
 
 # DNSSEC 검증
-# allow-downgrade: 지원 시 활성화, 미지원 시 우회
+# allow-downgrade: 지원 시 활성화, 미지원 시 우회 (하단 주의사항 참고)
 DNSSEC=allow-downgrade
 
 # DNS-over-TLS
@@ -173,6 +173,26 @@ CacheFromLocalhost=no
 DNSStubListener=yes
 DNSStubListenerExtra=
 ```
+
+:::warning DNSSEC=allow-downgrade 보안 트레이드오프
+`allow-downgrade`는 DNSSEC를 지원하지 않는 업스트림 서버에 만나면
+**검증 없이 평문 DNS로 자동 다운그레이드**하므로,
+다운그레이드 공격(downgrade attack)에 취약하다.
+
+배포판별 실제 기본값이 다를 수 있다.
+Ubuntu는 systemd 257.8+(2025년)에서 DNSSEC 기본값을 `no`로 되돌렸다.
+홈 라우터 환경에서 `allow-downgrade`가 광범위한 DNS 장애를
+유발한다는 사례가 누적되었기 때문이다.
+
+| 값 | 동작 | 권장 환경 |
+|----|------|-----------|
+| `no` | DNSSEC 비활성화 | 홈/소규모 네트워크, 호환성 우선 |
+| `allow-downgrade` | 지원 시 활성, 미지원 시 평문 허용 | 전환 기간·혼합 환경 (보안 타협) |
+| `yes` | DNSSEC 강제, 실패 시 쿼리 실패 | 통제된 엔터프라이즈 환경 |
+
+배포판 기본값은 릴리즈별로 달라지므로,
+`resolvectl status` 출력의 `DNSSEC=` 항목으로 실제 적용값을 반드시 확인한다.
+:::
 
 ### 3-3. resolvectl 명령어
 
@@ -480,7 +500,8 @@ kubectl -n kube-system get configmap coredns -o yaml
 # Corefile 예시 (일부)
 .:53 {
     errors
-    health
+    ready             # readiness 엔드포인트 :8181 (CoreDNS 1.8.0+)
+    health :8080      # liveness 엔드포인트
     kubernetes cluster.local in-addr.arpa ip6.arpa {
         pods insecure
         fallthrough in-addr.arpa ip6.arpa
@@ -494,6 +515,22 @@ kubectl -n kube-system get configmap coredns -o yaml
     loadbalance
 }
 ```
+
+:::warning CoreDNS `ready` 플러그인 누락 주의
+CoreDNS 1.8.0+ 이후 readiness 엔드포인트는 `ready` 플러그인이 전담한다.
+`health` 플러그인만 있으면 liveness만 제공되고
+readiness 엔드포인트(`:8181`)가 응답하지 않는다.
+
+| 플러그인 | 엔드포인트 | 역할 |
+|---------|-----------|------|
+| `health :8080` | `/health` (liveness) | 프로세스 생존 여부 |
+| `ready` | `/ready` :8181 (readiness) | 모든 플러그인 초기화 완료 여부 |
+
+kube-proxy와 K8s가 readiness probe로 CoreDNS를
+서비스에 포함할지 결정할 때 `ready` 플러그인을 사용하므로,
+`ready`가 없으면 파드가 준비 상태에 진입하지 못하거나
+클러스터 DNS 장애로 이어질 수 있다.
+:::
 
 ### 6-2. Pod DNS 설정
 
@@ -591,13 +628,29 @@ resolvectl status
 # resolv.conf mode: stub → 컨테이너 DNS 실패 가능
 
 # 해결 1: stub 대신 실제 서버 노출
+# ⚠️ 아래 보안 주의사항 참고
 sudo ln -sf /run/systemd/resolve/resolv.conf \
     /etc/resolv.conf
 
-# 해결 2: Docker에 별도 DNS 지정
+# 해결 2: Docker에 별도 DNS 지정 (권장)
 # /etc/docker/daemon.json
 { "dns": ["1.1.1.1"] }
 ```
+
+:::warning 해결 1(심링크 방식) 보안 트레이드오프
+`/run/systemd/resolve/resolv.conf`로 심링크를 바꾸면
+업스트림 DNS 서버 주소(예: 사내 내부망 DNS IP)가
+컨테이너 내부에 `/etc/resolv.conf`로 **직접 노출**된다.
+
+- 컨테이너 탈출·정보 수집 공격 시 내부 네트워크 구조 노출 위험
+- VPN 또는 Split DNS 환경에서는 컨테이너가
+  VPN 전용 DNS를 직접 사용하게 되어 의도치 않은 도메인 해석
+  또는 DNS 동작 이상이 발생할 수 있다
+
+가능하면 **해결 2(Docker 데몬에 공용 DNS 지정)**를 우선 적용하고,
+심링크 방식은 단독 개발 환경이나 내부망 구조가 노출되어도
+무방한 환경에서만 사용한다.
+:::
 
 ---
 

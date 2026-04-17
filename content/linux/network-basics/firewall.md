@@ -356,10 +356,11 @@ table inet filter {
     }
 
     # 동적 세트: 자동 만료 (rate limiting)
-    set ssh_bruteforce {
+    # rate over 초과 IP를 등록하고 timeout 후 자동 삭제
+    set ssh_ratelimit {
         type ipv4_addr
         flags dynamic,timeout
-        timeout 5m
+        timeout 60s
     }
 
     # 맵: IP → 액션 매핑
@@ -375,10 +376,14 @@ table inet filter {
         ip saddr @blocked_ips drop
 
         # SSH brute-force 방지 (rate limit)
+        # 분당 3회 초과 시 set에 등록하고 즉시 drop.
+        # accept 이후에 drop이 오는 구조는 도달 불가이므로
+        # update + drop을 한 규칙에서 처리해야 한다.
         tcp dport 22 ct state new \
-          add @ssh_bruteforce { ip saddr limit rate 3/minute } \
-          accept
-        ip saddr @ssh_bruteforce drop
+          update @ssh_ratelimit \
+            { ip saddr timeout 60s limit rate over 3/minute } \
+          drop
+        tcp dport 22 ct state new accept
 
         ct state established,related accept
     }
@@ -612,7 +617,7 @@ kubectl get configmap kube-proxy -n kube-system \
 |-----------------|-----------|------|
 | **iptables** | DNAT 규칙 | 기본값, 규칙 수에 비례해 성능 저하 |
 | **ipvs** | IP Virtual Server | 대규모 서비스에서 성능 우수 |
-| **nftables** | nft 규칙 | Kubernetes 1.31+ 실험적 |
+| **nftables** | nft 규칙 | 베타(K8s 1.31+), GA 예정(1.33+) |
 
 ---
 
@@ -666,8 +671,10 @@ Kubernetes 노드에 방화벽을 적용할 때 반드시 아래 포트를
 iptables -A INPUT -p tcp --dport 6443 -j ACCEPT
 # etcd
 iptables -A INPUT -p tcp --dport 2379:2380 -j ACCEPT
-# Scheduler, Controller Manager
-iptables -A INPUT -p tcp --dport 10251:10252 -j ACCEPT
+# Scheduler (10259), Controller Manager (10257)
+# K8s 1.24+ 기준 — 비보안 포트(10251/10252)는 제거됨
+iptables -A INPUT -p tcp --dport 10257 -j ACCEPT
+iptables -A INPUT -p tcp --dport 10259 -j ACCEPT
 # kubelet API
 iptables -A INPUT -p tcp --dport 10250 -j ACCEPT
 ```
@@ -689,13 +696,18 @@ iptables -A INPUT -p udp --dport 30000:32767 -j ACCEPT
 | 6443 | TCP | kube-apiserver | 인바운드 |
 | 2379-2380 | TCP | etcd | 내부 |
 | 10250 | TCP | kubelet API | 내부 |
-| 10251 | TCP | kube-scheduler | 내부 |
-| 10252 | TCP | kube-controller-manager | 내부 |
+| 10259 | TCP | kube-scheduler (HTTPS) | 내부 |
+| 10257 | TCP | kube-controller-manager (HTTPS) | 내부 |
 | 30000-32767 | TCP/UDP | NodePort | 인바운드 |
 | 4240 | TCP | Cilium health check | 내부 |
 | 4244 | TCP | Cilium Hubble | 내부 |
 | 8472 | UDP | VXLAN (flannel/overlay) | 내부 |
 | 51820-51821 | UDP | WireGuard (Cilium 암호화) | 내부 |
+
+> **K8s 1.24+ 기준**: kube-scheduler(10251)와
+> kube-controller-manager(10252)의 비보안 HTTP 포트는
+> K8s 1.24에서 제거되었다. 각각 10259(HTTPS),
+> 10257(HTTPS)로 교체해서 사용해야 한다.
 
 ---
 

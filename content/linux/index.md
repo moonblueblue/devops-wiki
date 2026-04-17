@@ -69,10 +69,10 @@ sidebar_label: "Linux"
 
 ### 네트워크 기초 (Linux 관점)
 
-- [ ] [iproute2 명령어 (ip, ss, tc)](network-basics/iproute2.md)
-- [ ] [DNS 설정 (resolv.conf, systemd-resolved, NSS)](network-basics/dns-config.md)
-- [ ] [방화벽 (iptables, nftables, firewalld, ufw)](network-basics/firewall.md)
-- [ ] [SSH 설정과 키 관리 (ssh-agent, ProxyJump)](network-basics/ssh.md)
+- [x] [iproute2 명령어 (ip, ss, tc)](network-basics/iproute2.md)
+- [x] [DNS 설정 (resolv.conf, systemd-resolved, NSS)](network-basics/dns-config.md)
+- [x] [방화벽 (iptables, nftables, firewalld, ufw)](network-basics/firewall.md)
+- [x] [SSH 설정과 키 관리 (ssh-agent, ProxyJump)](network-basics/ssh.md)
 
 ### 로깅
 
