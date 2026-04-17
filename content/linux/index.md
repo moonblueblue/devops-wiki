@@ -76,9 +76,9 @@ sidebar_label: "Linux"
 
 ### 로깅
 
-- [ ] [syslog, rsyslog, journald](logging/system-logging.md)
-- [ ] [로그 로테이션 (logrotate)](logging/log-rotation.md)
-- [ ] [대규모 로그 관리 전략](logging/log-management.md)
+- [x] [syslog, rsyslog, journald](logging/system-logging.md)
+- [x] [로그 로테이션 (logrotate)](logging/log-rotation.md)
+- [x] [대규모 로그 관리 전략](logging/log-management.md)
 
 ### 성능 분석
 
