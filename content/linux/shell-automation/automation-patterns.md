@@ -975,22 +975,22 @@ main "$@"
 
 ```mermaid
 graph TD
-    Q1{"작업 실패 가능성 있음?"}
+    Q1{"작업 실패 가능성?"}
     Q1 -->|YES| R1["재시도 패턴 적용"]
     R1 --> Q2{"네트워크 관련?"}
     Q2 -->|YES| BO["지수 백오프 추가"]
     Q1 -->|NO| DIRECT["그대로 실행"]
 
-    Q3{"대량 처리가 필요한가?"}
-    Q3 -->|"단순 파일/URL 목록"| XP["xargs -P"]
-    Q3 -->|"복잡한 의존성·로깅"| GP["GNU parallel"]
-    Q3 -->|"간단한 고정 개수"| BG["& + wait"]
+    Q3{"대량 처리 필요?"}
+    Q3 -->|"파일/URL 목록"| XP["xargs -P"]
+    Q3 -->|"의존성 복잡"| GP["GNU parallel"]
+    Q3 -->|"고정 개수"| BG["& + wait"]
 
     Q4{"크론잡인가?"}
     Q4 -->|YES| WR["래퍼 패턴 필수"]
-    WR --> FL["중복 방지: flock"]
-    WR --> DT["실행 시간 측정: date +%s"]
-    WR --> AL["알림: Slack Webhook"]
+    WR --> FL["중복 방지 flock"]
+    WR --> DT["실행 시간 측정"]
+    WR --> AL["알림 Slack Webhook"]
 ```
 
 ---
