@@ -57,8 +57,8 @@ sidebar_label: "Linux"
 - [x] [파일시스템 선택 (ext4, xfs, btrfs, zfs)](filesystem-storage/filesystem-comparison.md)
 - [x] [LVM 관리 (PV, VG, LV, 스냅샷)](filesystem-storage/lvm.md)
 - [x] [RAID 기초 (소프트웨어/하드웨어)](filesystem-storage/raid.md)
-- [ ] [디스크 I/O 스케줄러 (none, mq-deadline, kyber, bfq)](filesystem-storage/io-scheduler.md)
-- [ ] [마운트 옵션 튜닝 (noatime, barrier)](filesystem-storage/mount-tuning.md)
+- [x] [디스크 I/O 스케줄러 (none, mq-deadline, kyber, bfq)](filesystem-storage/io-scheduler.md)
+- [x] [마운트 옵션 튜닝 (noatime, barrier)](filesystem-storage/mount-tuning.md)
 
 ### 셸과 자동화
 
