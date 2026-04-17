@@ -32,7 +32,7 @@ CPU 분석에서 가장 먼저 적용하는 구조화 프레임워크다.
 |------|--------------|----------|
 | **U**tilization | CPU 사용률 (이상적: 70% 미만) | `mpstat`, `top` |
 | **S**aturation | 런큐 포화 (r > CPU 수) | `vmstat r`, `uptime` |
-| **E**rrors | MCE, CPU 하드웨어 오류 | `dmesg`, `mcelog` |
+| **E**rrors | MCE, CPU 하드웨어 오류 | `dmesg`, `rasdaemon` |
 
 ### 분석 흐름
 
@@ -333,7 +333,8 @@ sudo perf trace -e write,read -p 1234
 
 ```bash
 # 1단계: 어떤 프로세스인지 특정
-pidstat -u 1 | sort -k8 -rn | head
+# -k 컬럼 번호는 시간 표시 형식(12h/24h)에 따라 달라짐 — ps 방식이 안전
+ps aux --sort=-%cpu | head
 
 # 2단계: 어떤 함수인지 확인
 sudo perf top -p <PID>
@@ -355,8 +356,10 @@ sudo perf script | ./FlameGraph/stackcollapse-perf.pl | \
 # 시스템콜 과다 확인
 sudo perf trace -s -a -- sleep 5
 
-# Lock 경합 (futex 분석)
-sudo perf stat -e 'lock:*' -a sleep 5
+# Lock 경합 (커널 5.19+, CONFIG_LOCKDEP 불필요)
+sudo perf lock record -a -- sleep 5
+sudo perf lock report
+# lock:* 트레이스포인트 방식은 CONFIG_LOCKDEP 커널 전용
 
 # 컨텍스트 스위치 과다 확인
 vmstat 1
