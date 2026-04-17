@@ -194,8 +194,8 @@ graph TD
 
 ```mermaid
 graph LR
-    A["3%"] -->|dirty_background_ratio 설정값 예시| B["백그라운드 flush 시작"]
-    C["10%"] -->|dirty_background_ratio 기본값| D["백그라운드 flush 시작 (기본)"]
+    A["3%"] -->|설정값 예시| B["백그라운드 flush 시작"]
+    C["10%"] -->|기본값| D["백그라운드 flush 시작 (기본)"]
     E["20%"] -->|dirty_ratio 기본값| F["프로세스 직접 쓰기 - 블로킹!"]
 ```
 

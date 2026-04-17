@@ -81,7 +81,7 @@ derivation {
 graph LR
     A["~/.nix-profile"] -->|심링크| B["/nix/var/.../alice/profile"]
     B -->|심링크| C["profile-43-link"]
-    C -->|심링크| D["/nix/store/&lt;hash&gt;-user-environment/"]
+    C -->|심링크| D["/nix/store/\n&lt;hash&gt;-env"]
 ```
 
 ```bash
