@@ -316,11 +316,11 @@ mdadm --monitor --test --mail=admin@example.com /dev/md0
 
 ```mermaid
 graph TD
-    HOST["Host (OS/Kernel)<br/>/dev/sda (단일 디스크로 인식)"]
-    CTRL["RAID 컨트롤러 (HBA+RAID)<br/>Dedicated Processor<br/>+ Write-Back Cache (BBU)"]
-    SDB["/dev/sdb<br/>(물리 드라이브)"]
-    SDC["/dev/sdc<br/>(물리 드라이브)"]
-    SDD["/dev/sdd<br/>(물리 드라이브)"]
+    HOST["Host OS/Kernel\n/dev/sda"]
+    CTRL["RAID 컨트롤러\nHBA+RAID"]
+    SDB["/dev/sdb"]
+    SDC["/dev/sdc"]
+    SDD["/dev/sdd"]
 
     HOST --> CTRL
     CTRL --> SDB

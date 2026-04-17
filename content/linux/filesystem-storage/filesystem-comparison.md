@@ -376,10 +376,10 @@ OpenZFS 2.3은 세 가지 주요 기능을 추가했다:
 ```mermaid
 graph TD
     APP["Application Layer"]
-    ARC["ARC (Adaptive Replacement Cache)<br/>RAM 기반, 서브 마이크로초 레이턴시<br/>MRU (최근 사용) + MFU (자주 사용) 관리"]
-    L2ARC["L2ARC (Layer 2 ARC)<br/>선택적 SSD 읽기 캐시<br/>arcstat으로 히트율 확인 후 추가 결정"]
-    POOL["RAIDZ / Mirror (HDD/SSD Pool)"]
-    ZIL["ZIL (ZFS Intent Log) — 동기 쓰기 버퍼<br/>기본: pool 내 일부 공간 사용<br/>SLOG: 별도 NVMe에 ZIL 분리<br/>(DB, NFS, 가상화 환경 강력 권장)"]
+    ARC["ARC\nRAM 읽기 캐시"]
+    L2ARC["L2ARC\nSSD 읽기 캐시"]
+    POOL["RAIDZ Mirror\nHDD/SSD Pool"]
+    ZIL["ZIL\n동기 쓰기 버퍼"]
 
     APP -- "읽기 요청" --> ARC
     ARC -- "ARC 미스 시" --> L2ARC

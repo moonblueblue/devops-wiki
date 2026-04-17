@@ -466,11 +466,11 @@ I/O 성능에 직접 영향을 준다.
 
 ```mermaid
 graph TD
-    HOST["호스트 파일시스템 (ext4/xfs)"]
-    --> DOCKER["/var/lib/docker<br/>이 파티션의 마운트 옵션이 핵심"]
+    HOST["호스트 파일시스템\next4/xfs"]
+    --> DOCKER["/var/lib/docker\n마운트 옵션 핵심"]
     --> OVL["overlay2/"]
-    OVL --> LOW["lowerdir (이미지 레이어)"]
-    OVL --> UPP["upperdir (컨테이너 쓰기 레이어)"]
+    OVL --> LOW["lowerdir\n이미지 레이어"]
+    OVL --> UPP["upperdir\n쓰기 레이어"]
     OVL --> WORK["workdir"]
 ```
 

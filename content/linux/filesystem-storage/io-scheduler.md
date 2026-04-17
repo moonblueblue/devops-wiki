@@ -33,16 +33,16 @@ Linux 5.0 이후, 단일 큐(sq) 방식은 완전히 제거되고
 
 ```mermaid
 graph TD
-    APP["User Space (Application)<br/>read() / write() / io_uring / aio"]
+    APP["User Space\nread/write/io_uring"]
     VFS["VFS / Page Cache"]
-    BIO["Generic Block Layer (bio)<br/>bio 분할, 병합, 보안 정책 적용"]
-    MQ["blk-mq: Software Staging Queues<br/>(CPU당 1개 큐, lock-free MPSC 구조)"]
+    BIO["Generic Block Layer\nbio 분할/병합"]
+    MQ["blk-mq\nSoftware Queues"]
     SQ0["CPU0 SQ"]
     SQ1["CPU1 SQ"]
     SQ2["CPU2 SQ"]
-    SCHED["I/O Scheduler (선택적)<br/>none │ mq-deadline │ bfq │ kyber<br/>요청 정렬·병합·우선순위화"]
-    HCTX["Hardware Dispatch Queues (hctx)<br/>(장치 큐 수만큼 존재, NVMe는 수십~수백 개)"]
-    DRV["Storage Driver (NVMe / SCSI / etc.)"]
+    SCHED["I/O Scheduler\nnone/mq-deadline/bfq"]
+    HCTX["Hardware Queues\nhctx"]
+    DRV["Storage Driver\nNVMe/SCSI 등"]
 
     APP -- "VFS" --> VFS
     VFS -- "bio" --> BIO
