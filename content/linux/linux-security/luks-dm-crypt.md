@@ -30,11 +30,11 @@ dm-crypt는 Linux 커널의 device mapper 서브시스템에 내장된
 
 ```mermaid
 graph TD
-    A["Application / Filesystem<br/>(ext4, xfs, btrfs, LVM PV...)"]
-    B["/dev/mapper/NAME<br/>(decrypted virtual block device)"]
-    C["dm-crypt  (kernel device mapper)<br/>Cipher: AES-XTS, ChaCha20..."]
-    D["LUKS Header  (disk front area)<br/>Magic | UUID | Cipher params | Keyslot 0~31"]
-    E["Physical Block Device<br/>(/dev/sda, /dev/nvme0n1p2)"]
+    A["Application\nFilesystem"]
+    B["/dev/mapper/NAME\n복호화 블록 디바이스"]
+    C["dm-crypt\nAES-XTS 암호화"]
+    D["LUKS Header\n키슬롯 0-31"]
+    E["물리 블록 디바이스\n/dev/sda 등"]
 
     A --> B --> C --> D --> E
 ```

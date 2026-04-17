@@ -333,7 +333,7 @@ sequenceDiagram
 
     CP->>SF: mount() syscall 호출
     SF->>CM: SECCOMP_RET_USER_NOTIF 반환
-    CM->>CM: SECCOMP_IOCTL_NOTIF_ID_VALID<br/>(race condition 방지)<br/>요청 검사 및 호스트에서 에뮬레이션
+    CM->>CM: SECCOMP_IOCTL_NOTIF_ID_VALID<br/>요청 검사 및 에뮬레이션
     alt syscall 직접 실행
         CM->>K: SECCOMP_USER_NOTIF_FLAG_CONTINUE
         K-->>CP: 커널이 syscall 직접 실행

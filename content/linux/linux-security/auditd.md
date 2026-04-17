@@ -33,7 +33,7 @@ PCI-DSS, HIPAA, STIG, CIS Benchmark 등
 graph TD
     subgraph kernel["커널 공간"]
         SRC["syscall / file watch / user event"]
-        AUD["커널 audit subsystem<br/>- 이벤트 생성 &amp; 직렬화<br/>- 필터 규칙 평가 (task/exit/user/exclude/filesystem)<br/>- 백로그 큐에 적재"]
+        AUD["커널 audit subsystem"]
     end
 
     subgraph user["사용자 공간"]
@@ -1007,7 +1007,7 @@ graph LR
     LAUREL --> LOG["/var/log/audit/audit.log.json"]
     LOG --> VECTOR["Vector<br/>(경량, 고성능)"]
     LOG --> AUDITBEAT["Auditbeat<br/>(Elasticsearch 공식)"]
-    VECTOR --> SIEM["SIEM / Elastic<br/>(Splunk / OpenSearch)"]
+    VECTOR --> SIEM["SIEM\nElastic/Splunk"]
     AUDITBEAT --> SIEM
 ```
 

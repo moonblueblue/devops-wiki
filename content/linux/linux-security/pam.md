@@ -33,12 +33,12 @@ PAM 위에 구축된다.
 
 ```mermaid
 graph TD
-    APP["애플리케이션\nsshd · sudo · login · su · cron"]
+    APP["애플리케이션\nsshd sudo login 등"]
     APP -->|"libpam.so PAM API"| LIB
-    LIB["PAM 라이브러리\n/etc/pam.d/&lt;service&gt; 설정 파일 읽기"]
-    LIB --> STACK["모듈 스택 순서대로 평가\nauth / account / password / session"]
+    LIB["PAM 라이브러리\npam.d 설정 파일 읽기"]
+    LIB --> STACK["모듈 스택 평가\nauth account password session"]
     STACK -->|"성공/실패 반환"| MOD
-    MOD["PAM 모듈 (.so)\npam_unix · pam_sss · pam_faillock · ..."]
+    MOD["PAM 모듈\npam_unix pam_sss 등"]
 ```
 
 **핵심 원칙**: 애플리케이션은 인증 로직을 모른다.

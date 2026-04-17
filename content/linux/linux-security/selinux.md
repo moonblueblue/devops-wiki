@@ -73,13 +73,13 @@ SELinux는 모든 파일, 프로세스, 포트에 **레이블(컨텍스트)**을
 ```mermaid
 graph TD
     LABEL["user : role : type : level"]
-    LABEL --> U["SELinux 사용자 (user)"]
-    LABEL --> R["역할 (role)"]
-    LABEL --> T["타입 (type)<br/>← 정책의 핵심"]
-    LABEL --> L["MLS/MCS 레벨 (level)"]
+    LABEL --> U["SELinux 사용자\nuser"]
+    LABEL --> R["역할\nrole"]
+    LABEL --> T["타입 type\n정책의 핵심"]
+    LABEL --> L["MLS/MCS 레벨\nlevel"]
 
-    L --> L1["targeted: s0 (단일 레벨)"]
-    L --> L2["컨테이너/Pod: s0:c123,c456 (고유 카테고리)"]
+    L --> L1["targeted: s0\n단일 레벨"]
+    L --> L2["s0:c123,c456\n고유 카테고리"]
 ```
 
 > **컨테이너/Kubernetes에서 MCS**: Kubernetes는 SELinux 활성화
