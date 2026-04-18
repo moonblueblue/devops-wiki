@@ -880,27 +880,20 @@ Grafana Labs 공식 USE Method 대시보드 ID: **13977**
 
 **패널 구성 원칙:**
 
-```
-Row: CPU
-  ├── [Stat]  CPU Utilization %      ← use:cpu:utilization
-  ├── [Graph] CPU Saturation (Load)  ← use:cpu:saturation
-  └── [Stat]  MCE Errors             ← 커널 카운터
-
-Row: Memory
-  ├── [Gauge] Memory Utilization %   ← use:memory:utilization
-  ├── [Graph] Swap In/Out KB/s       ← vmstat si/so
-  └── [Graph] PSI Memory Pressure    ← use:memory:saturation_psi
-
-Row: Disk
-  ├── [Heatmap] IO Latency (ms)      ← 분포 시각화
-  ├── [Graph]   %util per device     ← use:disk:utilization
-  └── [Graph]   Queue Depth          ← use:disk:saturation
-
-Row: Network
-  ├── [Graph] RX/TX Bytes/s          ← use:network:utilization_*
-  ├── [Graph] Drops/s                ← use:network:saturation_drops
-  └── [Graph] Errors/s               ← use:network:errors
-```
+| Row | 패널 타입 | 패널 이름 | 데이터 소스 / 쿼리 |
+|-----|-----------|-----------|---------------------|
+| CPU | Stat | CPU Utilization % | `use:cpu:utilization` |
+| CPU | Graph | CPU Saturation (Load) | `use:cpu:saturation` |
+| CPU | Stat | MCE Errors | 커널 카운터 |
+| Memory | Gauge | Memory Utilization % | `use:memory:utilization` |
+| Memory | Graph | Swap In/Out KB/s | vmstat `si`/`so` |
+| Memory | Graph | PSI Memory Pressure | `use:memory:saturation_psi` |
+| Disk | Heatmap | IO Latency (ms) | 분포 시각화 |
+| Disk | Graph | `%util` per device | `use:disk:utilization` |
+| Disk | Graph | Queue Depth | `use:disk:saturation` |
+| Network | Graph | RX/TX Bytes/s | `use:network:utilization_*` |
+| Network | Graph | Drops/s | `use:network:saturation_drops` |
+| Network | Graph | Errors/s | `use:network:errors` |
 
 ---
 

@@ -60,8 +60,13 @@ kill -USR1 <PID>    # 앱 정의 이벤트
 
 ```mermaid
 graph LR
-    A["프로세스 A\nwrite(fd[1])"] -->|커널 버퍼| B["프로세스 B\nread(fd[0])"]
+    A["프로세스 A"] -->|커널 버퍼| B["프로세스 B"]
 ```
+
+| 노드 | 동작 |
+|------|------|
+| 프로세스 A | `write(fd[1])` 으로 쓰기 |
+| 프로세스 B | `read(fd[0])` 으로 읽기 |
 
 ```c
 int fd[2];
@@ -326,15 +331,20 @@ nsenter -t <container-PID> --ipc ipcs -a
 
 ```mermaid
 graph TD
-    A{"데이터 많고\n속도 중요?"}
-    A -->|YES| B["Shared Memory\n세마포어 동기화"]
-    A -->|NO| C{"단방향\n스트리밍?"}
-    C -->|YES| D["Pipe\nNamed Pipe"]
-    C -->|NO| E{"양방향\n요청-응답?"}
-    E -->|YES| F[Unix Domain Socket]
+    A{"대용량 고속?"}
+    A -->|YES| B["Shared Memory"]
+    A -->|NO| C{"단방향 스트리밍?"}
+    C -->|YES| D["Pipe 계열"]
+    C -->|NO| E{"양방향 요청 응답?"}
+    E -->|YES| F["Unix Domain Socket"]
     E -->|NO| G{"비동기 메시지?"}
-    G -->|YES| H[POSIX Message Queue]
+    G -->|YES| H["POSIX Message Queue"]
 ```
+
+| 노드 | 부연 |
+|------|------|
+| Shared Memory | 세마포어로 동기화 |
+| Pipe 계열 | 익명 Pipe, Named Pipe (FIFO) |
 
 ---
 

@@ -253,12 +253,19 @@ while true; do
 done
 ```
 
+```mermaid
+graph LR
+    Q["queue"] -->|mv| P["processing"]
+    P -->|mv 성공| D["done"]
+    P -->|mv 실패| F["failed"]
 ```
-queue/         ──mv──▶  processing/  ──mv──▶  done/
-  job_001.json            job_001.json          job_001.json.1713340800
-  job_002.json                                failed/
-                                                job_002.json.1713340801
-```
+
+| 디렉토리 | 예시 파일명 |
+|----------|-------------|
+| `queue/` | `job_001.json`, `job_002.json` |
+| `processing/` | `job_001.json` |
+| `done/` | `job_001.json.1713340800` (timestamp suffix) |
+| `failed/` | `job_002.json.1713340801` (timestamp suffix) |
 
 ---
 

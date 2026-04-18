@@ -133,10 +133,11 @@ Battery-Backed Unit(BBU) 또는 Flash-Backed Write Cache(FBWC)가 있는
 하드웨어 RAID 컨트롤러는 전원이 꺼져도 캐시 내용을 보존한다.
 이 경우에만 `barrier=0`이 안전하며 성능 향상을 기대할 수 있다.
 
-```
-확인 방법 (MegaRAID 예시)
-$ megacli -AdpBbuCmd -GetBbuStatus -aALL | grep "Battery State"
-$ storcli /c0 show | grep "BBU"
+확인 방법 (MegaRAID 예시):
+
+```bash
+megacli -AdpBbuCmd -GetBbuStatus -aALL | grep "Battery State"
+storcli /c0 show | grep "BBU"
 ```
 
 :::danger
@@ -462,13 +463,22 @@ I/O 성능에 직접 영향을 준다.
 
 ```mermaid
 graph TD
-    HOST["호스트 파일시스템\next4/xfs"]
-    --> DOCKER["/var/lib/docker\n마운트 옵션 핵심"]
-    --> OVL["overlay2/"]
-    OVL --> LOW["lowerdir\n이미지 레이어"]
-    OVL --> UPP["upperdir\n쓰기 레이어"]
+    HOST["호스트 FS"]
+    --> DOCKER["docker 루트"]
+    --> OVL["overlay2"]
+    OVL --> LOW["lowerdir"]
+    OVL --> UPP["upperdir"]
     OVL --> WORK["workdir"]
 ```
+
+| 노드 | 설명 |
+|------|------|
+| 호스트 FS | ext4 또는 xfs로 포맷된 호스트 파일시스템 |
+| docker 루트 | `/var/lib/docker`. 마운트 옵션이 성능에 직접 영향 |
+| overlay2 | 스토리지 드라이버 |
+| lowerdir | 이미지 레이어 (읽기 전용) |
+| upperdir | 컨테이너 쓰기 레이어 |
+| workdir | 원자적 변경을 위한 작업 디렉터리 |
 
 ```ini
 # /etc/fstab — 컨테이너 런타임 권장

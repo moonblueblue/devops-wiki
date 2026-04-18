@@ -83,14 +83,14 @@ DevOps 엔지니어가 이 구조를 이해해야 하는 이유는 세 가지다
 FHS에서 `/usr`은 **두 번째 주요 계층**으로, 읽기 전용으로
 마운트할 수 있도록 설계됐다.
 
-```
-/usr/bin    → 사용자 명령어 (ls, grep, python3 등)
-/usr/sbin   → 시스템 관리 명령어 (useradd, iptables 등)
-/usr/lib    → 공유 라이브러리
-/usr/local  → 패키지 매니저 외 수동 설치 (로컬 오버라이드)
-/usr/share  → 매뉴얼 페이지, 로케일, 문서
-/usr/libexec → 다른 프로그램이 내부적으로 호출하는 바이너리
-```
+| 경로 | 용도 |
+|------|------|
+| `/usr/bin` | 사용자 명령어 (ls, grep, python3 등) |
+| `/usr/sbin` | 시스템 관리 명령어 (useradd, iptables 등) |
+| `/usr/lib` | 공유 라이브러리 |
+| `/usr/local` | 패키지 매니저 외 수동 설치 (로컬 오버라이드) |
+| `/usr/share` | 매뉴얼 페이지, 로케일, 문서 |
+| `/usr/libexec` | 다른 프로그램이 내부적으로 호출하는 바이너리 |
 
 #### usr-merge: /bin → /usr/bin 통합
 
@@ -116,17 +116,16 @@ Fedora CoreOS 같은 Immutable OS의 원자적 업데이트가 가능해진다.
 재부팅 간에 지속되어야 하는 가변 데이터. 로그, DB 상태,
 패키지 캐시, 스풀 등이 위치한다.
 
-```
-/var/log        시스템·애플리케이션 로그
-/var/lib        영구 상태 데이터
-/var/lib/docker    Docker 이미지·컨테이너 데이터
-/var/lib/kubelet   Kubernetes 노드 상태
-/var/lib/etcd      etcd 데이터 (컨트롤 플레인)
-/var/cache      재생성 가능 캐시 (apt 패키지 등)
-/var/spool      처리 대기 큐 (메일, cron, 프린터)
-/var/tmp        재부팅 후에도 유지되는 임시 파일
-                (atime/mtime 모두 30일 초과 시 정리)
-```
+| 경로 | 용도 |
+|------|------|
+| `/var/log` | 시스템·애플리케이션 로그 |
+| `/var/lib` | 영구 상태 데이터 |
+| `/var/lib/docker` | Docker 이미지·컨테이너 데이터 |
+| `/var/lib/kubelet` | Kubernetes 노드 상태 |
+| `/var/lib/etcd` | etcd 데이터 (컨트롤 플레인) |
+| `/var/cache` | 재생성 가능 캐시 (apt 패키지 등) |
+| `/var/spool` | 처리 대기 큐 (메일, cron, 프린터) |
+| `/var/tmp` | 재부팅 후에도 유지되는 임시 파일 (atime/mtime 모두 30일 초과 시 정리) |
 
 `/var/lib/docker`는 이미지·레이어 누적으로 디스크를 빠르게 소진한다.
 정기적으로 점검하고 정리해야 한다.
@@ -236,20 +235,21 @@ sysctl --system   # 전체 sysctl.d 파일 로드
 ```
 
 sysctl 파일 로드 우선순위 (man 7 sysctl.d):
-```
-규칙 1: 파일명이 같으면 /etc/ > /run/ > /usr/lib/ 순으로 우선
-규칙 2: 파일명이 다르면 사전순(lexicographic) 정렬로 뒤에 오는 파일이 이김
-```
+
+| 규칙 | 내용 |
+|------|------|
+| 규칙 1 | 파일명이 같으면 `/etc/` > `/run/` > `/usr/lib/` 순으로 우선 |
+| 규칙 2 | 파일명이 다르면 사전순(lexicographic) 정렬로 뒤에 오는 파일이 이김 |
 
 즉 `/usr/lib/sysctl.d/99-foo.conf`가 `/etc/sysctl.d/10-custom.conf`보다
 **나중에** 적용된다. 운영자 설정 파일은 반드시 **60~90번대 접두사**를 사용해야
 패키지 기본값에 덮어쓰이지 않는다.
 
-```
-/etc/sysctl.d/99-custom.conf    ← 99 접두사로 최우선 보장
-/run/sysctl.d/
-/usr/lib/sysctl.d/              ← 패키지 기본값
-```
+| 경로 | 비고 |
+|------|------|
+| `/etc/sysctl.d/99-custom.conf` | 99 접두사로 최우선 보장 |
+| `/run/sysctl.d/` | 런타임 설정 |
+| `/usr/lib/sysctl.d/` | 패키지 기본값 |
 
 ---
 
@@ -284,12 +284,12 @@ cgroups v2는 `/sys/fs/cgroup/` 아래 단일 계층 구조로 관리된다.
 FHS 3.0이 `/var/run`을 대체하기 위해 추가한 디렉토리.
 시스템 시작 시 tmpfs로 마운트되어 RAM에만 존재한다.
 
-```
-/run/docker.sock     Docker 소켓 (containerd 런타임 통신)
-/run/sshd.pid        SSH 데몬 PID 파일
-/run/lock/           락 파일 (이전 /var/lock)
-/run/user/$UID/      로그인 사용자별 런타임 디렉토리
-```
+| 경로 | 용도 |
+|------|------|
+| `/run/docker.sock` | Docker 소켓 (containerd 런타임 통신) |
+| `/run/sshd.pid` | SSH 데몬 PID 파일 |
+| `/run/lock/` | 락 파일 (이전 /var/lock) |
+| `/run/user/$UID/` | 로그인 사용자별 런타임 디렉토리 |
 
 `/var/run` → `/run` 심볼릭 링크로 하위 호환성 유지.
 
@@ -301,17 +301,17 @@ FHS 3.0이 `/var/run`을 대체하기 위해 추가한 디렉토리.
 
 **DevOps 관련 주요 경로**
 
-```
-/etc/systemd/           systemd 유닛·오버라이드
-/etc/sysctl.d/          커널 파라미터 영구 설정
-/etc/fstab              파일시스템 마운트 설정
-/etc/hosts              로컬 DNS 오버라이드
-/etc/resolv.conf        DNS 리졸버 설정
-/etc/ssh/               SSH 서버·클라이언트 설정
-/etc/kubernetes/        kubeadm 클러스터 설정
-/etc/docker/            Docker 데몬 설정
-/etc/cron.d/            예약 작업
-```
+| 경로 | 용도 |
+|------|------|
+| `/etc/systemd/` | systemd 유닛·오버라이드 |
+| `/etc/sysctl.d/` | 커널 파라미터 영구 설정 |
+| `/etc/fstab` | 파일시스템 마운트 설정 |
+| `/etc/hosts` | 로컬 DNS 오버라이드 |
+| `/etc/resolv.conf` | DNS 리졸버 설정 |
+| `/etc/ssh/` | SSH 서버·클라이언트 설정 |
+| `/etc/kubernetes/` | kubeadm 클러스터 설정 |
+| `/etc/docker/` | Docker 데몬 설정 |
+| `/etc/cron.d/` | 예약 작업 |
 
 ---
 
@@ -347,15 +347,22 @@ Docker `overlay2` 드라이버는 이미지 레이어(읽기 전용)와
 
 ```mermaid
 graph TD
-    L4["컨테이너 레이어\n쓰기 가능"]
-    L3["이미지 레이어 3\n읽기 전용"]
-    L2["이미지 레이어 2\n읽기 전용"]
-    L1["이미지 레이어 1\nFROM 기반"]
+    L4[컨테이너 레이어]
+    L3[이미지 레이어 3]
+    L2[이미지 레이어 2]
+    L1[이미지 레이어 1]
 
     L4 --> L3
     L3 --> L2
     L2 --> L1
 ```
+
+| 레이어 | 속성 |
+|--------|------|
+| 컨테이너 레이어 | 쓰기 가능 |
+| 이미지 레이어 3 | 읽기 전용 |
+| 이미지 레이어 2 | 읽기 전용 |
+| 이미지 레이어 1 | FROM 기반 |
 
 **레이어 수 주의**: overlay2는 최대 128개 레이어를 지원한다.
 `apt-get install` 후 `apt-get clean`을 **같은 RUN 명령**에서

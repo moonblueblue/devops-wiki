@@ -250,11 +250,11 @@ machinectl bind      <name> <host-path>   # 실행 중 동적 바인드
 
 ### veth 네트워크 + systemd-networkd 자동 구성
 
-```
-호스트 networkd → ve-<name> IP 할당 + DHCP 서버 + nftables 마스커레이드
-컨테이너 networkd → host0 DHCP 클라이언트
-결과: 컨테이너 → 호스트 → 외부 인터넷 자동 연결
-```
+| 구성 요소 | 역할 |
+|-----------|------|
+| 호스트 `networkd` | `ve-<name>` 인터페이스 IP 할당, DHCP 서버, nftables 마스커레이드 |
+| 컨테이너 `networkd` | `host0` DHCP 클라이언트 |
+| 결과 | 컨테이너에서 호스트를 경유해 외부 인터넷 자동 연결 |
 
 systemd-networkd가 호스트와 컨테이너 양쪽에서 실행되면
 추가 설정 없이 자동으로 구성된다.

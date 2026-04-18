@@ -527,16 +527,23 @@ systemd의 종료 시퀀스:
 
 ```mermaid
 graph TD
-    A[systemctl stop 명령]
+    A[systemctl stop]
     B[SIGTERM 전송]
-    C["TimeoutStopSec 대기 (기본 90초)"]
+    C[TimeoutStopSec 대기]
     D[정상 종료]
-    E["타임아웃 초과\nSIGKILL 강제 종료"]
+    E[SIGKILL 강제 종료]
 
     A --> B --> C
     C -->|종료 완료| D
     C -->|타임아웃 초과| E
 ```
+
+| 단계 | 설명 |
+|------|------|
+| `systemctl stop` | 운영자가 중지 명령 실행 |
+| SIGTERM 전송 | 메인 프로세스 또는 cgroup에 SIGTERM |
+| TimeoutStopSec 대기 | 기본 90초 대기 |
+| SIGKILL 강제 종료 | 타임아웃 초과 시 cgroup 전체 SIGKILL |
 
 ```ini
 # 장기 처리 서비스 (배치 잡, DB)

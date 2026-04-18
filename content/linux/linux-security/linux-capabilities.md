@@ -25,25 +25,33 @@ tags:
 
 각 프로세스(스레드)는 5개의 capability 집합을 가진다.
 
-```
-Permitted(P)    — 프로세스가 보유 가능한 최대 집합
-Effective(E)    — 커널이 실제 권한 검사에 사용하는 집합
-Inheritable(I)  — execve 후 자식 프로세스에 상속 가능한 집합
-Bounding(B)     — execve 시 Permitted의 최대 상한
-Ambient(A)      — 비특권 프로그램 execve 시 보존 (Linux 4.3+)
-```
+| 집합 | 기호 | 의미 |
+|------|------|------|
+| Permitted | `P` | 프로세스가 보유 가능한 최대 집합 |
+| Effective | `E` | 커널이 실제 권한 검사에 사용하는 집합 |
+| Inheritable | `I` | execve 후 자식 프로세스에 상속 가능한 집합 |
+| Bounding | `B` | execve 시 Permitted의 최대 상한 |
+| Ambient | `A` | 비특권 프로그램 execve 시 보존, Linux 4.3+ |
 
 ```mermaid
 sequenceDiagram
     participant Parent as 부모 프로세스
     participant Child as 자식 프로세스
 
-    Parent->>Child: execve()
-    Note over Child: P(자식 permitted) ← P(부모) ∩ B
-    Note over Child: P(자식 추가) ← P(부모) ∩ 파일 P
-    Note over Child: P(자식 추가) ← I(부모) ∩ 파일 I
-    Note over Child: P(자식), E(자식) ← A(부모) [ambient]
+    Parent->>Child: execve
+    Note over Child: Permitted 계산
+    Note over Child: Inheritable 적용
+    Note over Child: Ambient 전파
 ```
+
+execve 시 자식의 capability 계산 규칙:
+
+| 대상 | 계산식 |
+|------|--------|
+| 자식 Permitted | `P(부모) ∩ B` |
+| 자식 Permitted 추가 | `P(부모) ∩ 파일 P` |
+| 자식 Permitted 추가 | `I(부모) ∩ 파일 I` |
+| 자식 Permitted/Effective | `A(부모)` (ambient 전파) |
 
 | 집합 | 역할 | 수정 권한 |
 |------|------|---------|
@@ -132,14 +140,20 @@ setcap cap_net_bind_service=ep /usr/sbin/nginx
 ```mermaid
 graph LR
     CAP["cap_net_bind_service=eip"]
-    E["e → Effective"]
-    I["i → Inheritable"]
-    P["p → Permitted"]
+    E["Effective"]
+    I["Inheritable"]
+    P["Permitted"]
 
     CAP --> E
     CAP --> I
     CAP --> P
 ```
+
+| 기호 | 집합 |
+|------|------|
+| `e` | Effective |
+| `i` | Inheritable |
+| `p` | Permitted |
 
 > **경고**: 인터프리터 바이너리(python, perl, bash, ruby 등)에
 > `setcap`을 절대 사용하지 말 것. 인터프리터가 실행하는

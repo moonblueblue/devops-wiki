@@ -65,11 +65,15 @@ APT 3.2 (Ubuntu 26.04 "Resolute Raccoon" 탑재)의 핵심 신기능:
 Ubuntu 23.10+부터 **DEB822 형식**이 표준이다.
 `apt-key`는 Debian 13에서 완전 제거됐다.
 
-```
-기존 one-line (.list 파일):
-deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable
+기존 one-line (`.list` 파일):
 
-DEB822 (.sources 파일):
+```text
+deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable
+```
+
+DEB822 (`.sources` 파일):
+
+```text
 Enabled: yes
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu

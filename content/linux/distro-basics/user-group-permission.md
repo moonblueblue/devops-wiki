@@ -31,12 +31,15 @@ SUID 바이너리 취약점이 root 권한 탈취로 이어진다.
 디렉토리에서 `x` 없이 `r`만 있으면 파일명은 보이지만
 진입·접근이 불가하다.
 
-```
--rwxr-xr-x  root  root  /usr/bin/ls
-  ↑↑↑ ↑↑↑ ↑↑↑
-  소유자 그룹 기타
-  (7)   (5)  (5) = 755
-```
+예시 `-rwxr-xr-x  root  root  /usr/bin/ls`의 권한 해석:
+
+| 위치 | 비트 | 대상 | 값 |
+|------|------|------|------|
+| 1~3 | `rwx` | 소유자 | 7 |
+| 4~6 | `r-x` | 그룹 | 5 |
+| 7~9 | `r-x` | 기타 | 5 |
+
+합계 755.
 
 ### 자주 쓰는 권한 패턴
 
@@ -55,14 +58,13 @@ SUID 바이너리 취약점이 root 권한 탈취로 이어진다.
 umask는 새로 생성되는 파일·디렉토리의 기본 권한에서
 **제거할 비트**를 지정한다.
 
-```
-파일 최대 권한:    666 - umask = 기본 권한
-디렉토리 최대 권한: 777 - umask = 기본 권한
+계산식: 파일 최대 권한 666, 디렉토리 최대 권한 777에서 umask 비트를 제거.
 
-umask 022:  파일 644, 디렉토리 755  (가장 일반적)
-umask 027:  파일 640, 디렉토리 750  (보안 강화)
-umask 077:  파일 600, 디렉토리 700  (최대 보안)
-```
+| umask | 파일 | 디렉토리 | 용도 |
+|-------|------|---------|------|
+| `022` | 644 | 755 | 가장 일반적 |
+| `027` | 640 | 750 | 보안 강화 |
+| `077` | 600 | 700 | 최대 보안 |
 
 ```bash
 # 현재 umask 확인
@@ -89,8 +91,9 @@ UMask=0027
 ```bash
 $ ls -l /usr/bin/passwd
 -rwsr-xr-x  root  root  /usr/bin/passwd
-    ↑ s = SUID 활성화
 ```
+
+소유자 실행 비트 자리의 `s`가 SUID 활성화 표시다.
 
 `/usr/bin/passwd`가 root 소유 SUID인 이유:
 일반 사용자가 자신의 비밀번호를 바꾸려면 root 전용 파일인
@@ -116,7 +119,7 @@ chmod 4755 /path/to/file
 chmod g+s /srv/shared
 ls -ld /srv/shared
 # drwxrwsr-x  root  devteam  /srv/shared
-#        ↑ s = SGID 활성화
+# 그룹 실행 비트 자리의 s가 SGID 활성화 표시
 ```
 
 ### sticky bit
@@ -126,7 +129,7 @@ ls -ld /srv/shared
 ```bash
 $ ls -ld /tmp
 drwxrwxrwt  root  root  /tmp
-           ↑ t = sticky bit 활성화
+# 기타 실행 비트 자리의 t가 sticky bit 활성화 표시
 
 chmod +t /path/to/dir   # 또는
 chmod 1777 /path/to/dir
@@ -284,7 +287,7 @@ find / -xdev -exec getcap {} + 2>/dev/null
 ### 컨테이너와 Capabilities
 
 Docker 기본 부여 Capabilities (14개):
-```
+```text
 AUDIT_WRITE, CHOWN, DAC_OVERRIDE, FOWNER, FSETID, KILL,
 MKNOD, NET_BIND_SERVICE, NET_RAW, SETFCAP, SETGID,
 SETPCAP, SETUID, SYS_CHROOT
@@ -315,7 +318,7 @@ securityContext:
 
 ### /etc/passwd
 
-```
+```text
 root:x:0:0:root:/root:/bin/bash
 nginx:x:101:101:nginx user:/var/cache/nginx:/usr/sbin/nologin
 ```
@@ -332,10 +335,11 @@ nginx:x:101:101:nginx user:/var/cache/nginx:/usr/sbin/nologin
 
 ### /etc/shadow — 비밀번호 해시
 
-```
+```text
 alice:$y$j9T$salt$hash:19845:0:99999:7:::
-      ↑ $id$ 식별자
 ```
+
+두 번째 필드의 `$id$` 접두사가 해시 알고리즘 식별자다.
 
 | `$id$` | 알고리즘 | 상태 |
 |---------|---------|------|
@@ -381,11 +385,11 @@ UMask=0027
 
 ### sudo 정책
 
-```
-su -      root 비밀번호 필요, 개인 추적 불가 → 비권장
-sudo      개인 계정 인증, /var/log/auth.log에 전체 로깅 → 권장
-root SSH  /etc/ssh/sshd_config: PermitRootLogin no → 차단
-```
+| 방법 | 특징 | 권장 여부 |
+|------|------|----------|
+| `su -` | root 비밀번호 필요, 개인 추적 불가 | 비권장 |
+| `sudo` | 개인 계정 인증, `/var/log/auth.log`에 전체 로깅 | 권장 |
+| root SSH | `/etc/ssh/sshd_config`에 `PermitRootLogin no` | 차단 |
 
 ```bash
 # sudoers 편집 (항상 visudo 사용 — 문법 검사 포함)
@@ -425,15 +429,13 @@ Ubuntu: `pam_faillock` 또는 `pam_tally2`를 `/etc/pam.d/common-auth`에 추가
 
 ### 최소 권한 체크리스트
 
-```
-[ ] 서비스 계정: nologin 쉘, 홈 없음
-[ ] 중요 설정 파일: 640 또는 600
-[ ] 서비스 디렉토리: 750 (기타 접근 차단)
-[ ] SUID 바이너리: 주기적 감사, 불필요한 것 제거
-[ ] capabilities: setuid 대신 파일 capabilities 사용
-[ ] sudo: 특정 명령어만 허용, NOPASSWD 최소화
-[ ] root SSH 로그인: 차단
-```
+- [ ] 서비스 계정: nologin 쉘, 홈 없음
+- [ ] 중요 설정 파일: 640 또는 600
+- [ ] 서비스 디렉토리: 750 (기타 접근 차단)
+- [ ] SUID 바이너리: 주기적 감사, 불필요한 것 제거
+- [ ] capabilities: setuid 대신 파일 capabilities 사용
+- [ ] sudo: 특정 명령어만 허용, NOPASSWD 최소화
+- [ ] root SSH 로그인: 차단
 
 ---
 
@@ -464,10 +466,10 @@ CMD ["./myapp"]
 
 **User Namespace UID 매핑**:
 
-```
-컨테이너 내부 UID 0 (root) ↔ 호스트 UID 100000
-컨테이너 내부 UID 1000     ↔ 호스트 UID 101000
-```
+| 컨테이너 내부 UID | 호스트 UID |
+|-----------------|-----------|
+| 0 (root) | 100000 |
+| 1000 | 101000 |
 
 범위는 `/etc/subuid`, `/etc/subgid`로 설정한다.
 

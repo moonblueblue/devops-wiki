@@ -89,14 +89,13 @@ ssh-keygen -l -E sha256 -f ~/.ssh/id_ed25519
 
 ### 2.1 기본 구조
 
-```
-~/.ssh/
-├── config            # 클라이언트 설정
-├── id_ed25519        # 개인키 (chmod 600)
-├── id_ed25519.pub    # 공개키 (chmod 644)
-├── known_hosts       # 서버 호스트키 캐시
-└── authorized_keys   # 이 서버 접속 허용 공개키 목록
-```
+| 파일 | 설명 | 권장 권한 |
+|------|------|-----------|
+| `~/.ssh/config` | 클라이언트 설정 | `600` |
+| `~/.ssh/id_ed25519` | 개인키 | `600` |
+| `~/.ssh/id_ed25519.pub` | 공개키 | `644` |
+| `~/.ssh/known_hosts` | 서버 호스트키 캐시 | `644` |
+| `~/.ssh/authorized_keys` | 이 서버 접속 허용 공개키 목록 | `600` |
 
 ### 2.2 핵심 디렉티브
 
@@ -390,14 +389,20 @@ systemctl reload sshd
 
 ```mermaid
 graph LR
-    L1["로컬 :8080"] -->|"-L 로컬 포워딩"| S["배스천/서버"]
-    S -->|포워딩| D1["db:5432"]
+    L1["로컬 8080"] -->|-L| S["배스천"]
+    S -->|포워딩| D1["db 5432"]
 
-    S2["서버 :8080"] -->|"-R 원격 포워딩"| L2["로컬 :8080"]
+    S2["서버 8080"] -->|-R| L2["로컬 8080"]
 
-    L3["로컬 SOCKS"] -->|"-D 동적 프록시"| S3["배스천/서버"]
-    S3 -->|프록시| I["internet"]
+    L3["로컬 SOCKS"] -->|-D| S3["배스천"]
+    S3 -->|프록시| I["인터넷"]
 ```
+
+| 옵션 | 방향 | 용도 |
+|------|------|------|
+| `-L` | 로컬 → 원격 | 로컬 포트를 원격 대상으로 포워딩 |
+| `-R` | 원격 → 로컬 | 원격 포트를 로컬로 포워딩 |
+| `-D` | 동적 | SOCKS 프록시로 동적 터널링 |
 
 ### 5.1 로컬 포트 포워딩 (-L)
 
@@ -455,9 +460,12 @@ curl --socks5-hostname localhost:1080 http://internal-service
 ```mermaid
 graph TD
     DEV["개발자 PC"]
-    -->|"ssh prod-app-01"| BAS["bastion.company.com :22<br/>(퍼블릭 IP 노출)"]
-    -->|"ProxyJump"| PROD["10.0.1.x prod 서버들<br/>(프라이빗 IP만 존재)"]
+    -->|ssh| BAS["배스천"]
+    -->|ProxyJump| PROD["프로덕션 서버"]
 ```
+
+- `배스천`: `bastion.company.com:22`, 퍼블릭 IP 노출
+- `프로덕션 서버`: `10.0.1.x` 대역, 프라이빗 IP만 존재
 
 ```ssh-config
 # ~/.ssh/config
@@ -522,16 +530,21 @@ scp -J bastion file.txt app@192.168.10.20:/tmp/
 
 ```mermaid
 graph TD
-    subgraph pub["기존 방식 (공개키)"]
+    subgraph pub["기존 방식"]
         direction LR
-        DEV1["개발자 키"] -->|"각 서버에 등록"| AUTH["authorized_keys<br/>100명 × 100서버<br/>= 10,000개 항목"]
+        DEV1["개발자 키"] -->|서버 등록| AUTH["authorized_keys"]
     end
-    subgraph ca["CA 방식 (인증서)"]
+    subgraph ca["CA 방식"]
         direction LR
-        CAKEY["CA 공개키"] -->|"서버에 한 번만 등록"| SRV["각 서버"]
-        DEV2["개발자 키"] -->|"CA 서명"| CERT["인증서 발급<br/>100명 × 100서버<br/>= CA 키 1개 + 인증서 100개"]
+        CAKEY["CA 공개키"] -->|서버 1회 등록| SRV["각 서버"]
+        DEV2["개발자 키"] -->|CA 서명| CERT["인증서 발급"]
     end
 ```
+
+| 방식 | 등록 규모 예시 (100명 × 100서버) |
+|------|------------------------------|
+| 기존 방식(공개키) | `authorized_keys` 항목 10,000개 |
+| CA 방식(인증서) | CA 키 1개 + 인증서 100개 |
 
 ### 7.1 CA 설정
 
@@ -645,11 +658,18 @@ ignoreregex =
 
 ```mermaid
 graph TD
-    F2B["fail2ban<br/>(소프트웨어 차단)"]
-    <-->|연동| IPT["iptables/nftables<br/>(커널 패킷 필터)"]
-    <-->|연동| SSHD["sshd<br/>(MaxAuthTries, LoginGraceTime)"]
-    <-->|연동| PAM["PAM<br/>(계정 잠금 pam_faillock)"]
+    F2B["fail2ban"]
+    <-->|연동| IPT["iptables nftables"]
+    <-->|연동| SSHD["sshd"]
+    <-->|연동| PAM["PAM"]
 ```
+
+| 구성 요소 | 역할 |
+|-----------|------|
+| `fail2ban` | 소프트웨어 차단 |
+| `iptables/nftables` | 커널 패킷 필터 |
+| `sshd` | `MaxAuthTries`, `LoginGraceTime` 등 서버 정책 |
+| `PAM` | 계정 잠금 (`pam_faillock`) |
 
 ---
 

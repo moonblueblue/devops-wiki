@@ -79,10 +79,17 @@ derivation {
 
 ```mermaid
 graph LR
-    A["~/.nix-profile"] -->|심링크| B["/nix/var/.../alice/profile"]
-    B -->|심링크| C["profile-43-link"]
-    C -->|심링크| D["/nix/store/\n&lt;hash&gt;-env"]
+    A[프로파일 진입점] -->|심링크| B[사용자 프로파일]
+    B -->|심링크| C[generation 43]
+    C -->|심링크| D[store env]
 ```
+
+| 노드 | 실제 경로 |
+|------|-----------|
+| 프로파일 진입점 | `~/.nix-profile` |
+| 사용자 프로파일 | `/nix/var/.../alice/profile` |
+| generation 43 | `profile-43-link` |
+| store env | `/nix/store/<hash>-env` |
 
 ```bash
 # generation 목록 확인

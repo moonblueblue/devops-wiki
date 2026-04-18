@@ -40,17 +40,20 @@ I/O, 네트워크 등의 자원을 제한·계량·격리하는 커널 기능이
 
 ```mermaid
 graph TD
-    ROOT["/sys/fs/cgroup/"]
-    ROOT --> CPU["cpu/"]
-    ROOT --> MEM["memory/"]
-    ROOT --> BLK["blkio/"]
-    ROOT --> ETC["기타 컨트롤러..."]
-    CPU --> CPU_APP["myapp/"]
-    CPU_APP --> CPU_PID["PID 1234, 5678"]
-    MEM --> MEM_APP["myapp/"]
-    MEM_APP --> MEM_PID["PID 1234, 5678"]
-    BLK --> BLK_APP["myapp/"]
+    ROOT["sys fs cgroup"]
+    ROOT --> CPU["cpu"]
+    ROOT --> MEM["memory"]
+    ROOT --> BLK["blkio"]
+    ROOT --> ETC["기타 컨트롤러"]
+    CPU --> CPU_APP["cpu myapp"]
+    CPU_APP --> CPU_PID["PID 1234 5678"]
+    MEM --> MEM_APP["memory myapp"]
+    MEM_APP --> MEM_PID["PID 1234 5678"]
+    BLK --> BLK_APP["blkio myapp"]
 ```
+
+> 루트는 `/sys/fs/cgroup/`이며, 각 컨트롤러 하위에
+> 동일한 `myapp/` 디렉토리가 반복 생성된다.
 
 **문제점**: 동일 프로세스가 각 컨트롤러 계층에 따로 존재.
 계층 간 동기화 없음 → 일관성 유지가 어려움.
@@ -61,17 +64,20 @@ graph TD
 
 ```mermaid
 graph TD
-    ROOT["/sys/fs/cgroup/"]
+    ROOT["sys fs cgroup"]
     ROOT --> CC["controllers"]
     ROOT --> CSC["subtree_control"]
-    ROOT --> SYS["system.slice/"]
-    ROOT --> USR["user.slice/"]
-    SYS --> SVC["myapp.service/"]
+    ROOT --> SYS["system.slice"]
+    ROOT --> USR["user.slice"]
+    SYS --> SVC["myapp.service"]
     SVC --> PROCS["cgroup.procs"]
     SVC --> MEMMAX["memory.max"]
     SVC --> CPUW["cpu.weight"]
     SVC --> IOMAX["io.max"]
 ```
+
+> 루트는 `/sys/fs/cgroup/`이며,
+> `system.slice/`, `user.slice/`가 최상위 하위 cgroup이다.
 
 **핵심 규칙**: 내부 노드(자식이 있는 cgroup)에는
 프로세스를 직접 배치할 수 없다 (no-internal-process 규칙).

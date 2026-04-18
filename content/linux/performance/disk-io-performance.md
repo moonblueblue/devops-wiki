@@ -204,7 +204,7 @@ lsof +L1 | awk '{print $7, $NF}' | sort -rn | head -10
 
 ```mermaid
 graph LR
-    Q["Q: Queue"] --> G["G: Get Request"] --> I["I: Insert"] --> D["D: Issue"] --> C["C: Complete"]
+    Q["Q Queue"] --> G["G Get Request"] --> I["I Insert"] --> D["D Issue"] --> C["C Complete"]
 
     style Q fill:#fff3cd
     style D fill:#cce5ff

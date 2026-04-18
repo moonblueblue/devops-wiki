@@ -43,32 +43,23 @@ RAID(Redundant Array of Independent Disks)는 여러 디스크를
 
 ### 1.2 용량 계산 예시 (4TB × 6개 디스크)
 
-```
-RAID 0  : 4 × 6 = 24 TB  (장애 허용 없음)
-RAID 1  : 4 × 1 = 4 TB   (6개 중 1개만 유효)
-RAID 5  : 4 × 5 = 20 TB  (패리티 1개 디스크)
-RAID 6  : 4 × 4 = 16 TB  (패리티 2개 디스크)
-RAID 10 : 4 × 3 = 12 TB  (3쌍 미러)
-```
+| RAID | 계산 | 가용 용량 | 비고 |
+|------|------|----------|------|
+| RAID 0 | 4 × 6 | 24 TB | 장애 허용 없음 |
+| RAID 1 | 4 × 1 | 4 TB | 6개 중 1개만 유효 |
+| RAID 5 | 4 × 5 | 20 TB | 패리티 1개 디스크 |
+| RAID 6 | 4 × 4 | 16 TB | 패리티 2개 디스크 |
+| RAID 10 | 4 × 3 | 12 TB | 3쌍 미러 |
 
 ### 1.3 RAID 레벨 선택 가이드
 
-```
-성능 최우선 (장애 허용 불필요)
-  └─ RAID 0
-
-소규모 / OS 볼륨
-  └─ RAID 1
-
-범용 파일 서버 (소용량 드라이브, 4TB 미만)
-  └─ RAID 5
-
-대용량 드라이브 (8TB 이상) / 아카이브
-  └─ RAID 6  ← URE 위험으로 RAID 5 비권장
-
-고성능 + 안정성 (DB, OLTP)
-  └─ RAID 10
-```
+| 상황 | 권장 RAID | 메모 |
+|------|----------|------|
+| 성능 최우선, 장애 허용 불필요 | RAID 0 | 임시 캐시 용도 |
+| 소규모 / OS 볼륨 | RAID 1 | 단순·안정 |
+| 범용 파일 서버 (4 TB 미만) | RAID 5 | 일반적 선택 |
+| 대용량 드라이브 (8 TB 이상) / 아카이브 | RAID 6 | URE 위험으로 RAID 5 비권장 |
+| 고성능 + 안정성 (DB, OLTP) | RAID 10 | 쓰기·랜덤 I/O 우수 |
 
 ---
 
@@ -87,12 +78,13 @@ RAID 리빌드 중 URE가 발생하면
 
 ### 2.2 드라이브 용량별 RAID 5 리빌드 실패 확률
 
-```
-드라이브 8 TB, RAID 5 (5개):
-  리빌드 중 읽는 데이터 = 8 TB × 4 = 32 TB
-  소비자 드라이브 URE 확률 ≈ 32 / 12.5 = 약 256%
-  → 리빌드 성공률 매우 낮음
-```
+8 TB 드라이브 5개로 구성한 RAID 5를 예로 들면:
+
+| 항목 | 계산 |
+|------|------|
+| 리빌드 중 읽는 데이터 | 8 TB × 4 = 32 TB |
+| 소비자 드라이브 URE 확률 | 32 / 12.5 ≈ 256% |
+| 결과 | 리빌드 성공률 매우 낮음 |
 
 > 2025년 기준, **8 TB 이상 드라이브에 RAID 5는
 > 비권장**이다. RAID 6 또는 RAID 10을 사용한다.
@@ -234,11 +226,11 @@ dev.raid.speed_limit_max = 200000
 **Write Hole**이란 RAID 5/6에서 정전·패닉 발생 시
 데이터와 패리티 불일치가 생기는 문제다.
 
-```
-정상 쓰기 흐름:
-  1. 데이터 블록 기록
-  2. 패리티 블록 기록  ← 여기서 크래시 발생 시 불일치
-```
+정상 쓰기 흐름은 다음 두 단계로 진행된다.
+
+1. 데이터 블록 기록
+2. 패리티 블록 기록 — 이 사이에 크래시가 발생하면
+   데이터와 패리티가 불일치 상태로 남는다.
 
 | 대응 방법 | 설명 | 성능 영향 |
 |---------|-----|---------|
@@ -316,17 +308,23 @@ mdadm --monitor --test --mail=admin@example.com /dev/md0
 
 ```mermaid
 graph TD
-    HOST["Host OS/Kernel\n/dev/sda"]
-    CTRL["RAID 컨트롤러\nHBA+RAID"]
-    SDB["/dev/sdb"]
-    SDC["/dev/sdc"]
-    SDD["/dev/sdd"]
+    HOST["Host OS"]
+    CTRL["RAID 컨트롤러"]
+    SDB["디스크 1"]
+    SDC["디스크 2"]
+    SDD["디스크 3"]
 
     HOST --> CTRL
     CTRL --> SDB
     CTRL --> SDC
     CTRL --> SDD
 ```
+
+| 노드 | 설명 |
+|------|------|
+| Host OS | 커널은 단일 디스크 `/dev/sda`만 본다 |
+| RAID 컨트롤러 | HBA + RAID 기능 통합. RAID 연산 전담 |
+| 디스크 1~3 | 물리 디스크. OS는 인식하지 못함 |
 
 OS는 RAID를 인식하지 못하고 단일 디스크로 본다.
 RAID 연산은 컨트롤러가 전담한다.
@@ -443,12 +441,16 @@ Azure Disk   : LRS/ZRS/GRS 옵션으로 복제
 graph TD
     subgraph cluster["Kubernetes Cluster"]
         Pod["Pod"] -- PVC --> SC["StorageClass"]
-        SC --> STORAGE["Rook-Ceph / Longhorn"]
-        STORAGE --> NA["Node A\n(/dev/sdb)"]
-        STORAGE --> NB["Node B\n(/dev/sdb)"]
-        STORAGE --> NC["Node C\n(/dev/sdb)"]
+        SC --> STORAGE["분산 스토리지"]
+        STORAGE --> NA["Node A"]
+        STORAGE --> NB["Node B"]
+        STORAGE --> NC["Node C"]
     end
 ```
+
+각 Node에는 블록 디바이스(`/dev/sdb` 등)가 연결되어 있으며,
+분산 스토리지 계층(Rook-Ceph, Longhorn 등)이 복제와 장애
+조치를 담당한다.
 
 | 솔루션 | RAID 대응 기능 | 추가 기능 |
 |-------|-------------|---------|

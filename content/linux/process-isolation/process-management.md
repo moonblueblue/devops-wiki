@@ -28,11 +28,17 @@ graph TD
     RQ --> RN[실행 중 R]
     RN -->|I/O 대기| S[슬립 S]
     S -->|I/O 완료| RQ
-    RN -->|시그널 / ptrace| T[정지 T/t]
-    RN -->|커널 I/O\n인터럽트 불가| D["Disk Sleep D\nNFS/Ceph 지연"]
+    RN -->|시그널 ptrace| T[정지 T t]
+    RN -->|커널 I/O| D[Disk Sleep D]
     D -->|I/O 완료| RQ
-    RN -->|"exit() 후 wait() 없음"| Z[좀비 Z]
+    RN -->|wait 누락| Z[좀비 Z]
 ```
+
+| 엣지·노드 | 부연 |
+|----------|------|
+| 커널 I/O | 인터럽트 불가 상태 진입 |
+| Disk Sleep D | NFS·Ceph 지연 시 발생 |
+| wait 누락 | `exit()` 후 부모가 `wait()` 미호출 |
 
 | 상태 코드 | 이름 | 설명 |
 |----------|------|------|
@@ -56,10 +62,16 @@ graph TD
 ```mermaid
 graph TD
     P["부모 프로세스"]
-    P -->|"fork()"| C["자식 프로세스<br/>(부모의 복사본, PID 다름)"]
-    C -->|"exec()"| NP["새 프로그램으로 대체"]
-    P -->|"wait()"| W["자식 종료 대기 (좀비 회수)"]
+    P -->|fork| C["자식 프로세스"]
+    C -->|exec| NP["새 프로그램"]
+    P -->|wait| W["자식 종료 대기"]
 ```
+
+| 노드·엣지 | 부연 |
+|----------|------|
+| 자식 프로세스 | 부모의 복사본, PID가 다름 |
+| 새 프로그램 | `exec` 이후 현재 이미지가 교체됨 |
+| 자식 종료 대기 | `wait` 호출로 좀비 회수 |
 
 ```c
 pid_t pid = fork();
@@ -184,14 +196,16 @@ Kubernetes가 파드를 종료할 때의 시그널 흐름:
 
 ```mermaid
 graph TD
-    A["kubectl delete pod / 스케일 다운"]
+    A["kubectl delete pod"]
     A --> B["preStop hook"]
     B --> C["SIGTERM 전송"]
-    C --> D["Grace Period 대기\n기본 30초"]
+    C --> D["Grace Period 대기"]
     D --> E{"아직 살아있는가?"}
     E -->|Yes| F[SIGKILL]
     E -->|No| G[정상 종료]
 ```
+
+- **Grace Period**: 기본 30초 (`terminationGracePeriodSeconds`로 조정)
 
 **endpoint 전파 지연 문제**: SIGTERM이 전달될 때
 kube-proxy/Cilium이 아직 이 파드의 endpoint를

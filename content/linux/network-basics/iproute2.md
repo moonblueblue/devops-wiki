@@ -311,11 +311,11 @@ ip route add unreachable 192.168.99.0/24
 정책 라우팅은 **소스 IP, TOS, fwmark** 등을 기준으로
 다른 라우팅 테이블을 적용하는 기능이다.
 
-```
-패킷 수신
-  → ip rule 목록 순서대로 매칭
-    → 매칭된 rule의 테이블에서 경로 조회
-      → 경로 발견 시 사용
+```mermaid
+graph TD
+    A["패킷 수신"] --> B["ip rule 매칭"]
+    B --> C["테이블 경로 조회"]
+    C --> D["경로 사용"]
 ```
 
 #### 기본 rule 목록
@@ -414,10 +414,16 @@ ip rule del from 203.0.113.2 table isp1
 
 ```mermaid
 graph TD
-    HOST["호스트 네트워크 스택<br/>eth0, lo, route, iptables ..."]
-    HOST --> NS1["netns: ns1<br/>lo, veth1, 독립 route/iptables"]
-    HOST --> NS2["netns: ns2<br/>lo, veth2, 독립 route/iptables"]
+    HOST["호스트 네트워크"]
+    HOST --> NS1["네임스페이스 ns1"]
+    HOST --> NS2["네임스페이스 ns2"]
 ```
+
+| 네임스페이스 | 구성 |
+|-------------|------|
+| 호스트 | `eth0`, `lo`, 라우팅, iptables |
+| ns1 | `lo`, `veth1`, 독립 route/iptables |
+| ns2 | `lo`, `veth2`, 독립 route/iptables |
 
 #### 네임스페이스 생성 및 관리
 
@@ -663,11 +669,11 @@ ESTAB  0       0       10.0.0.1:22     10.0.0.2:54321
 
 ```mermaid
 graph TD
-    NIC["NIC (eth0)"]
-    --> QDISC["qdisc (큐 규칙, 스케줄러)"]
-    QDISC --> CLASS["class (트래픽 클래스, HTB에서 사용)"]
-    CLASS --> SUBCLASS["class (중첩 가능)"]
-    QDISC --> FILTER["filter (패킷 → 클래스 매핑)"]
+    NIC["NIC eth0"]
+    --> QDISC["qdisc"]
+    QDISC --> CLASS["class"]
+    CLASS --> SUBCLASS["하위 class"]
+    QDISC --> FILTER["filter"]
 ```
 
 | 구성요소 | 역할 |

@@ -134,18 +134,13 @@ cat /proc/<PID>/attr/current
 
 ## 프로파일 작성 워크플로
 
-```
-1. complain 모드로 프로파일 적용
-        ↓
-2. 실제 워크로드 실행 (충분한 시간)
-        ↓
-3. 로그에서 위반 사항 수집
-        ↓
-4. aa-logprof로 자동 제안 반영
-        ↓
-5. enforce 모드로 전환
-        ↓
-6. 추가 위반 모니터링
+```mermaid
+flowchart TD
+    A[complain 적용] --> B[워크로드 실행]
+    B --> C[위반 로그 수집]
+    C --> D[aa-logprof 반영]
+    D --> E[enforce 전환]
+    E --> F[위반 모니터링]
 ```
 
 ### aa-genprof: 프로파일 생성 보조

@@ -130,12 +130,18 @@ seccomp_release(ctx);
 
 ```mermaid
 graph TD
-    ROOT["no_new_privs = 1 설정 효과"]
-    ROOT --> A["execve() 후 setuid/CAP 상승 불가"]
-    ROOT --> B["seccomp 필터 설치 권한 부여<br/>(CAP_SYS_ADMIN 없이도)"]
-    ROOT --> C["자식 프로세스에 상속"]
-    ROOT --> D["설정 후 해제 불가 (one-way)"]
+    ROOT["no_new_privs = 1"]
+    ROOT --> A["특권 상승 불가"]
+    ROOT --> B["필터 설치 허용"]
+    ROOT --> C["자식에 상속"]
+    ROOT --> D["해제 불가"]
 ```
+
+| 노드 | 의미 |
+|------|------|
+| 특권 상승 불가 | `execve` 후 setuid·CAP 상승 차단 |
+| 필터 설치 허용 | `CAP_SYS_ADMIN` 없이도 seccomp 필터 설치 가능 |
+| 해제 불가 | 설정 후 one-way, 되돌릴 수 없음 |
 
 > CAP_SYS_ADMIN을 보유한 경우 no_new_privs 없이도 필터를
 > 설치할 수 있다. 그러나 컨테이너에서는 항상 no_new_privs와
@@ -251,17 +257,21 @@ seccompDefault: true   # 모든 파드에 RuntimeDefault 적용
 
 ## 실무 프로파일 작성 워크플로
 
+```mermaid
+flowchart TD
+    A[strace 후보 추출] --> B[oci-seccomp-bpf-hook 생성]
+    B --> C[프로파일 검토]
+    C --> D[SCMP_ACT_LOG 테스트]
+    D --> E[SCMP_ACT_ERRNO 적용]
 ```
-1. strace -c 로 후보 syscall 목록 확인
-         ↓
-2. oci-seccomp-bpf-hook 으로 정확한 프로파일 생성
-         ↓
-3. 생성된 프로파일 검토 (불필요 syscall 제거)
-         ↓
-4. SCMP_ACT_LOG 로 audit 모드 테스트
-         ↓
-5. SCMP_ACT_ERRNO 로 전환 (프로덕션 적용)
-```
+
+| 단계 | 설명 |
+|------|------|
+| strace 후보 추출 | `strace -c` 로 syscall 목록 확인 |
+| oci-seccomp-bpf-hook | 정확한 프로파일 자동 생성 |
+| 프로파일 검토 | 불필요 syscall 제거 |
+| SCMP_ACT_LOG | audit 모드로 동작 검증 |
+| SCMP_ACT_ERRNO | 프로덕션 차단 모드 적용 |
 
 ### strace로 syscall 추출
 
@@ -333,7 +343,7 @@ sequenceDiagram
 
     CP->>SF: mount() syscall 호출
     SF->>CM: SECCOMP_RET_USER_NOTIF 반환
-    CM->>CM: SECCOMP_IOCTL_NOTIF_ID_VALID<br/>요청 검사 및 에뮬레이션
+    CM->>CM: 요청 검사 및 에뮬레이션
     alt syscall 직접 실행
         CM->>K: SECCOMP_USER_NOTIF_FLAG_CONTINUE
         K-->>CP: 커널이 syscall 직접 실행

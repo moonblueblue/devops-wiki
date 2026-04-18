@@ -44,14 +44,14 @@ sysctl --system                        # 모든 시스템 디렉토리를 순서
 `sysctl --system`은 아래 순서로 파일을 읽는다.
 **나중에 읽히는 파일이 이전 값을 덮어쓴다 (later wins).**
 
-```
-/usr/lib/sysctl.d/*.conf      ← 배포판·패키지 기본값 (먼저 읽힘)
-/lib/sysctl.d/*.conf
-/usr/local/lib/sysctl.d/*.conf
-/run/sysctl.d/*.conf          ← 런타임 임시 설정
-/etc/sysctl.d/*.conf          ← 관리자 설정
-/etc/sysctl.conf              ← 마지막에 읽혀 최고 우선순위
-```
+| 순서 | 경로 | 용도 |
+|:---:|------|------|
+| 1 | `/usr/lib/sysctl.d/*.conf` | 배포판·패키지 기본값 (먼저 읽힘) |
+| 2 | `/lib/sysctl.d/*.conf` | 라이브러리 기본값 |
+| 3 | `/usr/local/lib/sysctl.d/*.conf` | 로컬 설치 소프트웨어 |
+| 4 | `/run/sysctl.d/*.conf` | 런타임 임시 설정 |
+| 5 | `/etc/sysctl.d/*.conf` | 관리자 설정 |
+| 6 | `/etc/sysctl.conf` | 마지막에 읽혀 최고 우선순위 |
 
 > `/etc/sysctl.conf`는 전체 중 **가장 마지막**에 읽히므로
 > 다른 모든 파일의 값을 오버라이드한다.
@@ -84,13 +84,19 @@ systemd-sysctl.service가 부팅 시 `sysctl --system`을 실행한다.
 ```mermaid
 graph TD
     A[클라이언트 SYN]
-    B["SYN Queue\n(tcp_max_syn_backlog)"]
-    C[3-way handshake 완료]
-    D["Accept Queue\n(somaxconn)"]
-    E[애플리케이션 accept]
+    B[SYN Queue]
+    C[핸드셰이크 완료]
+    D[Accept Queue]
+    E[앱 accept]
 
     A --> B --> C --> D --> E
 ```
+
+| 단계 | 관련 파라미터 |
+|------|--------------|
+| SYN Queue | `tcp_max_syn_backlog` |
+| 핸드셰이크 완료 | 3-way handshake 종료 시점 |
+| Accept Queue | `somaxconn` |
 
 | 파라미터 | 기본값 | 고트래픽 권장 | 설명 |
 |---------|--------|------------|------|
@@ -161,7 +167,7 @@ graph TD
 graph TD
     A[fs.file-max]
     B[fs.nr_open]
-    C["ulimit -n"]
+    C[ulimit -n]
 
     A --> B --> C
 ```
@@ -192,12 +198,11 @@ graph TD
 
 ### vm.dirty_ratio / vm.dirty_background_ratio
 
-```mermaid
-graph LR
-    A["3%"] -->|설정값 예시| B["백그라운드 flush 시작"]
-    C["10%"] -->|기본값| D["백그라운드 flush 시작 (기본)"]
-    E["20%"] -->|dirty_ratio 기본값| F["프로세스 직접 쓰기 - 블로킹!"]
-```
+| dirty 비율 | 의미 |
+|-----------|------|
+| 3% | 설정값 예시 — 이 시점에 백그라운드 flush 시작 |
+| 10% | `dirty_background_ratio` 기본값 — 백그라운드 flush 시작 |
+| 20% | `dirty_ratio` 기본값 — 프로세스 직접 쓰기(블로킹) 시작 |
 
 | 파라미터 | 기본값 | DB 권장 | 웹서버 권장 |
 |---------|--------|---------|-----------|
@@ -231,11 +236,12 @@ graph LR
 
 ### Transparent Hugepages (THP)
 
-```
-/sys/kernel/mm/transparent_hugepage/
-  enabled: always | madvise | never
-  defrag:  always | defer | defer+madvise | never
-```
+THP 관련 `/sys/kernel/mm/transparent_hugepage/` 하위 파일:
+
+| 파일 | 허용 값 |
+|------|---------|
+| `enabled` | `always` / `madvise` / `never` |
+| `defrag` | `always` / `defer` / `defer+madvise` / `never` |
 
 **DB 서버 공통 권장**: `never` (비활성화)
 MongoDB, PostgreSQL, Oracle 모두 THP 비활성화를 공식 권고한다.
@@ -411,20 +417,20 @@ readlink /proc/1234/ns/net
 
 ### Safe Sysctls (기본 허용, K8s 1.32+)
 
-```
-kernel.shm_rmid_forced
-net.ipv4.ip_local_port_range
-net.ipv4.tcp_syncookies
-net.ipv4.ping_group_range          (1.18+)
-net.ipv4.ip_unprivileged_port_start (1.22+)
-net.ipv4.ip_local_reserved_ports   (1.27+)
-net.ipv4.tcp_keepalive_time        (1.29+)
-net.ipv4.tcp_fin_timeout           (1.29+)
-net.ipv4.tcp_keepalive_intvl       (1.29+)
-net.ipv4.tcp_keepalive_probes      (1.29+)
-net.ipv4.tcp_rmem                  (1.32+, kernel 4.15+)
-net.ipv4.tcp_wmem                  (1.32+, kernel 4.15+)
-```
+| 파라미터 | 추가 버전 |
+|---------|---------|
+| `kernel.shm_rmid_forced` | 초기 |
+| `net.ipv4.ip_local_port_range` | 초기 |
+| `net.ipv4.tcp_syncookies` | 초기 |
+| `net.ipv4.ping_group_range` | 1.18+ |
+| `net.ipv4.ip_unprivileged_port_start` | 1.22+ |
+| `net.ipv4.ip_local_reserved_ports` | 1.27+ |
+| `net.ipv4.tcp_keepalive_time` | 1.29+ |
+| `net.ipv4.tcp_fin_timeout` | 1.29+ |
+| `net.ipv4.tcp_keepalive_intvl` | 1.29+ |
+| `net.ipv4.tcp_keepalive_probes` | 1.29+ |
+| `net.ipv4.tcp_rmem` | 1.32+, kernel 4.15+ |
+| `net.ipv4.tcp_wmem` | 1.32+, kernel 4.15+ |
 
 ### Pod securityContext 설정
 

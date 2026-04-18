@@ -25,18 +25,27 @@ RHEL 9 / Ubuntu 22.04 기준, LVM2 2.03.x 버전을 다룬다.
 ```mermaid
 graph TD
     APP["애플리케이션"]
-    FS["파일시스템 (ext4 / xfs / btrfs)"]
-    LV["LV (Logical Volume) — /dev/vg0/lv_data<br/>LE0 | LE1 | LE2 ..."]
-    VG["VG (Volume Group) — vg0<br/>PE Pool: 물리 익스텐트(PE) 전체를 하나로 묶음"]
-    PV1["PV (sda1)<br/>/dev/sda1"]
-    PV2["PV (sdb1)<br/>/dev/sdb1"]
-    PV3["PV (sdc1)<br/>/dev/sdc1"]
+    FS["파일시스템"]
+    LV["LV"]
+    VG["VG"]
+    PV1["PV sda1"]
+    PV2["PV sdb1"]
+    PV3["PV sdc1"]
 
     APP --> FS --> LV --> VG
     VG --> PV1
     VG --> PV2
     VG --> PV3
 ```
+
+| 노드 | 설명 |
+|------|------|
+| 파일시스템 | ext4, xfs, btrfs 등 |
+| LV | `/dev/vg0/lv_data`, LE0·LE1·LE2… 로 구성 |
+| VG | `vg0`, 여러 PV의 PE를 하나의 풀로 통합 |
+| PV sda1 | `/dev/sda1` 물리 볼륨 |
+| PV sdb1 | `/dev/sdb1` 물리 볼륨 |
+| PV sdc1 | `/dev/sdc1` 물리 볼륨 |
 
 | 계층 | 역할 | 핵심 단위 |
 |------|------|-----------|
@@ -157,14 +166,16 @@ lvcreate --type raid10 -m 1 -i 2 -L 200G -n lv_raid10 vg0
 
 ### 4.1 Thin Pool 구조
 
-```
-VG (vg0) - 물리 용량: 1 TiB
-└── Thin Pool (tp0) - 500 GiB
-    ├── Thin LV (lv_a) - 200 GiB 할당 (실제 50 GiB 사용)
-    ├── Thin LV (lv_b) - 200 GiB 할당 (실제 30 GiB 사용)
-    └── Thin LV (lv_c) - 200 GiB 할당 (실제 20 GiB 사용)
-    ← 총 할당: 600 GiB > 물리 500 GiB (오버프로비저닝)
-```
+| 계층 | 크기 | 비고 |
+|------|------|------|
+| VG `vg0` | 1 TiB | 물리 용량 |
+| Thin Pool `tp0` | 500 GiB | VG 내부에 생성 |
+| Thin LV `lv_a` | 200 GiB 할당 | 실제 50 GiB 사용 |
+| Thin LV `lv_b` | 200 GiB 할당 | 실제 30 GiB 사용 |
+| Thin LV `lv_c` | 200 GiB 할당 | 실제 20 GiB 사용 |
+
+총 할당 600 GiB는 물리 500 GiB보다 크다(오버프로비저닝).
+실제 사용 합계가 Pool 용량을 초과하면 쓰기 실패가 발생한다.
 
 ### 4.2 Thin Pool 생성 및 사용
 
@@ -218,23 +229,23 @@ lvextend -L +100G vg0/tp0
 
 ### 5.1 COW(Copy-on-Write) 방식 (일반 스냅샷)
 
+```mermaid
+graph TD
+    ORIG["Origin LV"]
+    SNAP["Snapshot LV"]
+    ORIG -- "COW 참조" --> SNAP
 ```
-스냅샷 생성 시점:
-┌─────────────────┐
-│   Origin LV     │  ← 원본 데이터
-│  (lv_data)      │
-└────────┬────────┘
-         │ COW 참조
-┌────────▼────────┐
-│   Snapshot LV   │  ← 변경된 블록만 저장
-│  (lv_data_snap) │
-└─────────────────┘
 
-쓰기 발생 시:
+| 볼륨 | 이름 | 역할 |
+|------|------|------|
+| Origin LV | `lv_data` | 원본 데이터 |
+| Snapshot LV | `lv_data_snap` | 변경된 구 블록만 저장 |
+
+쓰기가 발생하면 다음 순서로 동작한다.
+
 1. 원본 블록을 스냅샷 공간으로 복사
 2. 원본 LV에 새 데이터 기록
 3. 스냅샷은 복사된 구 블록을 참조
-```
 
 ```bash
 # 일반(COW) 스냅샷 생성
@@ -289,13 +300,10 @@ lvremove /dev/vg0/lv_a_snap
 
 ### 6.1 구조 비교
 
-```
-mdadm RAID:
-/dev/sda + /dev/sdb → /dev/md0 (RAID 1) → pvcreate → VG
-
-lvmraid:
-/dev/sda + /dev/sdb → PV → VG → lvcreate --type raid1 → RAID LV
-```
+| 방식 | 구성 흐름 |
+|------|----------|
+| mdadm RAID | `sda + sdb` → `/dev/md0` (RAID 1) → `pvcreate` → VG |
+| lvmraid | `sda + sdb` → PV → VG → `lvcreate --type raid1` → RAID LV |
 
 ### 6.2 특성 비교
 
@@ -348,15 +356,10 @@ vgextend vg0 /dev/sde
 
 ### 7.1 교체 절차
 
-```
-Before:
-VG(vg0): [sdb(old)] [sdc] [sdd]
-         LV 데이터가 sdb에 분산
-
-After:
-VG(vg0): [sdc] [sdd] [sde(new)]
-         sdb 제거 완료
-```
+| 단계 | VG 구성 | 비고 |
+|------|---------|------|
+| Before | `[sdb(old)] [sdc] [sdd]` | LV 데이터가 sdb에 분산 |
+| After | `[sdc] [sdd] [sde(new)]` | sdb 제거 완료 |
 
 ```bash
 # Step 1: 신규 디스크 PV 등록 및 VG 추가
@@ -560,14 +563,14 @@ pvs
 lvs vg0
 ```
 
-```
-Before:  vg0 = [sdb(장애)] + [sdc] + [sdd]
-Step 1:  vg0 = [sdb(장애)] + [sdc] + [sdd] + [sde(신규)]
-Step 2:  pvmove: sdb → sde 데이터 이동 중
-Step 3:  vg0 = [sdb(빈)] + [sdc] + [sdd] + [sde]
-Step 4:  vg0 = [sdc] + [sdd] + [sde]
-After:   sdb 물리 교체 가능
-```
+| 단계 | VG 구성 | 상태 |
+|------|---------|------|
+| Before | `[sdb(장애)] + [sdc] + [sdd]` | 장애 디스크 포함 |
+| Step 1 | `[sdb(장애)] + [sdc] + [sdd] + [sde(신규)]` | 신규 디스크 추가 |
+| Step 2 | `pvmove` 진행 중 | sdb 데이터가 sde로 이동 중 |
+| Step 3 | `[sdb(빈)] + [sdc] + [sdd] + [sde]` | 이동 완료 |
+| Step 4 | `[sdc] + [sdd] + [sde]` | `vgreduce`로 sdb 제외 |
+| After | 동일 | sdb 물리 교체 가능 |
 
 ---
 

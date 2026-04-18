@@ -33,18 +33,18 @@ Linux 5.0 이후, 단일 큐(sq) 방식은 완전히 제거되고
 
 ```mermaid
 graph TD
-    APP["User Space\nread/write/io_uring"]
-    VFS["VFS / Page Cache"]
-    BIO["Generic Block Layer\nbio 분할/병합"]
-    MQ["blk-mq\nSoftware Queues"]
+    APP["User Space"]
+    VFS["VFS"]
+    BIO["Block Layer"]
+    MQ["blk-mq"]
     SQ0["CPU0 SQ"]
     SQ1["CPU1 SQ"]
     SQ2["CPU2 SQ"]
-    SCHED["I/O Scheduler\nnone/mq-deadline/bfq"]
-    HCTX["Hardware Queues\nhctx"]
-    DRV["Storage Driver\nNVMe/SCSI 등"]
+    SCHED["Scheduler"]
+    HCTX["hctx"]
+    DRV["Driver"]
 
-    APP -- "VFS" --> VFS
+    APP --> VFS
     VFS -- "bio" --> BIO
     BIO -- "request" --> MQ
     MQ --> SQ0
@@ -56,6 +56,16 @@ graph TD
     SCHED --> HCTX
     HCTX --> DRV
 ```
+
+| 계층 | 설명 |
+|------|------|
+| User Space | `read`, `write`, `io_uring` 시스템 호출 |
+| VFS | VFS 및 페이지 캐시 |
+| Block Layer | bio 분할/병합을 수행하는 제네릭 블록 레이어 |
+| blk-mq | Software Queue(CPU당 1개)를 관리 |
+| Scheduler | `none`, `mq-deadline`, `bfq`, `kyber` 중 선택 |
+| hctx | 장치 제출 큐에 매핑되는 하드웨어 큐 |
+| Driver | NVMe, SCSI 등 스토리지 드라이버 |
 
 ### blk-mq의 핵심 개념
 
@@ -359,15 +369,13 @@ spec:
 
 Linux 5.0에서 단일 큐(SQ) 스케줄러가 제거되었다.
 
-```
-레거시 (≤ 4.x, SQ 전용)    →    현대 (5.0+, blk-mq)
-─────────────────────────────────────────────────
-noop  (정렬 없음, FIFO)     →    none
-deadline (만료 기한)        →    mq-deadline
-cfq   (공정 큐잉)           →    bfq
-as    (anticipatory)        →    (제거, 대안 없음)
-                                 kyber (신규 추가)
-```
+| 레거시 (≤ 4.x, SQ 전용) | 알고리즘 | 현대 (5.0+, blk-mq) |
+|------------------------|---------|---------------------|
+| `noop` | 정렬 없음, FIFO | `none` |
+| `deadline` | 만료 기한 | `mq-deadline` |
+| `cfq` | 공정 큐잉 | `bfq` |
+| `as` (anticipatory) | 예측적 대기 | 제거, 대안 없음 |
+| - | 토큰 버킷 | `kyber` (신규) |
 
 | 항목 | 레거시 SQ | 현대 blk-mq |
 |------|-----------|-------------|

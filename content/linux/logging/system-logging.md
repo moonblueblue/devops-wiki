@@ -39,7 +39,7 @@ rsyslog 데몬, systemd-journald를 깊이 있게 다룬다.
 ```mermaid
 flowchart TD
     subgraph kernel["커널 공간"]
-        K1[프로세스] --> K2[dev/kmsg]
+        K1[프로세스] --> K2[커널 링버퍼]
     end
 
     subgraph journald["systemd-journald"]
@@ -940,32 +940,34 @@ journalctl --since "1 hour ago" | \
 
 ## 8. 운영 체크리스트
 
-```
-초기 설정
-├── [ ] rsyslog RainerScript 문법으로 설정 작성
-├── [ ] journald Storage=persistent 설정 및 /var/log/journal 생성
-├── [ ] ForwardToSyslog vs imjournal 방식 결정 (중복 주의)
-├── [ ] 원격 전송: RELP + TLS, DA 큐, action.resumeRetryCount=-1
-└── [ ] rsyslogd -N1 문법 검사
+**초기 설정**
 
-크기/보존 정책
-├── [ ] SystemMaxUse + SystemKeepFree 설정 (여유 1G 이상)
-├── [ ] MaxRetentionSec 또는 rsyslog logrotate 연동
-├── [ ] DA 큐 maxdiskspace 제한 설정
-└── [ ] 주기적 vacuum 자동화 (systemd timer)
+- [ ] rsyslog RainerScript 문법으로 설정 작성
+- [ ] journald `Storage=persistent` 설정 및 `/var/log/journal` 생성
+- [ ] `ForwardToSyslog` vs `imjournal` 방식 결정 (중복 주의)
+- [ ] 원격 전송: RELP + TLS, DA 큐, `action.resumeRetryCount=-1`
+- [ ] `rsyslogd -N1` 문법 검사
 
-보안
-├── [ ] TLS: x509/name 모드, 허용 peer 명시
-├── [ ] rsyslog 8.2602.0 이상 업데이트 (인증서 검증 강화)
-├── [ ] /var/log/secure, /var/log/auth.log 권한 0640
-└── [ ] authpriv 로그 별도 파일 분리
+**크기/보존 정책**
 
-모니터링
-├── [ ] impstats로 dropped 메시지 수 모니터링
-├── [ ] journald disk usage 알림 설정
-├── [ ] 큐 highwatermark 도달 알림
-└── [ ] 로그 파이프라인 end-to-end 테스트 (logger + tail)
-```
+- [ ] `SystemMaxUse` + `SystemKeepFree` 설정 (여유 1G 이상)
+- [ ] `MaxRetentionSec` 또는 rsyslog logrotate 연동
+- [ ] DA 큐 `maxdiskspace` 제한 설정
+- [ ] 주기적 vacuum 자동화 (systemd timer)
+
+**보안**
+
+- [ ] TLS: `x509/name` 모드, 허용 peer 명시
+- [ ] rsyslog 8.2602.0 이상 업데이트 (인증서 검증 강화)
+- [ ] `/var/log/secure`, `/var/log/auth.log` 권한 0640
+- [ ] authpriv 로그 별도 파일 분리
+
+**모니터링**
+
+- [ ] `impstats`로 dropped 메시지 수 모니터링
+- [ ] journald disk usage 알림 설정
+- [ ] 큐 `highwatermark` 도달 알림
+- [ ] 로그 파이프라인 end-to-end 테스트 (`logger` + `tail`)
 
 ---
 

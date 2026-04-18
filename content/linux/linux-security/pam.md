@@ -33,13 +33,20 @@ PAM 위에 구축된다.
 
 ```mermaid
 graph TD
-    APP["애플리케이션\nsshd sudo login 등"]
-    APP -->|"libpam.so PAM API"| LIB
-    LIB["PAM 라이브러리\npam.d 설정 파일 읽기"]
-    LIB --> STACK["모듈 스택 평가\nauth account password session"]
-    STACK -->|"성공/실패 반환"| MOD
-    MOD["PAM 모듈\npam_unix pam_sss 등"]
+    APP["애플리케이션"]
+    APP -->|PAM API| LIB
+    LIB["PAM 라이브러리"]
+    LIB --> STACK["모듈 스택 평가"]
+    STACK -->|결과 반환| MOD
+    MOD["PAM 모듈"]
 ```
+
+| 노드 | 예시·설명 |
+|------|----------|
+| 애플리케이션 | sshd, sudo, login 등 |
+| PAM 라이브러리 | `libpam.so`, `pam.d` 설정 파일 로드 |
+| 모듈 스택 평가 | auth, account, password, session 타입 |
+| PAM 모듈 | `pam_unix`, `pam_sss` 등 |
 
 **핵심 원칙**: 애플리케이션은 인증 로직을 모른다.
 PAM 설정 파일만 바꾸면 인증 방식을 교체·추가할 수 있다.
@@ -153,22 +160,28 @@ session    optional     pam_motd.so
 ```mermaid
 graph TD
     REQ["required 실패"]
-    REQ --> REQ1["스택 계속 실행<br/>(사용자에게 이유 노출 방지)"]
-    REQ --> REQ2["최종 결과: 실패"]
+    REQ --> REQ1["스택 계속 실행"]
+    REQ --> REQ2["최종 결과 실패"]
 
     RQT["requisite 실패"]
-    RQT --> RQT1["즉시 반환: 실패<br/>(이후 모듈 실행 안 함)"]
+    RQT --> RQT1["즉시 반환 실패"]
 
     SUF["sufficient 성공"]
-    SUF --> SUF1{"이전 required<br/>모두 성공?"}
-    SUF1 -->|"예"| SUF2["즉시 반환: 성공"]
-    SUF1 -->|"아니오"| SUF3["스택 계속<br/>(sufficient 무시)"]
+    SUF --> SUF1{"이전 required 성공?"}
+    SUF1 -->|예| SUF2["즉시 반환 성공"]
+    SUF1 -->|아니오| SUF3["스택 계속"]
 
     OPT["optional 실패"]
     OPT --> OPT1{"다른 모듈 있음?"}
-    OPT1 -->|"예"| OPT2["무시"]
-    OPT1 -->|"이 모듈뿐이면"| OPT3["결과에 반영"]
+    OPT1 -->|예| OPT2["무시"]
+    OPT1 -->|이 모듈뿐| OPT3["결과에 반영"]
 ```
+
+| 분기 | 부연 |
+|------|------|
+| required 스택 계속 실행 | 사용자에게 실패 이유 노출 방지 |
+| requisite 즉시 반환 실패 | 이후 모듈 실행하지 않음 |
+| sufficient 스택 계속 | sufficient 결과를 무시하고 진행 |
 
 #### 확장 control 문법 (대괄호)
 
@@ -921,11 +934,15 @@ sssctl domain-status ad.example.com
 
 ### 치명적 실수 방지
 
-```mermaid
-graph TD
-    WARN["⚠️ 시스템 잠금 방지 필수<br/><br/>PAM 설정 변경 전 반드시:<br/>1. 별도 root 터미널 세션 유지 (절대 닫지 말 것!)<br/>2. 설정 변경 후 새 세션으로 테스트<br/>3. pamtester로 사전 검증<br/>4. 설정 파일 백업 (cp /etc/pam.d/sshd /tmp/sshd.bak)<br/><br/>잘못된 required 모듈 추가 한 줄로 전체 SSH 차단 가능!"]
-    style WARN fill:#fff3cd,stroke:#ffc107,color:#856404
-```
+> **시스템 잠금 방지 체크리스트** — 잘못된 `required` 모듈
+> 한 줄로 전체 SSH 접근이 차단될 수 있다.
+
+| 순서 | 절차 |
+|------|------|
+| 1 | 별도 root 터미널 세션을 유지 (절대 닫지 말 것) |
+| 2 | 설정 변경 후 새 세션으로 테스트 |
+| 3 | `pamtester`로 사전 검증 |
+| 4 | 설정 파일 백업 (`cp /etc/pam.d/sshd /tmp/sshd.bak`) |
 
 ---
 

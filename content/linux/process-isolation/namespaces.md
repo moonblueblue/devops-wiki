@@ -49,11 +49,11 @@ ls -la /proc/<PID>/ns/
 
 ## 핵심 시스템콜
 
-```
-clone(flags)   → 새 namespace와 함께 자식 프로세스 생성
-unshare(flags) → 현재 프로세스를 새 namespace로 이동
-setns(fd)      → fd가 가리키는 namespace에 합류
-```
+| 시스템콜 | 동작 |
+|---------|------|
+| `clone(flags)` | 새 namespace와 함께 자식 프로세스 생성 |
+| `unshare(flags)` | 현재 프로세스를 새 namespace로 이동 |
+| `setns(fd)` | `fd`가 가리키는 namespace에 합류 |
 
 ---
 

@@ -43,18 +43,16 @@ tags:
 
 ### 용도별 빠른 선택 가이드
 
-```
-워크로드 / 환경           → 권장 파일시스템
-─────────────────────────────────────────────
-일반 서버 / 부팅 볼륨     → ext4
-RHEL 계열 데이터베이스    → XFS
-대용량 순차 I/O / 스트리밍 → XFS
-스냅샷 기반 백업 환경     → Btrfs or ZFS
-NAS / 고신뢰 스토리지     → ZFS
-컨테이너 이미지 레이어    → overlayfs(ext4/xfs 위에)
-읽기 전용 컨테이너 FS     → EROFS
-메모리 기반 임시 공간     → tmpfs
-```
+| 워크로드 / 환경 | 권장 파일시스템 |
+|----------------|----------------|
+| 일반 서버 / 부팅 볼륨 | ext4 |
+| RHEL 계열 데이터베이스 | XFS |
+| 대용량 순차 I/O / 스트리밍 | XFS |
+| 스냅샷 기반 백업 환경 | Btrfs 또는 ZFS |
+| NAS / 고신뢰 스토리지 | ZFS |
+| 컨테이너 이미지 레이어 | overlayfs (ext4/xfs 위) |
+| 읽기 전용 컨테이너 FS | EROFS |
+| 메모리 기반 임시 공간 | tmpfs |
 
 ---
 
@@ -77,16 +75,11 @@ ext4는 ext3의 후속으로, 2008년 Linux 2.6.28에 통합됐다.
 
 ### 저널링 모드
 
-```
-data=journal   가장 안전. 데이터+메타 모두 저널
-               성능 최하. 서버 운영에는 사용 안 함
-
-data=ordered   기본값. 데이터 먼저 쓴 후 메타 커밋
-               안전성과 성능의 균형
-
-data=writeback 메타데이터만 저널. 가장 빠름
-               배터리 백업 캐시 환경에서 권장
-```
+| 모드 | 특성 |
+|------|------|
+| `data=journal` | 가장 안전. 데이터+메타 모두 저널. 성능 최하, 서버 운영에 사용 안 함 |
+| `data=ordered` | 기본값. 데이터 먼저 쓴 후 메타 커밋. 안전성과 성능의 균형 |
+| `data=writeback` | 메타데이터만 저널. 가장 빠름. 배터리 백업 캐시 환경에서 권장 |
 
 ### 주요 마운트 옵션
 
@@ -150,18 +143,21 @@ RHEL 7(2014)부터 기본 파일시스템으로 채택됐다.
 
 ```mermaid
 graph LR
-    subgraph xfs["XFS 내부 구조 (Allocation Group 기반)"]
-        AG0["AG 0<br/>inode alloc<br/>btree"]
-        AG1["AG 1<br/>inode alloc<br/>btree"]
-        AG2["AG 2<br/>inode alloc<br/>btree"]
-        AG3["AG 3<br/>inode alloc<br/>btree"]
+    subgraph xfs["XFS 내부 구조"]
+        AG0["AG 0"]
+        AG1["AG 1"]
+        AG2["AG 2"]
+        AG3["AG 3"]
     end
-    NOTE["각 AG가 독립적으로 병렬 처리"]
+    NOTE["병렬 처리"]
     AG0 -.-> NOTE
     AG1 -.-> NOTE
     AG2 -.-> NOTE
     AG3 -.-> NOTE
 ```
+
+각 AG(Allocation Group)는 독립적인 inode 할당과 B-tree를
+가지며, 서로 다른 잠금으로 병렬 I/O를 처리한다.
 
 ### 핵심 기능
 
@@ -246,15 +242,19 @@ graph LR
     end
     subgraph after["쓰기 발생 후"]
         BA2["Block A"]
-        BB2["Block B (스냅샷 참조)"]
-        BB3["Block B' (새 위치에 기록)"]
+        BB2["Block B"]
+        BB3["Block B'"]
         BC2["Block C"]
-        META["메타데이터 트리 업데이트"]
+        META["메타트리 갱신"]
     end
     BB --> BB2
     BB --> BB3
     BB3 --> META
 ```
+
+쓰기 발생 후 `Block B`는 스냅샷이 참조를 유지하고,
+`Block B'`는 새 위치에 기록된다. 변경된 포인터는 메타데이터
+트리를 거쳐 루트까지 순차적으로 업데이트된다.
 
 ### 주요 기능
 
@@ -375,18 +375,25 @@ OpenZFS 2.3은 세 가지 주요 기능을 추가했다:
 
 ```mermaid
 graph TD
-    APP["Application Layer"]
-    ARC["ARC\nRAM 읽기 캐시"]
-    L2ARC["L2ARC\nSSD 읽기 캐시"]
-    POOL["RAIDZ Mirror\nHDD/SSD Pool"]
-    ZIL["ZIL\n동기 쓰기 버퍼"]
+    APP["Application"]
+    ARC["ARC"]
+    L2ARC["L2ARC"]
+    POOL["Pool"]
+    ZIL["ZIL"]
 
-    APP -- "읽기 요청" --> ARC
-    ARC -- "ARC 미스 시" --> L2ARC
-    L2ARC -- "L2ARC 미스 시" --> POOL
+    APP -- "읽기" --> ARC
+    ARC -- "미스" --> L2ARC
+    L2ARC -- "미스" --> POOL
     APP -- "동기 쓰기" --> ZIL
     ZIL --> POOL
 ```
+
+| 계층 | 매체 | 역할 |
+|------|------|------|
+| ARC | RAM | 1차 읽기 캐시 |
+| L2ARC | SSD | 2차 읽기 캐시 |
+| ZIL | NVMe/SSD | 동기 쓰기 버퍼 |
+| Pool | HDD/SSD | RAIDZ 또는 Mirror 구성 영구 저장소 |
 
 ### RAIDZ 구성 가이드
 
@@ -529,19 +536,14 @@ lsmod | grep zfs
 
 Linux 5.4+에서 지원. 읽기 전용 용도에 최적화됐다.
 
-```mermaid
-graph TD
-    EROFS["EROFS (Enhanced Read-Only File System)"]
-    C1["컨테이너 이미지 레이어 (ComposeFS)"]
-    C2["Android 시스템 파티션"]
-    C3["임베디드 시스템 rootfs"]
-    C4["패키지 배포 (RPM, DEB 메타데이터)"]
+주요 활용처:
 
-    EROFS --> C1
-    EROFS --> C2
-    EROFS --> C3
-    EROFS --> C4
-```
+| 활용처 | 설명 |
+|--------|------|
+| 컨테이너 이미지 레이어 | ComposeFS 기반 |
+| Android 시스템 파티션 | 표준 채택 |
+| 임베디드 시스템 rootfs | 저용량 고압축 |
+| 패키지 배포 | RPM, DEB 메타데이터 |
 
 특징: 내장 압축, 청크 기반 데이터 중복 제거,
 파일 기반 lazy-pull 컨테이너 시작 지원 (Linux 6.12+).
@@ -593,22 +595,20 @@ tmpfs /dev/shm  tmpfs defaults,size=1G             0 0
 
 ### 마이그레이션 고려사항
 
-```
-ext4 → XFS 마이그레이션
-─────────────────────────
+**ext4 → XFS 마이그레이션**
+
 1. XFS로 새 파티션/볼륨 생성
-2. rsync --archive 로 데이터 복사
-3. /etc/fstab UUID 업데이트
-4. initramfs 재생성 (update-initramfs -u)
+2. `rsync --archive`로 데이터 복사
+3. `/etc/fstab` UUID 업데이트
+4. initramfs 재생성 (`update-initramfs -u`)
 5. 재부팅 후 검증
 
-⚠️  in-place 변환 불가. 반드시 새 볼륨으로 복사해야 함
+> in-place 변환 불가. 반드시 새 볼륨으로 복사해야 한다.
 
-ZFS → Btrfs (또는 반대)
-─────────────────────────
-동일하게 데이터 복사 방식만 가능.
-스냅샷/서브볼륨 구조는 수동으로 재구성 필요.
-```
+**ZFS ↔ Btrfs 마이그레이션**
+
+동일하게 데이터 복사 방식만 가능하다.
+스냅샷/서브볼륨 구조는 수동으로 재구성해야 한다.
 
 ### 파일시스템별 fsck 도구
 

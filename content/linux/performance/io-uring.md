@@ -88,9 +88,9 @@ graph TB
         CQEs["CQ Ring Buffer"]
     end
 
-    subgraph SharedMemory["공유 메모리 (mmap)"]
-        SQ_Head["SQ Head/Tail"]
-        CQ_Head["CQ Head/Tail"]
+    subgraph SharedMemory["공유 메모리 mmap"]
+        SQ_Head["SQ HeadTail"]
+        CQ_Head["CQ HeadTail"]
     end
 
     subgraph Kernel

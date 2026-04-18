@@ -23,16 +23,24 @@ tags:
 ```mermaid
 graph TD
     A[전원 ON]
-    A --> B[POST / UEFI 초기화]
-    B --> C[Secure Boot 서명 검증 + ESP 탐색]
-    C --> D[shim → 부트로더 실행]
-    D --> E[커널 + initramfs 로드]
-    E --> F["initramfs: LUKS / LVM / RAID 조립"]
+    A --> B[POST UEFI 초기화]
+    B --> C[서명 검증 ESP 탐색]
+    C --> D[shim 부트로더]
+    D --> E[커널 initramfs 로드]
+    E --> F[initramfs 조립]
     F --> G[switch_root]
     G --> H[systemd PID 1]
     H --> I[타겟 유닛 도달]
     I --> J[로그인 프롬프트]
 ```
+
+| 단계 | 설명 |
+|------|------|
+| POST UEFI 초기화 | 전원 자가 진단과 펌웨어 기동 |
+| 서명 검증 ESP 탐색 | Secure Boot 서명 검증 후 ESP 탐색 |
+| shim 부트로더 | shim이 부트로더(grub/systemd-boot) 실행 |
+| 커널 initramfs 로드 | 커널 이미지와 initramfs 메모리 적재 |
+| initramfs 조립 | LUKS, LVM, RAID 등 스토리지 조립 |
 
 ---
 
@@ -123,11 +131,11 @@ PCR(Platform Configuration Register)에 누적 기록한다.
 
 ### 파일 구조
 
-```
-/etc/default/grub          ← 사용자 설정
-/etc/grub.d/               ← 생성 스크립트
-/boot/grub/grub.cfg        ← 최종 설정 (직접 수정 금지)
-```
+| 경로 | 역할 |
+|------|------|
+| `/etc/default/grub` | 사용자 설정 |
+| `/etc/grub.d/` | 생성 스크립트 |
+| `/boot/grub/grub.cfg` | 최종 설정 (직접 수정 금지) |
 
 ```bash
 # grub.cfg 재생성
@@ -292,13 +300,20 @@ systemd-analyze plot > boot.svg    # SVG 타임라인
 
 ```mermaid
 graph TD
-    A[graphical.target @12.543s]
-    B[multi-user.target @12.543s]
-    C["nginx.service\n← 병목"]
-    D[network.target @7.891s]
+    A[graphical.target]
+    B[multi-user.target]
+    C[nginx.service]
+    D[network.target]
 
     A --> B --> C --> D
 ```
+
+| 유닛 | 시각 | 비고 |
+|------|------|------|
+| `graphical.target` | @12.543s | — |
+| `multi-user.target` | @12.543s | — |
+| `nginx.service` | — | 병목 지점 |
+| `network.target` | @7.891s | — |
 
 ---
 

@@ -32,27 +32,35 @@ PCI-DSS, HIPAA, STIG, CIS Benchmark 등
 ```mermaid
 graph TD
     subgraph kernel["커널 공간"]
-        SRC["syscall / file watch / user event"]
-        AUD["커널 audit subsystem"]
+        SRC["이벤트 소스"]
+        AUD["audit subsystem"]
     end
 
     subgraph user["사용자 공간"]
-        AUDITD["auditd (데몬)"]
-        LOG["/var/log/audit/audit.log"]
-        AUDISP["audisp dispatcher"]
-        SYSLOG["audisp-syslog → syslog/journald"]
-        REMOTE["audisp-remote → 원격 audit 서버"]
-        LAUREL["laurel → JSON 변환 → SIEM"]
+        AUDITD["auditd 데몬"]
+        LOG["audit.log"]
+        AUDISP["audisp"]
+        SYSLOG["audisp-syslog"]
+        REMOTE["audisp-remote"]
+        LAUREL["laurel"]
     end
 
     SRC --> AUD
-    AUD -- "NETLINK_AUDIT socket" --> AUDITD
+    AUD -- NETLINK_AUDIT --> AUDITD
     AUDITD --> LOG
     AUDITD --> AUDISP
     AUDISP --> SYSLOG
     AUDISP --> REMOTE
     AUDISP --> LAUREL
 ```
+
+| 노드 | 의미 |
+|------|------|
+| 이벤트 소스 | syscall, file watch, user event |
+| audit.log | `/var/log/audit/audit.log` |
+| audisp-syslog | syslog/journald로 전달 |
+| audisp-remote | 원격 audit 서버로 전송 |
+| laurel | JSON 변환 후 SIEM으로 전달 |
 
 **핵심 특성**: auditd가 없어도 커널은 이벤트를 생성한다.
 auditd 미실행 시 이벤트는 `dmesg`에 출력된다.
@@ -218,12 +226,12 @@ auditd 규칙은 **파일 번호순(오름차순)** 으로 로드된다.
 순서대로 평가하며 **`never` 규칙에 먼저 매칭되면
 이후 `always` 규칙은 무시**된다.
 
-```
-# 10-base-config.rules  → 제어 규칙 (버퍼, 모드)
-# 20-dont-audit.rules   → 노이즈 제외 (never)  ← 상단 배치 핵심
-# 30-stig.rules         → 주요 규칙
-# 99-finalize.rules     → 불변 모드 설정 (-e 2)
-```
+| 파일 | 역할 |
+|------|------|
+| `10-base-config.rules` | 제어 규칙 (버퍼, 모드) |
+| `20-dont-audit.rules` | 노이즈 제외 `never` — 상단 배치 핵심 |
+| `30-stig.rules` | 주요 규칙 |
+| `99-finalize.rules` | 불변 모드 설정 `-e 2` |
 
 ---
 
@@ -494,10 +502,10 @@ name_format = NONE
 
 ### 플러시 정책 비교
 
-```
-보안성 우선:  SYNC > DATA > INCREMENTAL > INCREMENTAL_ASYNC > NONE
-성능 우선:    NONE > INCREMENTAL_ASYNC > INCREMENTAL > DATA > SYNC
-```
+| 관점 | 순서 (좌측이 우위) |
+|------|-----------------|
+| 보안성 우선 | `SYNC` > `DATA` > `INCREMENTAL` > `INCREMENTAL_ASYNC` > `NONE` |
+| 성능 우선 | `NONE` > `INCREMENTAL_ASYNC` > `INCREMENTAL` > `DATA` > `SYNC` |
 
 | 설정 | 성능 | 데이터 안전성 | 권장 환경 |
 |------|------|-------------|---------|
@@ -741,11 +749,11 @@ ausearch -k access_denied -ts today --raw \
 ```mermaid
 graph TD
     subgraph host["호스트 커널"]
-        AUD["audit subsystem<br/>(네임스페이스 미격리)"]
-        HOST_EV["호스트 프로세스 이벤트"]
-        CA["container-A 이벤트"]
-        CB["container-B 이벤트"]
-        AUDITD["호스트 auditd<br/>(모든 이벤트를 수집)"]
+        AUD["audit subsystem"]
+        HOST_EV["호스트 이벤트"]
+        CA["container-A"]
+        CB["container-B"]
+        AUDITD["호스트 auditd"]
     end
 
     AUD --> HOST_EV
@@ -755,6 +763,11 @@ graph TD
     CA --> AUDITD
     CB --> AUDITD
 ```
+
+| 노드 | 비고 |
+|------|------|
+| audit subsystem | 네임스페이스 미격리 |
+| 호스트 auditd | 모든 이벤트를 수집 |
 
 - audit 서브시스템은 **네트워크 네임스페이스처럼 격리되지 않는다**
 - 호스트의 auditd 하나가 **모든 컨테이너의 syscall을 수집**한다
@@ -795,15 +808,21 @@ ausearch --containerid 123456 -i
 ```mermaid
 graph LR
     subgraph cluster["Kubernetes 클러스터"]
-        API["API Server Audit Logs<br/>- API 오브젝트 변경 감사<br/>- RBAC 위반, namespace 변경"]
-        NODE["노드 레벨<br/>- syscall 감사<br/>- 파일시스템 변경<br/>- 컨테이너 프로세스 실행 추적"]
-        RT["런타임 레벨<br/>- 컨테이너 이상 행동 탐지<br/>- 실시간 알림"]
+        API["API Server Audit"]
+        NODE["노드 레벨"]
+        RT["런타임 레벨"]
     end
 
-    FALCO_K8S["Falco (k8s 이벤트)"] --> API
-    AUDITD["auditd (OS 이벤트)"] --> NODE
-    FALCO_RT["Falco (eBPF/커널 모듈)"] --> RT
+    FALCO_K8S["Falco k8s"] --> API
+    AUDITD["auditd"] --> NODE
+    FALCO_RT["Falco eBPF"] --> RT
 ```
+
+| 레벨 | 역할 |
+|------|------|
+| API Server Audit | API 오브젝트 변경, RBAC 위반, namespace 변경 감사 |
+| 노드 레벨 | syscall, 파일시스템 변경, 컨테이너 프로세스 실행 추적 |
+| 런타임 레벨 | 컨테이너 이상 행동 탐지, 실시간 알림 |
 
 | 도구 | 강점 | 약점 |
 |------|------|------|
@@ -918,14 +937,14 @@ tail -f /var/log/audit/audit.log.json | python3 -m json.tool
 
 ### 성능 영향 이해
 
-```
 규칙이 많을수록 커널이 매 syscall마다 더 많은 규칙을 평가한다.
 exit 필터 규칙은 모든 syscall에 평가 비용이 발생한다.
 
-일반 서버:  +2~5% CPU 오버헤드
-DB 서버:    I/O syscall 집약적 → +10~20% 가능
-네트워크:   connect/accept 규칙 다수 → 연결 많을수록 증가
-```
+| 환경 | 오버헤드 | 요인 |
+|------|--------|------|
+| 일반 서버 | +2~5% CPU | — |
+| DB 서버 | +10~20% 가능 | I/O syscall 집약적 |
+| 네트워크 | 연결량에 비례 증가 | `connect`·`accept` 규칙 다수 |
 
 ### 성능 최적화 전략
 
@@ -1004,12 +1023,18 @@ auditctl -D
 ```mermaid
 graph LR
     AUDITD["auditd"] --> LAUREL["laurel"]
-    LAUREL --> LOG["/var/log/audit/audit.log.json"]
-    LOG --> VECTOR["Vector<br/>(경량, 고성능)"]
-    LOG --> AUDITBEAT["Auditbeat<br/>(Elasticsearch 공식)"]
-    VECTOR --> SIEM["SIEM\nElastic/Splunk"]
+    LAUREL --> LOG["audit.log.json"]
+    LOG --> VECTOR["Vector"]
+    LOG --> AUDITBEAT["Auditbeat"]
+    VECTOR --> SIEM["SIEM"]
     AUDITBEAT --> SIEM
 ```
+
+| 노드 | 설명 |
+|------|------|
+| Vector | 경량, 고성능 수집기 |
+| Auditbeat | Elasticsearch 공식 수집기 |
+| SIEM | Elastic, Splunk 등 |
 
 **Vector 설정 예시 (laurel JSON 수집)**:
 
@@ -1039,32 +1064,28 @@ index = "auditd-%Y.%m.%d"
 
 ## 운영 체크리스트
 
-```
-설치 및 초기 설정
-├── [ ] auditd 패키지 설치 및 서비스 활성화
-├── [ ] /etc/audit/auditd.conf 설정 검토
-│         (max_log_file, num_logs, space_left_action)
-├── [ ] rules.d/ 아래 기본 규칙 세트 배치
-│         (10-base-config, 30-stig, 99-finalize)
-├── [ ] augenrules --load 로 규칙 로드
-└── [ ] auditctl -s 로 상태 확인 (lost=0 확인)
+**설치 및 초기 설정**
+- [ ] auditd 패키지 설치 및 서비스 활성화
+- [ ] `/etc/audit/auditd.conf` 검토 (`max_log_file`, `num_logs`, `space_left_action`)
+- [ ] `rules.d/` 아래 기본 규칙 세트 배치 (`10-base-config`, `30-stig`, `99-finalize`)
+- [ ] `augenrules --load` 로 규칙 로드
+- [ ] `auditctl -s` 로 상태 확인 (`lost=0` 확인)
 
-규칙 관리
-├── [ ] -e 2 불변 모드 활성화 (프로덕션)
-├── [ ] 아키텍처별 b32/b64 규칙 쌍 확인
-├── [ ] never 규칙으로 불필요한 노이즈 제거
-└── [ ] 키 태그 명명 규칙 팀 내 통일
+**규칙 관리**
+- [ ] `-e 2` 불변 모드 활성화 (프로덕션)
+- [ ] 아키텍처별 `b32`·`b64` 규칙 쌍 확인
+- [ ] `never` 규칙으로 불필요한 노이즈 제거
+- [ ] 키 태그 명명 규칙 팀 내 통일
 
-SIEM 연동
-├── [ ] laurel 설치 및 JSON 변환 확인
-├── [ ] 로그 전달 에이전트 (Vector/Auditbeat) 설정
-└── [ ] SIEM에서 대시보드/알림 구성
+**SIEM 연동**
+- [ ] laurel 설치 및 JSON 변환 확인
+- [ ] 로그 전달 에이전트 (Vector·Auditbeat) 설정
+- [ ] SIEM에서 대시보드·알림 구성
 
-정기 점검
-├── [ ] aureport --summary 주간 검토
-├── [ ] backlog lost 카운터 모니터링
-└── [ ] 규칙 커버리지 vs 성능 영향 균형 검토
-```
+**정기 점검**
+- [ ] `aureport --summary` 주간 검토
+- [ ] backlog lost 카운터 모니터링
+- [ ] 규칙 커버리지와 성능 영향의 균형 검토
 
 ---
 

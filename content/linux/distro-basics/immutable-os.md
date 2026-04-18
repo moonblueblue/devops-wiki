@@ -46,14 +46,21 @@ $ touch /usr/bin/test
 
 ```mermaid
 graph LR
-    A["Boot/EFI"] --> B["파티션 A\n현재 활성"]
-    A --> C["파티션 B\n업데이트 대상"]
-    A --> D["/var\n데이터"]
+    A[부트 EFI] --> B[파티션 A]
+    A --> C[파티션 B]
+    A --> D[데이터 var]
 
-    C -->|"새 버전 기록"| E{"재부팅"}
-    E -->|"성공"| C2["파티션 B 활성"]
-    E -->|"실패"| B2["파티션 A로 자동 롤백"]
+    C -->|새 버전 기록| E{재부팅}
+    E -->|성공| C2[파티션 B 활성]
+    E -->|실패| B2[파티션 A 롤백]
 ```
+
+| 노드 | 역할 |
+|------|------|
+| 부트 EFI | 부트로더 진입점 |
+| 파티션 A | 현재 활성 루트 |
+| 파티션 B | 업데이트 대상 루트 |
+| 데이터 var | `/var` 데이터 영역 |
 
 전통적인 `apt upgrade`와의 차이점:
 - 업데이트 도중 실패해도 기존 파티션이 온전히 남아 있다
@@ -86,10 +93,10 @@ graph LR
 
 ### Flatcar Container Linux
 
-```
-Stable: 4459.2.4 (2026-03-09)  커널 6.12, containerd 2.0.7, systemd 256
-LTS:    4081.3.6                18개월 지원 (LTS-2024, 2026년 중반 EOL 예정)
-```
+| 채널 | 버전 | 비고 |
+|------|------|------|
+| Stable | 4459.2.4 (2026-03-09) | 커널 6.12, containerd 2.0.7, systemd 256 |
+| LTS | 4081.3.6 | 18개월 지원 (LTS-2024, 2026년 중반 EOL 예정) |
 
 > **LTS-2024 EOL 주의**: 4081.x 시리즈는 2026년 중반 종료된다.
 > 신규 도입 시 Stable 채널을 사용하고, 차기 LTS 채널로 전환을 준비한다.
@@ -126,10 +133,10 @@ CoreOS 계보 친숙한 팀
 
 ### Bottlerocket
 
-```
-Stable: v1.57.0 (2026-03-23)
-Variants: aws-k8s-1.29 ~ 1.35, NVIDIA GPU, FIPS, arm64, vmware, metal
-```
+| 항목 | 값 |
+|------|------|
+| Stable | v1.57.0 (2026-03-23) |
+| Variants | aws-k8s-1.29 ~ 1.35, NVIDIA GPU, FIPS, arm64, vmware, metal |
 
 AWS가 EKS/ECS 노드를 위해 처음부터 설계한 OS.
 "OS를 관리 부담 없는 어플라이언스처럼"이 설계 철학이다.
@@ -184,10 +191,10 @@ AWS 종속성이 강해 멀티클라우드 이전 시 OS 교체 필요.
 
 ### Talos Linux
 
-```
-Stable: v1.12.6 (2026-03-19)  Linux 6.18, runc 1.3.5
-Beta:   v1.13.0-beta.1         Clang 빌드 커널 + ThinLTO
-```
+| 채널 | 버전 | 비고 |
+|------|------|------|
+| Stable | v1.12.6 (2026-03-19) | Linux 6.18, runc 1.3.5 |
+| Beta | v1.13.0-beta.1 | Clang 빌드 커널 + ThinLTO |
 
 가장 급진적인 Immutable OS.
 **쉘, 패키지 관리자, SSH가 모두 없다.**
@@ -196,25 +203,33 @@ Beta:   v1.13.0-beta.1         Clang 빌드 커널 + ThinLTO
 
 ```mermaid
 graph TD
-    subgraph trad["기존 Linux 노드"]
+    subgraph trad[기존 Linux 노드]
         T1[systemd] --> T2[sshd]
         T2 --> T3[bash]
         T3 --> T4[패키지 관리자]
-        T2 -->|"직접 접속/수정"| T5((운영자))
+        T2 -->|직접 접속 수정| T5((운영자))
     end
 ```
 
 ```mermaid
 graph TD
-    subgraph talos["Talos 노드"]
-        M["machined (PID 1)"]
-        M --> AP["apid (포트 50000)"]
-        M --> TR["trustd"]
-        M --> CT["containerd"]
-        M --> KB["kubelet"]
-        TC((talosctl)) -->|"gRPC"| AP
+    subgraph talos[Talos 노드]
+        M[machined]
+        M --> AP[apid]
+        M --> TR[trustd]
+        M --> CT[containerd]
+        M --> KB[kubelet]
+        TC((talosctl)) -->|gRPC| AP
     end
 ```
+
+| 컴포넌트 | 설명 |
+|---------|------|
+| machined | PID 1, systemd 대체 |
+| apid | gRPC 엔드포인트, 포트 50000 |
+| trustd | mTLS 인증서 발급·교환 |
+| containerd | 컨테이너 런타임 |
+| kubelet | K8s 노드 에이전트 |
 
 방화벽 규칙: talosctl은 **apid**(포트 50000/TCP)와 통신한다.
 machined가 직접 gRPC를 노출하는 것이 아니므로 이 구분이 중요하다.

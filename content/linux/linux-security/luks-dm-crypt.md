@@ -30,14 +30,22 @@ dm-crypt는 Linux 커널의 device mapper 서브시스템에 내장된
 
 ```mermaid
 graph TD
-    A["Application\nFilesystem"]
-    B["/dev/mapper/NAME\n복호화 블록 디바이스"]
-    C["dm-crypt\nAES-XTS 암호화"]
-    D["LUKS Header\n키슬롯 0-31"]
-    E["물리 블록 디바이스\n/dev/sda 등"]
+    A["Application FS"]
+    B["dev mapper NAME"]
+    C["dm-crypt"]
+    D["LUKS Header"]
+    E["물리 블록 디바이스"]
 
     A --> B --> C --> D --> E
 ```
+
+| 계층 | 설명 |
+|------|------|
+| Application FS | 애플리케이션과 파일시스템 |
+| dev mapper NAME | `/dev/mapper/NAME` 복호화 블록 디바이스 |
+| dm-crypt | AES-XTS 암호화 |
+| LUKS Header | 키슬롯 0-31 |
+| 물리 블록 디바이스 | `/dev/sda` 등 |
 
 **핵심 개념**:
 - **dm-crypt**: 커널 모듈. 블록 단위 암호화/복호화만 담당
@@ -90,8 +98,13 @@ Plain dm-crypt는 키 관리가 어렵고,
 
 ### 기본 워크플로
 
-```
-luksFormat → open → mkfs → mount → (운영) → close
+```mermaid
+flowchart LR
+    A[luksFormat] --> B[open]
+    B --> C[mkfs]
+    C --> D[mount]
+    D --> E[운영]
+    E --> F[close]
 ```
 
 ### 1단계: LUKS2 포맷
@@ -169,13 +182,13 @@ cryptsetup close mydata
 LUKS2는 **32개의 키슬롯**을 제공한다.
 각 슬롯은 동일한 Master Key를 서로 다른 방식으로 열 수 있다.
 
-```
-키슬롯 0: 관리자 패스프레이즈
-키슬롯 1: 백업 패스프레이즈 (에스크로)
-키슬롯 2: 키파일 (자동화/배치)
-키슬롯 3: TPM2 바인딩
-키슬롯 4: FIDO2 하드웨어 키
-```
+| 키슬롯 | 용도 |
+|------|------|
+| 0 | 관리자 패스프레이즈 |
+| 1 | 백업 패스프레이즈 (에스크로) |
+| 2 | 키파일 (자동화/배치) |
+| 3 | TPM2 바인딩 |
+| 4 | FIDO2 하드웨어 키 |
 
 ### 키슬롯 조작
 
@@ -257,15 +270,10 @@ dm-integrity는 블록 단위로 체크섬을 저장하여
 
 ### Authenticated Encryption
 
-```
-기존 dm-crypt: 암호화만 (Confidentiality)
-  - 데이터 복호화는 되지만 위변조 탐지 불가
-  - Bit-flip 공격에 취약
-
-dm-crypt + dm-integrity: 암호화 + 인증 (Confidentiality + Integrity)
-  - 블록 위변조 시 I/O 오류 반환
-  - AEAD(Authenticated Encryption with Associated Data) 구현
-```
+| 구성 | 보장 속성 | 특징 |
+|------|----------|------|
+| 기존 dm-crypt | Confidentiality | 복호화는 되지만 위변조 탐지 불가, Bit-flip 공격에 취약 |
+| dm-crypt + dm-integrity | Confidentiality + Integrity | 블록 위변조 시 I/O 오류, AEAD 구현 |
 
 ### integrity 모드 비교
 
@@ -376,13 +384,16 @@ cryptsetup 2.4+ / systemd 248+ 에서 지원한다.
 
 ### TPM2 바인딩
 
-```
-부팅 시 흐름:
-  UEFI → Secure Boot → GRUB → initramfs
-  → systemd-cryptsetup
-  → TPM2 PCR 값 검증
-  → 자동 잠금 해제
-  → 루트 마운트 → 시스템 부팅
+```mermaid
+flowchart LR
+    A[UEFI] --> B[Secure Boot]
+    B --> C[GRUB]
+    C --> D[initramfs]
+    D --> E[systemd-cryptsetup]
+    E --> F[TPM2 PCR 검증]
+    F --> G[자동 잠금 해제]
+    G --> H[루트 마운트]
+    H --> I[시스템 부팅]
 ```
 
 ```bash
@@ -456,12 +467,12 @@ mydata  /dev/sdb1  -  tpm2-device=auto,tpm2-pcrs=7
 ```mermaid
 graph TD
     subgraph disk["디스크 레이아웃"]
-        sda1["/dev/sda1 → /boot/efi<br/>(EFI 파티션, 평문)"]
-        sda2["/dev/sda2 → /boot<br/>(커널·initramfs, 평문)"]
-        sda3["/dev/sda3 → LUKS2 암호화"]
+        sda1["sda1 EFI"]
+        sda2["sda2 boot"]
+        sda3["sda3 LUKS2"]
         lvm["LVM PV"]
-        root["/ (루트)"]
-        home["/home"]
+        root["루트"]
+        home["home"]
         swap["swap"]
     end
 
@@ -470,6 +481,12 @@ graph TD
     lvm --> home
     lvm --> swap
 ```
+
+| 파티션 | 마운트 | 상태 |
+|------|------|------|
+| `/dev/sda1` | `/boot/efi` | EFI 파티션, 평문 |
+| `/dev/sda2` | `/boot` | 커널·initramfs, 평문 |
+| `/dev/sda3` | — | LUKS2 암호화 |
 
 - `/boot`는 initramfs와 GRUB이 패스프레이즈 입력 전에
   접근해야 하므로 기본적으로 평문
@@ -501,16 +518,23 @@ cryptsetup luksFormat \
 
 ```mermaid
 graph TD
-    A["펌웨어 부팅"] --> B["Secure Boot (서명 검증)"]
-    B -- "실패" --> HALT["부팅 중단"]
-    B -- "성공" --> C["GRUB 부트로더"]
-    C --> D["커널 + initramfs 로드"]
+    A["펌웨어 부팅"] --> B["Secure Boot"]
+    B -- 실패 --> HALT["부팅 중단"]
+    B -- 성공 --> C["GRUB"]
+    C --> D["커널 initramfs"]
     D --> E["systemd-cryptsetup"]
-    E --> F["TPM2에 PCR 값 요청"]
-    F -- "PCR 불일치<br/>(펌웨어·Secure Boot 상태 변경)" --> G["TPM2 잠금 (자동 해제 실패)<br/>→ 패스프레이즈 수동 입력 fallback"]
-    F -- "PCR 일치" --> H["자동 잠금 해제"]
-    H --> I["루트 마운트 → 시스템 부팅"]
+    E --> F["PCR 값 요청"]
+    F -- 불일치 --> G["TPM2 잠금"]
+    F -- 일치 --> H["자동 잠금 해제"]
+    H --> I["루트 마운트"]
 ```
+
+| 노드 | 설명 |
+|------|------|
+| Secure Boot | 서명 검증 |
+| PCR 불일치 | 펌웨어·Secure Boot 상태 변경 |
+| TPM2 잠금 | 자동 해제 실패, 패스프레이즈 수동 입력 fallback |
+| 루트 마운트 | 이후 시스템 부팅 |
 
 ---
 
@@ -520,13 +544,21 @@ graph TD
 
 ```mermaid
 graph TD
-    A[물리 디스크] --> B["LUKS2 암호화 컨테이너\n(/dev/sda3)"]
-    B --> C["LVM PV\n(/dev/mapper/cryptlvm)"]
-    C --> D["VG (vg0)"]
-    D --> E["LV root → /"]
-    D --> F["LV home → /home"]
-    D --> G["LV swap → swap"]
+    A[물리 디스크] --> B["LUKS2 컨테이너"]
+    B --> C["LVM PV"]
+    C --> D["VG vg0"]
+    D --> E["LV root"]
+    D --> F["LV home"]
+    D --> G["LV swap"]
 ```
+
+| 노드 | 대응 경로 |
+|------|----------|
+| LUKS2 컨테이너 | `/dev/sda3` |
+| LVM PV | `/dev/mapper/cryptlvm` |
+| LV root | `/` |
+| LV home | `/home` |
+| LV swap | swap 영역 |
 
 ```bash
 # 설정 절차
@@ -553,11 +585,19 @@ mkswap /dev/vg0/swap
 
 ```mermaid
 graph TD
-    A[물리 디스크] --> B["LVM PV\n(/dev/sda3)"]
-    B --> C["VG (vg0)"]
-    C --> D["LV data1 → LUKS2 → /data/prod"]
-    C --> E["LV data2 → LUKS2 → /data/archive"]
+    A[물리 디스크] --> B["LVM PV"]
+    B --> C["VG vg0"]
+    C --> D["LV data1"]
+    C --> E["LV data2"]
+    D --> D1["LUKS2 data1"]
+    E --> E1["LUKS2 data2"]
 ```
+
+| 노드 | 대응 경로 |
+|------|----------|
+| LVM PV | `/dev/sda3` |
+| LUKS2 data1 | `/data/prod` |
+| LUKS2 data2 | `/data/archive` |
 
 ```bash
 # LVM 먼저 구성
@@ -668,14 +708,21 @@ dd if=/dev/mapper/mydata_recovered of=/backup/data.img bs=4M
 
 ```mermaid
 sequenceDiagram
-    participant C as 서버 (Clevis 클라이언트)
-    participant T as Tang 서버 (/usr/bin/tangd)
+    participant C as Clevis 클라이언트
+    participant T as Tang 서버
 
     C->>T: 1. 잠금 해제 요청
-    T-->>C: 2. JWK (JSON Web Key) 응답
-    Note over C: 3. 로컬 바인딩 데이터와 복합하여<br/>Master Key 복원
+    T-->>C: 2. JWK 응답
+    Note over C: 3. Master Key 복원
     Note over C: 4. LUKS 잠금 해제
 ```
+
+| 단계 | 부연 |
+|------|------|
+| Clevis 클라이언트 | LUKS가 설치된 서버 |
+| Tang 서버 | `/usr/bin/tangd` 실행 |
+| JWK 응답 | JSON Web Key |
+| Master Key 복원 | 로컬 바인딩 데이터와 복합하여 복원 |
 
 ```bash
 # Tang 서버 설정 (별도 서버)
@@ -739,18 +786,24 @@ clevis luks unbind -d /dev/sdb1 -s 1
 ```mermaid
 graph TD
     subgraph node["Kubernetes 노드"]
-        Pod["Pod (앱)"]
+        Pod["Pod"]
         PVC["PVC"]
         PV["PV"]
-        SC["StorageClass<br/>(암호화 옵션)"]
-        CSI["CSI 레벨 암호화<br/>(rook-ceph encryption,<br/>OpenEBS cStor 등)"]
-        LUKS["노드 레벨 LUKS<br/>(PV가 암호화된<br/>블록 위에 위치)"]
+        SC["StorageClass"]
+        CSI["CSI 암호화"]
+        LUKS["노드 LUKS"]
     end
 
     Pod --> PVC --> PV --> SC
     SC --> CSI
     SC --> LUKS
 ```
+
+| 노드 | 부연 |
+|------|------|
+| StorageClass | 암호화 옵션을 지정 |
+| CSI 암호화 | rook-ceph encryption, OpenEBS cStor 등 |
+| 노드 LUKS | PV가 암호화된 블록 위에 위치 |
 
 **rook-ceph + 암호화**:
 
@@ -818,36 +871,34 @@ cryptsetup luksFormat \
 
 ## 운영 체크리스트
 
-```
-초기 설정
-├── [ ] LUKS2 포맷 시 Argon2id + AES-256-XTS 적용
-├── [ ] pbkdf-memory >= 1048576 (1 GiB) 확인
-├── [ ] 포맷 직후 luksHeaderBackup 실행
-├── [ ] 헤더 백업을 오프라인(별도 미디어)에 보관
-└── [ ] luksDump로 파라미터 검증
+**초기 설정**
+- [ ] LUKS2 포맷 시 Argon2id + AES-256-XTS 적용
+- [ ] `pbkdf-memory >= 1048576` (1 GiB) 확인
+- [ ] 포맷 직후 `luksHeaderBackup` 실행
+- [ ] 헤더 백업을 오프라인(별도 미디어)에 보관
+- [ ] `luksDump`로 파라미터 검증
 
-키슬롯 관리
-├── [ ] 키슬롯 0: 주 패스프레이즈
-├── [ ] 키슬롯 1: 백업 패스프레이즈 (에스크로 보관)
-├── [ ] 키슬롯 2+: TPM2/FIDO2/자동화 키파일
-└── [ ] 사용하지 않는 키슬롯 제거
+**키슬롯 관리**
+- [ ] 키슬롯 0 — 주 패스프레이즈
+- [ ] 키슬롯 1 — 백업 패스프레이즈 (에스크로 보관)
+- [ ] 키슬롯 2+ — TPM2·FIDO2·자동화 키파일
+- [ ] 사용하지 않는 키슬롯 제거
 
-자동 잠금 해제
-├── [ ] crypttab에 UUID로 디바이스 참조
-├── [ ] fstab에 nofail 옵션 설정
-├── [ ] TPM2/Tang 바인딩 시 fallback(수동 입력) 테스트
-└── [ ] initramfs 업데이트 (dracut -fv / update-initramfs -u)
+**자동 잠금 해제**
+- [ ] `crypttab`에 UUID로 디바이스 참조
+- [ ] `fstab`에 `nofail` 옵션 설정
+- [ ] TPM2·Tang 바인딩 시 수동 입력 fallback 테스트
+- [ ] initramfs 업데이트 (`dracut -fv`, `update-initramfs -u`)
 
-모니터링
-├── [ ] systemd-cryptsetup 실패 알림 설정
-├── [ ] 헤더 백업 주기적 최신화 (키슬롯 변경 시)
-└── [ ] AES-NI 하드웨어 가속 활성화 확인
+**모니터링**
+- [ ] `systemd-cryptsetup` 실패 알림 설정
+- [ ] 헤더 백업 주기적 최신화 (키슬롯 변경 시)
+- [ ] AES-NI 하드웨어 가속 활성화 확인
 
-정기 점검
-├── [ ] cryptsetup benchmark로 성능 기준선 유지
-├── [ ] 키파일 접근 권한 (600, root만 읽기) 확인
-└── [ ] Tang 서버 가용성 모니터링 (Clevis 환경)
-```
+**정기 점검**
+- [ ] `cryptsetup benchmark`로 성능 기준선 유지
+- [ ] 키파일 접근 권한 (`600`, root만 읽기) 확인
+- [ ] Tang 서버 가용성 모니터링 (Clevis 환경)
 
 ---
 

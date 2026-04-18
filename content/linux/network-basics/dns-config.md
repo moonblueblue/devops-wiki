@@ -24,16 +24,26 @@ tags:
 ```mermaid
 graph TD
     APP["애플리케이션"]
-    --> NSS["glibc getaddrinfo() / NSS"]
-    NSS --> HOSTS["/etc/hosts<br/>로컬 정적 매핑"]
-    NSS --> MDNS["mDNS (Avahi/systemd)<br/>.local 도메인"]
-    NSS --> RESOLVED["systemd-resolved<br/>스텁 리졸버 127.0.0.53"]
+    --> NSS["glibc NSS"]
+    NSS --> HOSTS["hosts 파일"]
+    NSS --> MDNS["mDNS"]
+    NSS --> RESOLVED["systemd-resolved"]
     RESOLVED --> CACHE["캐시 확인"]
-    RESOLVED --> UPSTREAM["상위 DNS 서버"]
-    UPSTREAM --> GDNS["글로벌 DNS (8.8.8.8 등)"]
-    UPSTREAM --> SDNS["도메인별 DNS (Split DNS)"]
-    NSS --> RESOLV["/etc/resolv.conf 직접 참조<br/>(systemd-resolved 미사용 시)"]
+    RESOLVED --> UPSTREAM["상위 DNS"]
+    UPSTREAM --> GDNS["글로벌 DNS"]
+    UPSTREAM --> SDNS["도메인별 DNS"]
+    NSS --> RESOLV["resolv.conf"]
 ```
+
+| 노드 | 설명 |
+|------|------|
+| `glibc NSS` | `getaddrinfo()` / NSS 경로 진입점 |
+| `hosts 파일` | `/etc/hosts` 로컬 정적 매핑 |
+| `mDNS` | Avahi/systemd의 `.local` 도메인 처리 |
+| `systemd-resolved` | 스텁 리졸버 `127.0.0.53` |
+| `글로벌 DNS` | 예: `8.8.8.8` |
+| `도메인별 DNS` | Split DNS 경로 |
+| `resolv.conf` | systemd-resolved 미사용 시 직접 참조 |
 
 | 단계 | 역할 | 설정 파일 |
 |------|------|-----------|
@@ -129,15 +139,22 @@ Ubuntu 18.04+, Fedora, Arch 등 주요 배포판의 기본 리졸버.
 ```mermaid
 graph TD
     subgraph resolved["systemd-resolved"]
-        STUB["스텁 리졸버: 127.0.0.53:53"]
-        MDNS_L["로컬 mDNS: 127.0.0.54:5353"]
+        STUB["스텁 리졸버"]
+        MDNS_L["로컬 mDNS"]
         CACHE2["캐시"]
         SPLIT["Split DNS"]
         DNSSEC["DNSSEC"]
     end
-    resolved --> GDNS2["글로벌 DNS (8.8.8.8 등)"]
-    resolved --> DDNS["도메인별 DNS (내부 도메인 전용)"]
+    resolved --> GDNS2["글로벌 DNS"]
+    resolved --> DDNS["도메인별 DNS"]
 ```
+
+| 구성 요소 | 바인드 주소 / 역할 |
+|-----------|--------------------|
+| 스텁 리졸버 | `127.0.0.53:53` |
+| 로컬 mDNS | `127.0.0.54:5353` |
+| 글로벌 DNS | 예: `8.8.8.8` |
+| 도메인별 DNS | 내부 도메인 전용 |
 
 ### 3-2. /etc/systemd/resolved.conf
 
@@ -464,15 +481,15 @@ journalctl -u systemd-resolved \
 
 ### 5-5. 디버깅 순서 체크리스트
 
-```
-1. resolvectl status          → DNS 서버·도메인 확인
-2. resolvectl query <host>    → resolved 캐시 통과 확인
-3. dig @127.0.0.53 <host>     → 스텁 리졸버 직접 확인
-4. dig @<upstream> <host>     → 업스트림 서버 직접 확인
-5. cat /etc/resolv.conf       → 심링크 대상·내용 확인
-6. cat /etc/nsswitch.conf     → hosts 라인 순서 확인
-7. getent hosts <host>        → NSS 전체 파이프라인 확인
-```
+| 순서 | 명령 | 확인 사항 |
+|-----|------|-----------|
+| 1 | `resolvectl status` | DNS 서버·도메인 확인 |
+| 2 | `resolvectl query <host>` | resolved 캐시 통과 확인 |
+| 3 | `dig @127.0.0.53 <host>` | 스텁 리졸버 직접 확인 |
+| 4 | `dig @<upstream> <host>` | 업스트림 서버 직접 확인 |
+| 5 | `cat /etc/resolv.conf` | 심링크 대상·내용 확인 |
+| 6 | `cat /etc/nsswitch.conf` | hosts 라인 순서 확인 |
+| 7 | `getent hosts <host>` | NSS 전체 파이프라인 확인 |
 
 ---
 
@@ -485,11 +502,17 @@ journalctl -u systemd-resolved \
 ```mermaid
 graph TD
     POD["Pod"]
-    --> KDNS["kube-dns ClusterIP<br/>(기본 10.96.0.10)"]
+    --> KDNS["kube-dns ClusterIP"]
     --> COREDNS["CoreDNS Pod"]
-    COREDNS --> INTERNAL["클러스터 내부<br/>→ etcd/API Server 조회"]
-    COREDNS --> EXTERNAL["외부 도메인<br/>→ 노드 DNS (resolv.conf) 전달"]
+    COREDNS --> INTERNAL["클러스터 내부"]
+    COREDNS --> EXTERNAL["외부 도메인"]
 ```
+
+| 노드 | 설명 |
+|------|------|
+| `kube-dns ClusterIP` | 기본 `10.96.0.10` |
+| `클러스터 내부` | etcd / API Server 조회 |
+| `외부 도메인` | 노드 DNS(`resolv.conf`)로 전달 |
 
 ```bash
 # CoreDNS ConfigMap 확인

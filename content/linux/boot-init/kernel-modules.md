@@ -30,7 +30,7 @@ tags:
 lsmod
 ```
 
-```
+```text
 Module                  Size  Used by
 br_netfilter           32768  0
 bridge                307200  1 br_netfilter
@@ -72,10 +72,12 @@ modinfo -k 6.8.0-50-generic nf_conntrack   # 다른 커널 기준 조회
 | `sig_hashalgo` | 서명 해시 알고리즘 (예: sha256) |
 
 `vermagic` 불일치 예:
-```
+
+```text
 vermagic: 6.8.0-50-generic SMP preempt mod_unload modversions
-→ 현재 커널과 다르면 로드 실패
 ```
+
+현재 커널의 vermagic과 다르면 로드가 실패한다.
 
 ---
 
@@ -207,12 +209,12 @@ nf_conntrack
 모든 경로의 파일이 **파일명 사전순**으로 정렬되어 함께 적용된다.
 **동명 파일이 여러 경로에 존재할 때만** 더 높은 우선순위 경로가 오버라이드한다.
 
-```
-/etc/modules-load.d/*.conf      ← 최우선 (동명 파일 오버라이드)
-/run/modules-load.d/*.conf
-/usr/local/lib/modules-load.d/
-/usr/lib/modules-load.d/*.conf  ← 배포판 기본값
-```
+| 경로 | 우선순위 |
+|------|----------|
+| `/etc/modules-load.d/*.conf` | 최우선 (동명 파일 오버라이드) |
+| `/run/modules-load.d/*.conf` | 런타임 설정 |
+| `/usr/local/lib/modules-load.d/` | 로컬 설치 |
+| `/usr/lib/modules-load.d/*.conf` | 배포판 기본값 |
 
 > `/usr/lib/modules-load.d/10-distro.conf`와
 > `/etc/modules-load.d/90-custom.conf`는 이름이 다르므로
@@ -235,16 +237,24 @@ journalctl -u systemd-modules-load.service --since boot
 
 ```mermaid
 graph TD
-    A[UEFI Secure Boot 활성화]
-    B["서명된 커널만 로드\n(shim/GRUB)"]
-    C["LOCKDOWN integrity 모드\n자동 활성화"]
-    D[서명 없는 모듈 로드 차단]
+    A[Secure Boot 활성화]
+    B[서명 커널 로드]
+    C[LOCKDOWN 모드]
+    D[미서명 모듈 차단]
 
     A --> B --> C --> D
 ```
 
+| 단계 | 설명 |
+|------|------|
+| Secure Boot 활성화 | UEFI에서 Secure Boot 켜짐 |
+| 서명 커널 로드 | shim/GRUB이 서명된 커널만 로드 |
+| LOCKDOWN 모드 | `integrity` 모드 자동 활성화 |
+| 미서명 모듈 차단 | 서명 없는 `.ko` 로드 거부 |
+
 서명된 `.ko` 파일 구조:
-```
+
+```text
 [ELF 컨텐츠][PKCS#7 서명][서명 정보 블록][~Module signature appended~.]
 ```
 
@@ -338,14 +348,22 @@ NVIDIA 드라이버, VirtualBox, WireGuard(구버전) 등이 대표적인 사례
 
 ```mermaid
 graph TD
-    A[커널 업데이트 apt/dnf]
-    B["패키지 매니저\npost-install hook"]
+    A[커널 업데이트]
+    B[post-install hook]
     C[dkms autoinstall]
-    D["linux-headers\n참조하여 재컴파일"]
-    E["updates/dkms/\n&lt;name&gt;.ko 설치"]
+    D[재컴파일]
+    E[모듈 설치]
 
     A --> B --> C --> D --> E
 ```
+
+| 단계 | 설명 |
+|------|------|
+| 커널 업데이트 | `apt`/`dnf`로 새 커널 설치 |
+| post-install hook | 패키지 매니저의 설치 후 훅 실행 |
+| dkms autoinstall | DKMS가 등록된 모듈 일괄 처리 |
+| 재컴파일 | `linux-headers`를 참조해 재컴파일 |
+| 모듈 설치 | `updates/dkms/<name>.ko` 설치 |
 
 ### dkms.conf 형식
 
