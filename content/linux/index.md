@@ -9,25 +9,26 @@ tags:
   - index
 ---
 
+<!-- @format -->
+
 # Linux
 
 > **티어**: 서브 (기반) — **작성 원칙**: 필수만
 >
 > Kubernetes · Observability · CI/CD 메인 카테고리를 받쳐주는 기반 지식.
-> 트러블슈팅 시 반드시 도달하는 레이어와, 컨테이너·보안 이해의
-> 선행 개념만 엄선해 22개 글로 구성한다.
+> 트러블슈팅 시 반드시 도달하는 레이어와, 컨테이너·보안 이해의 선행 개념들로 구성.
 
 ---
 
 ## 메인 카테고리와의 연결
 
-| 이 카테고리의 글 | 받쳐주는 메인 |
-|---|---|
-| namespaces, cgroups | Kubernetes (Pod·컨테이너 기반) |
-| performance 4종, logging 2종 | Observability (노드 메트릭·로그) |
-| systemd, boot-process | Kubernetes (kubelet·부팅 장애) |
-| linux-capabilities, seccomp, apparmor, selinux | Security (Pod securityContext) |
-| memory-oom, process-management | 장애 대응 (K8s에서 가장 흔한 증상) |
+| 이 카테고리의 글                               | 받쳐주는 메인                      |
+| ---------------------------------------------- | ---------------------------------- |
+| namespaces, cgroups                            | Kubernetes (Pod·컨테이너 기반)     |
+| performance 4종, logging 2종                   | Observability (노드 메트릭·로그)   |
+| systemd, boot-process                          | Kubernetes (kubelet·부팅 장애)     |
+| linux-capabilities, seccomp, apparmor, selinux | Security (Pod securityContext)     |
+| memory-oom, process-management                 | 장애 대응 (K8s에서 가장 흔한 증상) |
 
 ---
 
@@ -50,7 +51,7 @@ tags:
 - [ ] namespaces — pid, mnt, net, user, ipc, uts, cgroup, time
 - [ ] cgroups — v1 vs v2, CPU/Memory/IO 컨트롤러, PSI
 - [ ] process-management — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
-- [ ] resource-limits — ulimit, PAM limits, RLIMIT_* vs cgroup
+- [ ] resource-limits — ulimit, PAM limits, RLIMIT\_\* vs cgroup
 
 ### Performance
 
@@ -66,7 +67,7 @@ tags:
 
 ### Security
 
-- [ ] linux-capabilities — CAP_*, 바운딩·앰비언트·인헤리터블
+- [ ] linux-capabilities — CAP\_\*, 바운딩·앰비언트·인헤리터블
 - [ ] seccomp — Mode 1/2, BPF 필터, Docker/K8s 프로파일
 - [ ] apparmor — 프로파일 기반 MAC (Ubuntu/SUSE)
 - [ ] selinux — 레이블 기반 MAC (RHEL 계열)
@@ -90,6 +91,6 @@ tags:
 ## 참고 표준
 
 - CIS Linux Benchmarks
-- Brendan Gregg, *Systems Performance* (2nd ed.)
+- Brendan Gregg, _Systems Performance_ (2nd ed.)
 - man7.org 공식 man 페이지
 - kernel.org 공식 문서

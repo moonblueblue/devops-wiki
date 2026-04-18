@@ -364,3 +364,9 @@ pre code {
 html {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* ----- 15. Hidden sidebar items ----- */
+/* 루트 홈(/)은 로고 클릭으로 접근. 사이드바에는 노출 안 함. */
+.menu__list-item.hidden-sidebar-item {
+  display: none;
+}
