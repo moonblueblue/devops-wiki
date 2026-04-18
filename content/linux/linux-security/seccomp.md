@@ -248,10 +248,11 @@ seccompDefault: true   # 모든 파드에 RuntimeDefault 적용
 > SELinux를 모두 우회한다. 체크리스트의 다른 설정과 무관하게
 > 특권 컨테이너에는 어떠한 seccomp 제한도 적용되지 않는다.
 
-> **CVE-2023-2431**: K8s 1.24~1.27.1에서
+> **CVE-2023-2431**: K8s 1.24~1.27.0에서
 > `type: Localhost` + 빈 `localhostProfile` 설정 시
 > 의도치 않게 Unconfined로 동작.
-> 1.24.14 / 1.25.10 / 1.26.5 / 1.27.2에서 수정됨.
+> 1.24.14 / 1.25.9 / 1.26.4 / 1.27.1에서 수정됨
+> (공식 Kubernetes Security Advisory 기준).
 
 ---
 
@@ -438,7 +439,7 @@ strace -f myapp 2>&1 | grep "EPERM\|SIGSYS"
 [ ] capabilities: drop: ["ALL"] 후 필요한 것만 추가
 [ ] K8s 1.25+: kubelet seccompDefault: true 설정 권장
 [ ] CVE-2023-2431 패치 확인
-    (K8s 1.24.14+ / 1.25.10+ / 1.26.5+ / 1.27.2+)
+    (K8s 1.24.14+ / 1.25.9+ / 1.26.4+ / 1.27.1+)
 [ ] SCMP_ACT_LOG로 충분히 테스트 후 ERRNO 모드 전환
 ```
 

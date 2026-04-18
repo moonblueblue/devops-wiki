@@ -116,7 +116,7 @@ nvme0n1         523.0   312.0   65.4    24.8     0.0     4.2
 | **`await`** | 평균 I/O 완료 시간(ms) | NVMe: <1ms, HDD: <20ms | NVMe >5ms |
 | **`r_await`** | 읽기 평균 완료 시간(ms) | NVMe: <0.5ms | NVMe >2ms |
 | **`w_await`** | 쓰기 평균 완료 시간(ms) | NVMe: <1ms | NVMe >5ms |
-| **`aqu-sz`** | 평균 큐 깊이 (in-flight 요청 수) | <디바이스 큐 깊이 | >1 이면 큐 포화 의심 |
+| **`aqu-sz`** | 평균 큐 깊이 (in-flight 요청 수) | 디바이스별 상이 (아래 주석) | 디바이스 큐 깊이 근접 시 포화 |
 | `rareq-sz` | 평균 읽기 요청 크기(KB) | 랜덤: <16KB, 순차: >64KB | - |
 | `wareq-sz` | 평균 쓰기 요청 크기(KB) | 랜덤: <16KB, 순차: >64KB | - |
 | **`%util`** | 장치 사용률 | <70% 여유 | >85% 경보, 100% 포화 |
@@ -124,6 +124,19 @@ nvme0n1         523.0   312.0   65.4    24.8     0.0     4.2
 > `%util`이 100%라고 해서 반드시 병목은 아니다. 단일 큐 HDD에서는
 > 100%가 포화를 의미하지만, NVMe는 큐 깊이가 수백~수천이므로
 > `%util`이 100%여도 `aqu-sz`가 낮으면 아직 여유가 있다.
+
+**`aqu-sz` 해석 기준 (디바이스별)**:
+
+| 디바이스 | 정상 범위 | 포화 의심 | 근거 |
+|----------|---------|---------|------|
+| HDD / 단일 큐 SATA | 0 ~ 1 | > 1~2 | NCQ 32 depth지만 실효 병렬성 낮음 |
+| SATA SSD | 0 ~ 32 | > 32 | NCQ 32 queue |
+| NVMe (소비자) | 수십~수백 | > 1024 | 큐당 64K, 64큐 |
+| NVMe (엔터프라이즈) | 수백~수천 | > 수천 | 큐당 64K, 수백 큐 |
+
+> Little's Law: `aqu-sz = 처리량(IOPS) × 레이턴시(s)`.
+> NVMe에서 1M IOPS × 1ms = `aqu-sz=1000`이 **정상**이다.
+> HDD 기준의 "> 1이면 병목"을 NVMe에 그대로 적용하면 오진한다.
 
 ### 2.2 `iotop -o` — 프로세스별 I/O 원인 파악
 
@@ -280,21 +293,26 @@ blkparse -i /tmp/trace | grep mysqld
 # 완료 이벤트까지의 구간별 레이턴시 계산
 btt -i /tmp/trace
 
-# 출력 예
+# 출력 예 (NVMe 기준, 단위: 초)
 ==================== All Devices ====================
 
             ALL           MIN           AVG           MAX    N
 --------------- ------------- ------------- ------------- ----
-Q2Q           0.000000019   0.000985234   0.005234123   573
-Q2G           0.000000234   0.000001234   0.000025678   573
-G2I           0.000000012   0.000000456   0.000009123   573
-I2D           0.000000123   0.000065234   0.001234567   573
-D2C           0.000100234   0.000285123   0.000987654   573
-Q2C           0.000101345   0.000351234   0.001498765   573
+Q2Q           0.000000019   0.000012345   0.000523456   573
+Q2G           0.000000234   0.000000812   0.000004123   573
+G2I           0.000000012   0.000000456   0.000002123   573
+I2D           0.000000123   0.000003456   0.000045678   573
+D2C           0.000015234   0.000035123   0.000198765   573
+Q2C           0.000018345   0.000040234   0.000245678   573
 
-# Q2C: 전체 I/O 레이턴시 (Q→C)
-# I2D: 스케줄러 큐 대기 시간
-# D2C: 실제 디바이스 서비스 시간
+# NVMe 기준 일반적 범위
+# - D2C (디바이스 서비스): 10µs~200µs
+# - I2D (스케줄러 대기): 1µs~50µs (none 스케줄러에서는 매우 작음)
+# - Q2C (전체 레이턴시): 20µs~250µs
+
+# 참고: HDD/SATA 기준 범위
+# - D2C: 수 ms (seek + rotation)
+# - Q2C: 수~수십 ms
 
 # 레이턴시 히스토그램 생성 (gnuplot용)
 btt -i /tmp/trace -l /tmp/d2c_latency
@@ -406,9 +424,14 @@ cat /sys/block/nvme0n1/inflight
 ls /sys/block/nvme0n1/mq/       # 큐 수
 cat /sys/block/nvme0n1/queue/nr_hw_queues
 
-# HDD: aqu-sz > 1 → 즉시 병목
-# SATA SSD: aqu-sz > 32 → 병목 의심
-# NVMe: aqu-sz > 1024 → 병목 의심
+# 디바이스별 포화 판단 (Little's Law 반영)
+# HDD / 단일 큐 SATA: aqu-sz > 1~2 → 즉시 병목 의심
+# SATA SSD (NCQ 32): aqu-sz > 32 → 병목 의심
+# NVMe (소비자): aqu-sz > 1024 → 병목 의심
+# NVMe (엔터프라이즈): 수천 이상도 정상, await과 함께 판단
+
+# 핵심: aqu-sz 단독 판단 금지 → await/IOPS와 함께 본다
+#   예) NVMe 1M IOPS × 1ms 레이턴시 = aqu-sz=1000 (정상)
 ```
 
 ### 4.5 랜덤 vs 순차 I/O 패턴 식별
@@ -600,25 +623,41 @@ nvme id-ctrl /dev/nvme0 | grep -E "fr|mn|sn"
 Write barrier는 전원 장애 시 저널 일관성을 보장하지만
 I/O 레이턴시를 증가시킬 수 있다.
 
+> **⚠ barrier/nobarrier 옵션의 현황 (2020년 이후)**
+> - ext4의 `barrier=0/1` 마운트 옵션은 **deprecated**,
+>   `nobarrier`/`barrier` 형태로 통일되었다.
+> - 최신 커널(5.x+)에서는 **barrier가 파일시스템 저널링의
+>   핵심으로 통합**되어 `nobarrier` 지정이 대부분 무시되거나
+>   경고만 출력하는 경우가 많다 (특히 XFS는 5.0+에서 옵션
+>   자체 제거).
+> - 최근 하드웨어는 FUA(Force Unit Access)/flush cache 명령을
+>   직접 지원하므로 커널은 barrier 대신 FUA로 저널 일관성을
+>   보장한다. 수동 비활성화의 이득은 크지 않다.
+> - **결론**: 배터리 백업 RAID 컨트롤러가 있고 성능이 정말
+>   중요한 경우에만, 벤더 가이드를 따라 `nobarrier`를 고려.
+>   일반 NVMe 환경에서는 손대지 말 것.
+
 ```bash
 # barrier가 I/O에 주는 영향 측정 (ext4)
-# barrier=1 (기본)
+# barrier=1 (기본, 최신 커널에서는 옵션 명시 불필요)
 fio --name=barrier-on --filename=/mnt/ext4data/fio \
     --size=4G --direct=1 --rw=randwrite \
     --bs=4k --ioengine=libaio --iodepth=8 \
     --numjobs=1 --runtime=30 --time_based \
     --group_reporting
 
-# barrier=0 (BBU가 있는 환경에서만!)
-mount -o remount,barrier=0 /mnt/ext4data
+# nobarrier (BBU가 있는 환경에서만!)
+# 최신 커널에서는 옵션이 무시될 수 있음 (dmesg에 경고)
+mount -o remount,nobarrier /mnt/ext4data
 fio --name=barrier-off --filename=/mnt/ext4data/fio \
     --size=4G --direct=1 --rw=randwrite \
     --bs=4k --ioengine=libaio --iodepth=8 \
     --numjobs=1 --runtime=30 --time_based \
     --group_reporting
 
-# 일반적으로 barrier=0이 3-10% 빠름
-# BBU 없는 환경에서 barrier=0은 데이터 손상 위험
+# 과거에는 nobarrier가 3-10% 빨랐으나 최신 커널에서는
+# 효과가 미미하거나 무시됨. BBU 없는 환경에서 nobarrier는
+# 전원 장애 시 데이터 손상 위험이 있다.
 ```
 
 ---

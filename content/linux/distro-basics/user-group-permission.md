@@ -309,7 +309,8 @@ securityContext:
 ```
 
 `privileged: true`는 호스트 커널이 지원하는 **모든 capability를 부여**한다
-(커널 버전에 따라 상이, Linux 6.x 기준 40개 이상).
+(Linux 6.x 기준 총 41개: `CAP_LAST_CAP=40`, 0부터 시작하며
+`CAP_CHECKPOINT_RESTORE` 포함 — `man 7 capabilities` 참조).
 **가능하면 절대 사용하지 않는다.**
 
 ---
@@ -346,7 +347,7 @@ alice:$y$j9T$salt$hash:19845:0:99999:7:::
 | `$1$` | MD5 | **사용 금지** |
 | `$5$` | SHA-256 | 레거시 |
 | `$6$` | SHA-512 | 구형 시스템 기본값 |
-| `$y$` | **yescrypt** | Debian 11+, Ubuntu 22.04+ 기본값 ← 권장 |
+| `$y$` | **yescrypt** | Debian 11+ (Bullseye), Ubuntu 22.04+ 기본값 ← 권장 |
 
 yescrypt는 메모리 하드 함수로 GPU 브루트포스에 강하다.
 
@@ -358,7 +359,8 @@ grep ENCRYPT /etc/login.defs
 **특수 패스워드 값**:
 - `*` 또는 `!` : 계정 잠금 (직접 로그인 불가)
 - `!!` : 비밀번호 미설정 (초기 계정)
-- `!$6$...` : `passwd -l`로 잠금한 계정
+- `!<hash>` : `passwd -l`로 잠금한 계정
+  (알고리즘 무관, 기존 해시 앞에 `!` 접두가 붙음)
 
 ---
 

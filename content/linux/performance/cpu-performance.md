@@ -143,8 +143,13 @@ mpstat -P ALL 1 5
 11:23:02       3    0.00    0.00    2.00    0.00     0.00    1.00    0.00  97.00
 ```
 
-**CPU 0만 32%인 상황** → 단일 스레드 프로세스가 CPU 0을
-독점하거나, IRQ affinity 문제일 가능성이 크다.
+**CPU 0만 32%인 상황** → 다음 세 가지가 대표적 원인이다.
+
+| 원인 | 징후 |
+|------|------|
+| 단일 스레드 프로세스 | `pidstat`에서 `CPU` 컬럼이 0으로 고정 |
+| IRQ affinity 편중 | `%irq`/`%soft`가 특정 CPU에만 높음 |
+| Per-CPU kthread | `ksoftirqd/0`, `rcu_sched` 등이 특정 코어에 묶임 |
 
 ```bash
 # 특정 코어만 확인
@@ -308,8 +313,14 @@ sudo perf script | \
   ./FlameGraph/flamegraph.pl > cpu-flame.svg
 ```
 
-> `-F 99` (99Hz): 1000Hz로 하면 관측자 효과(overhead)가
-> 커진다. Netflix·Google이 사용하는 표준 샘플링 주파수다.
+> `-F 99` (99Hz) 선택 이유:
+> - **관측자 효과 최소화**: 1000Hz는 커널 타이머·작업 주기와
+>   겹쳐 lock-step(동기 편향) 샘플이 발생할 수 있다.
+> - **lock-step 회피**: 100Hz나 1000Hz처럼 정수 분할이 되는
+>   주파수를 피해 소수(prime) 99Hz를 선택하면 주기적
+>   이벤트와 샘플이 정렬되는 편향을 막을 수 있다.
+>   (Brendan Gregg - Linux perf Examples 원전)
+> - Netflix·Google이 사용하는 표준 샘플링 주파수다.
 
 **플레임그래프 읽는 법:**
 
@@ -533,7 +544,43 @@ echo "100000" > /sys/fs/cgroup/<path>/cpu.max.burst
 
 ---
 
-### 5-4. NUMA 토폴로지와 CPU 핀닝
+### 5-4. PSI for CPU — 포화 사전 감지
+
+PSI(Pressure Stall Information)는 커널 4.20+에서 도입된
+CPU 포화 조기 경보 지표다. Load Average는 1분 이동평균이라
+스파이크 감지가 늦지만, `/proc/pressure/cpu`는 10초·60초·
+300초 이동평균을 제공해 **포화 순간을 빠르게 포착**한다.
+
+```bash
+# 시스템 전체 CPU 압박 상태
+cat /proc/pressure/cpu
+# some avg10=5.20 avg60=2.15 avg300=0.80 total=123456789
+# full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+```
+
+| 지표 | 의미 | 경보 기준 |
+|------|------|-----------|
+| `some avg10` | 10초간 일부 태스크가 CPU 대기한 시간 비율 | > 20% |
+| `some avg60` | 60초 이동 평균 | > 10% |
+| `full` | CPU의 경우 0으로 고정 (CPU는 항상 progress) | — |
+
+```bash
+# cgroup별 CPU 압박 (cgroup v2)
+cat /sys/fs/cgroup/<path>/cpu.pressure
+
+# Prometheus node_exporter PSI 메트릭
+# node_pressure_cpu_waiting_seconds_total
+```
+
+> **Load Average와의 차이**: Load는 D state(I/O 대기)도
+> 포함하여 "CPU 포화"를 직접 가리키지 못한다. PSI `some`은
+> **CPU 부족으로 인한 지연**만 측정하므로 CPU 포화 지표로
+> 더 정확하다. K8s scheduler, systemd-oomd 같은 최신 시스템이
+> PSI를 기반으로 동작한다.
+
+---
+
+### 5-5. NUMA 토폴로지와 CPU 핀닝
 
 ```bash
 # NUMA 토폴로지 확인
@@ -576,7 +623,7 @@ taskset -p -c 0-3 <PID>
 
 ---
 
-### 5-5. CPU Frequency Scaling
+### 5-6. CPU Frequency Scaling
 
 ```bash
 # 현재 주파수 확인
@@ -638,8 +685,11 @@ rate(container_cpu_cfs_periods_total{
 > 0.25
 ```
 
-> throttle 비율 **25% 초과**를 알람 임계값으로 사용하는
-> 것이 업계 표준이다. 100ms 주기 중 25ms 이상 강제 정지.
+> throttle 비율 알람 임계값은 팀마다 다르며 일반적으로
+> **10~50% 범위**에서 설정한다. 25%를 기준으로 삼는
+> 사례가 많은데, 이는 100ms 주기 중 25ms 이상 강제 정지
+> 된다는 뜻이다. 레이턴시 민감 서비스는 10%, 배치성
+> 워크로드는 50%처럼 SLO에 맞춰 조정한다.
 
 ---
 

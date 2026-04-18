@@ -15,9 +15,12 @@ tags:
 # Linux Capabilities
 
 전통적으로 Linux는 권한을 "root(전권) vs 일반 사용자"로
-이분화했다. Capabilities는 root 권한을 41개(Linux 6.x 기준,
-커널 버전마다 추가됨)로 세분화해 최소 권한 원칙(Least Privilege)을
-구현하는 메커니즘이다.
+이분화했다. Capabilities는 root 권한을 독립 단위로 세분화해
+최소 권한 원칙(Least Privilege)을 구현하는 메커니즘이다.
+
+Linux 6.x 기준 총 **41개** 정의되어 있다 — `CAP_LAST_CAP=40`,
+번호는 0부터 시작하며 `CAP_CHECKPOINT_RESTORE`(5.9+)가 마지막이다
+(근거: `man 7 capabilities`).
 
 ---
 
@@ -44,14 +47,21 @@ sequenceDiagram
     Note over Child: Ambient 전파
 ```
 
-execve 시 자식의 capability 계산 규칙:
+execve 시 자식의 capability 계산 규칙
+(`man 7 capabilities` 공식 표기):
 
-| 대상 | 계산식 |
-|------|--------|
-| 자식 Permitted | `P(부모) ∩ B` |
-| 자식 Permitted 추가 | `P(부모) ∩ 파일 P` |
-| 자식 Permitted 추가 | `I(부모) ∩ 파일 I` |
-| 자식 Permitted/Effective | `A(부모)` (ambient 전파) |
+| 대상 집합 | 계산식 |
+|----------|--------|
+| `P'(permitted)` | `(P(inheritable) & F(inheritable))` `\|` `(F(permitted) & P(bounding))` `\|` `P'(ambient)` |
+| `P'(effective)` | `F(effective) ? P'(permitted) : P'(ambient)` |
+| `P'(inheritable)` | `P(inheritable)` (변하지 않음) |
+| `P'(bounding)` | `P(bounding)` (변하지 않음) |
+| `P'(ambient)` | 파일 capability 없으면 `P(ambient)`, 있으면 `0` |
+
+- `P`, `F`는 각각 프로세스·파일의 capability 집합
+- `P'`는 execve 후 자식 프로세스의 집합
+- file capability가 설정된 바이너리를 exec 하면
+  ambient set은 자동으로 비워진다
 
 | 집합 | 역할 | 수정 권한 |
 |------|------|---------|
@@ -85,9 +95,18 @@ execve 시 자식의 capability 계산 규칙:
 | `CAP_SYS_PTRACE` | 다른 프로세스 추적 | ❌ |
 | `CAP_SYS_MODULE` | 커널 모듈 로드/제거 | ❌ |
 | `CAP_SYS_RAWIO` | 원시 I/O 포트 접근 | ❌ |
+| `CAP_BPF` | BPF 프로그램 로드 (5.8+) | ❌ |
+| `CAP_PERFMON` | 성능 이벤트 접근 (5.8+) | ❌ |
+| `CAP_CHECKPOINT_RESTORE` | 체크포인트/복원 (5.9+) | ❌ |
 
 > `CAP_SYS_ADMIN`은 약 200개 이상의 syscall에 영향을 미친다.
 > "작은 root"가 아닌 사실상 root와 같은 권한이다.
+
+`CAP_BPF`, `CAP_PERFMON`, `CAP_CHECKPOINT_RESTORE`는
+기존에 모두 `CAP_SYS_ADMIN`이 가지던 권한을 별도 capability로
+분리한 것이다. eBPF 운영, perf 프로파일링, CRIU 기반
+컨테이너 체크포인트(`runc checkpoint`, k8s 체크포인트) 시
+`CAP_SYS_ADMIN` 없이 필요한 권한만 부여할 수 있다.
 
 ---
 
@@ -160,6 +179,26 @@ graph LR
 > 모든 스크립트가 그 capability를 상속받아
 > 컨테이너/시스템 탈출 경로가 된다.
 
+### 파일 복사 시 capability 손실 주의
+
+`setcap`은 확장 속성(xattr) `security.capability`에 저장된다.
+일반 복사·백업 도구는 xattr을 보존하지 않으므로 복사 후
+capability가 사라질 수 있다.
+
+| 도구 | xattr 보존 옵션 |
+|------|---------------|
+| `cp` | `--preserve=xattr` (또는 `-a`) |
+| `rsync` | `--xattrs` (`-X`) |
+| `tar` | `--xattrs` (추출 시 `--xattrs-include='*'`) |
+| `scp` | xattr 미지원 → `rsync -X` 사용 권장 |
+
+```bash
+# 예: setcap 설정 후 rsync 배포
+setcap cap_net_bind_service=ep /usr/local/bin/myserver
+rsync -aX /usr/local/bin/myserver deploy-host:/usr/local/bin/
+getcap deploy-host:/usr/local/bin/myserver   # 보존 확인
+```
+
 ---
 
 ## 컨테이너에서의 Capabilities
@@ -203,6 +242,27 @@ spec:
 > setuid 비트와 파일 capability가 무시된다.
 > `drop: ALL`만으로는 컨테이너 이미지 내
 > setuid 바이너리를 통한 권한 상승 경로가 남는다.
+
+### User Namespace 안의 Capabilities
+
+rootless 컨테이너(Podman rootless, Docker rootless,
+Kubernetes user namespace) 안에서는 프로세스가
+UID 0(root)으로 보이고 `capsh --print`에도
+모든 capability가 있어 보인다.
+
+그러나 이 권한은 **user namespace 내부에서만 유효**하다.
+호스트의 초기 user namespace 입장에서는 **비특권 사용자**이며,
+매핑된 실제 UID(예: 호스트 UID 100000)의 권한만 갖는다.
+
+| 관점 | UID | Capability 효과 |
+|------|-----|---------------|
+| 컨테이너 내부 | 0 (root) | 해당 ns가 소유한 자원에만 적용 |
+| 호스트 기준 | 100000 등 | 비특권, capability 없음 |
+
+호스트 커널 자원(`/dev/kmsg` 접근, 커널 모듈 로드,
+초기 ns의 파일 시스템 mount 등)은 그 ns의 소유가 아니므로
+거부된다. 이것이 rootless 컨테이너의 탈출 위험을 크게
+낮추는 핵심 메커니즘이다.
 
 ---
 

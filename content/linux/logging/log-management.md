@@ -89,6 +89,41 @@ Kafka 같은 메시지 큐를 사이에 두어 back pressure를 흡수한다.
 - **Vector**: Rust 기반으로 메모리 안전성과 고성능 두 마리
   토끼를 잡음. VRL(Vector Remap Language)로 정교한
   변환 가능. Datadog 인수 후 적극 개발 중.
+
+  ```toml
+  # vector.toml — VRL 변환 예시
+  [sources.app_logs]
+  type = "file"
+  include = ["/var/log/app/*.log"]
+
+  [transforms.parse_and_enrich]
+  type   = "remap"
+  inputs = ["app_logs"]
+  source = '''
+    # JSON 파싱 (실패 시 원문 유지)
+    . |= object!(parse_json(.message) ?? {})
+
+    # 5xx 응답에 severity=error 라벨 추가
+    if .status >= 500 {
+      .severity = "error"
+    } else if .status >= 400 {
+      .severity = "warning"
+    } else {
+      .severity = "info"
+    }
+
+    # PII 필드 마스킹
+    if exists(.email) {
+      .email = redact(.email, filters: ["email"])
+    }
+  '''
+
+  [sinks.loki]
+  type     = "loki"
+  inputs   = ["parse_and_enrich"]
+  endpoint = "http://loki:3100"
+  labels   = { app = "{{ app }}", env = "prod" }
+  ```
 - **Fluentd**: 플러그인 생태계는 최대이나 Ruby 오버헤드로
   경량화 요구사항엔 Fluent Bit로 대체 추세.
 - **Logstash**: 복잡한 엔터프라이즈 파이프라인(Elastic Stack)
@@ -471,8 +506,14 @@ spec:
 | 압축률 | ~3:1 | ~10:1 | ~15:1 | ~3:1 |
 | 운영 복잡도 | 높음 | 낮음–중간 | 중간 | 높음 |
 | OTel 네이티브 | ⚠️ 별도 설정 | ✅ 3.0+ 네이티브 | ⚠️ 별도 설정 | ⚠️ 별도 설정 |
-| 라이선스 | SSPL + ELv2 + AGPL-3.0 (v8.16+, 2024.09 삼중 라이선스) | AGPL-3.0 | Apache 2.0 | Apache 2.0 |
-| 비용 사례 | 100GB/일 → ~500GB 저장 | 100GB/일 → ~30GB 저장 | 100GB/일 → ~7GB 저장 | ~Elasticsearch 수준 |
+| 라이선스 | SSPL + ELv2 + AGPL-3.0 (v8.16+, 2024.09 삼중 라이선스) | AGPL-3.0 | Apache 2.0 | Apache 2.0 (ES 7.10 포크) |
+| 비용 사례* | 100GB/일 → ~500GB 저장 | 100GB/일 → ~30GB 저장 | 100GB/일 → ~7GB 저장 | ~Elasticsearch 수준 |
+
+> *비용 사례 수치는 **로그 구조·카디널리티·중복 비율에 따라
+> 크게 달라지는 추정치**다. 위 값은 Grafana Labs, SigNoz,
+> ClickHouse 공개 벤치마크의 "구조화된 JSON 로그·평균 500B/레코드"
+> 기준 근사치이며, 실제 환경은 2~3배 편차가 있을 수 있다.
+> 자사 로그 샘플로 최소 1주일 파일럿 측정 권장.
 
 ### 선택 기준
 
@@ -488,6 +529,21 @@ flowchart TD
     G -- 예 --> H[OpenSearch]
     G -- 아니오 --> E
 ```
+
+> **Elasticsearch 라이선스 역사 (OpenSearch가 존재하는 이유)**
+> - 2021.01: Elastic이 Elasticsearch/Kibana를 Apache 2.0 →
+>   **SSPL + ELv2** 듀얼 라이선스로 전환 (AWS 매니지드 서비스
+>   대응). 이는 OSI가 정의한 오픈소스 라이선스가 아니다.
+> - 2021.04: AWS가 마지막 Apache 2.0 버전(7.10)을 포크하여
+>   **OpenSearch** 출범. 이후 독립 진화.
+> - 2024.09: Elastic이 **AGPL-3.0을 추가**해 삼중 라이선스로
+>   전환(8.16+). "오픈소스 복귀"를 선언했지만 SSPL/ELv2 옵션이
+>   남아 있어 실질적 의미는 사용자가 선택하기 나름.
+>
+> Elastic 생태계와 OSI-compliant 오픈소스를 모두 원한다면
+> OpenSearch가 안전한 선택이다. Elastic 유료 기능
+> (Machine Learning, Security, RBAC 고급)이 필요하면
+> Elasticsearch를 유지한다.
 
 ### Grafana Loki 3.x 주요 변경사항 (2024–2025)
 
@@ -808,12 +864,35 @@ flowchart TD
 | 멀티 테넌시 | 레이블로 분리 | 완전 독립 |
 | 파일 로그 수집 | ✅ 용이 | ✅ 용이 |
 | stdout 수집 | ✅ 기본 | ⚠️ 추가 설정 필요 |
-| K8s 1.29+ 네이티브 사이드카 | N/A | ✅ stable(1.33) |
+| K8s 네이티브 사이드카 | N/A | ✅ 1.33 stable |
 | 권장 상황 | 일반 클러스터 | 고격리 멀티테넌트 |
 
-> K8s 1.29+에서 네이티브 사이드카(`initContainer` +
-> `restartPolicy: Always`)가 stable(v1.33, 2025.04)로
-> 졌음. 사이드카 생명주기 문제가 해소됨.
+> **K8s 네이티브 사이드카 정확한 구조**
+> - 별도의 `sidecarContainers` 필드가 신설된 것이 **아니다**.
+> - 기존 `initContainers` 스펙에 `restartPolicy: Always`를
+>   지정한 컨테이너가 네이티브 사이드카로 취급된다.
+> - 1.28 alpha → 1.29 beta(기본 활성화) → **1.33 stable**
+>   (2025-04) 순으로 graduation.
+> - 사이드카는 일반 컨테이너보다 먼저 시작, 나중에 종료되어
+>   로그 수집기·프록시의 생명주기 문제가 해결된다.
+
+```yaml
+# 네이티브 사이드카 예시 (Fluent Bit)
+spec:
+  initContainers:
+  - name: fluent-bit
+    image: fluent/fluent-bit:latest
+    restartPolicy: Always    # ← 이게 사이드카로 만드는 핵심
+    volumeMounts:
+    - name: app-logs
+      mountPath: /logs
+  containers:
+  - name: app
+    image: myapp:latest
+    volumeMounts:
+    - name: app-logs
+      mountPath: /var/log/app
+```
 
 ### Pod 로그 경로 매핑
 

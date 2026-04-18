@@ -58,11 +58,16 @@ SELINUXTYPE=targeted
 > Disabled → Enforcing 직접 전환 시 레이블이 없는 파일로 인해
 > **부팅 실패**가 발생할 수 있다.
 >
-> 안전한 전환 절차:
+> 안전한 전환 절차 (Red Hat 공식 문서 기준):
 > 1. `/etc/selinux/config`에서 `SELINUX=permissive` 설정
-> 2. `fixfiles -F onboot` 실행 (재부팅 시 재레이블 트리거)
-> 3. 재부팅 (Permissive 상태에서 전체 재레이블 완료)
-> 4. 재레이블 성공 확인 후 `SELINUX=enforcing` 변경 → 재부팅
+> 2. `touch /.autorelabel` — 다음 부팅 시 전체 재레이블 트리거
+>    (대안: `fixfiles -F onboot` — `.autorelabel`을 `-F`
+>    옵션과 함께 생성해 정책 변경 없이도 강제 재레이블)
+> 3. 재부팅 — Permissive 상태로 부팅 후 재레이블 자동 수행
+>    (대용량 FS는 수분~수십분 소요, `enforcing=0` 커널 옵션으로
+>    부트 안전성 추가 확보 가능)
+> 4. AVC 거부 로그 확인 (`ausearch -m AVC --start today`)
+> 5. 문제 없으면 `SELINUX=enforcing` 변경 → 재부팅
 
 ---
 
@@ -89,11 +94,14 @@ graph TD
 | targeted s0 | 단일 레벨 |
 | s0 c123 c456 | 고유 카테고리 (MCS) |
 
-> **컨테이너/Kubernetes에서 MCS**: Kubernetes는 SELinux 활성화
-> 노드에서 비권한 파드에 자동으로 고유 MCS 카테고리를 부여한다.
-> `s0:c123,c456` 같은 고유 레이블로 파드 간 볼륨 접근을
-> 커널 수준에서 차단한다.
-> (`pod-security.kubernetes.io/enforce=restricted` 정책 적용 시)
+> **컨테이너/Kubernetes에서 MCS**: 고유 MCS 카테고리 부여는
+> kubelet이나 PSA(Pod Security Admission)가 아닌
+> **컨테이너 런타임(container-selinux 정책을 사용하는
+> CRI-O, Podman, containerd 등)** 이 수행한다.
+> 런타임이 파드마다 `s0:c123,c456` 같은 고유 레이블을 할당해
+> 파드 간 볼륨·프로세스 접근을 커널 수준에서 차단한다.
+> Kubernetes는 파드 `securityContext.seLinuxOptions`를
+> 런타임에 전달할 뿐이며, 미지정 시 런타임이 기본값을 할당한다.
 
 ```bash
 # 파일 레이블 확인
@@ -315,6 +323,75 @@ for path in "${PATHS[@]}"; do
     ls -Zd "$path"
 done
 ```
+
+---
+
+## 컨테이너 SELinux 도메인
+
+`container-selinux` 정책(Red Hat에서 개발, 대부분의
+컨테이너 런타임이 사용)은 컨테이너용 전용 도메인을 정의한다.
+
+| 도메인 | 용도 | 위험도 |
+|--------|------|--------|
+| `container_t` | 기본 격리 컨테이너 도메인 | 낮음 |
+| `container_init_t` | 컨테이너 내 init 프로세스 | 낮음 |
+| `spc_t` | super privileged container (`--privileged`) | **매우 높음** |
+
+- `container_t`: 호스트 파일시스템·프로세스와 격리된
+  기본 도메인. 대부분의 워크로드가 여기에 해당한다.
+- `spc_t`: `--privileged` 플래그 사용 시 적용되며
+  사실상 SELinux 보호가 해제된다.
+
+### 런타임 레이블 옵션
+
+```bash
+# Docker / Podman: 레이블 지정
+podman run --security-opt label=level:s0:c123,c456 alpine
+
+# 레이블 비활성화 (격리 해제 — 권장하지 않음)
+podman run --security-opt label=disable alpine
+
+# 호스트 볼륨 공유 시 relabel 지시
+# z : 컨테이너 간 공유 (공통 레이블)
+# Z : 해당 컨테이너 전용 (고유 MCS 레이블)
+podman run -v /data:/data:Z alpine
+```
+
+`:Z` 옵션은 호스트 디렉토리를 해당 컨테이너의 MCS
+레이블로 재지정한다. 대용량 디렉토리에는 relabel 비용이
+크므로 주의한다 (뒤의 Kubernetes 성능 섹션 참조).
+
+### 커스텀 정책 자동 생성 — udica
+
+`audit2allow`는 범용 도구지만 컨테이너 워크로드에 맞는
+최소 정책을 만들기에는 과도한 권한을 포함시키기 쉽다.
+Red Hat이 개발한 **udica**는 컨테이너 spec(JSON)을
+입력받아 실제 마운트·포트·capability에 맞춘 맞춤 정책을
+생성한다.
+
+```bash
+# 실행 중인 컨테이너 spec → 정책 생성
+podman inspect <cid> > container.json
+udica -j container.json mycontainer_policy
+
+# 생성된 정책 로드 후 --security-opt label=type:mycontainer_policy.process
+```
+
+### Kubernetes 볼륨 relabel 성능
+
+기본적으로 컨테이너 런타임은 마운트된 볼륨 전체를
+재귀적으로 relabel한다. RWO(ReadWriteOnce) 볼륨에
+파일이 수백만 개면 파드 기동이 수분씩 지연된다.
+
+Kubernetes는 이를 해결하는 `SELinuxMountReadWriteOncePod`
+feature gate를 제공한다 (1.27부터 베타, 1.28부터 GA 추진).
+
+- 활성화 시 kubelet이 마운트 시점에 `-o context=<label>`
+  옵션을 CSI/볼륨 플러그인에 전달한다
+- 커널이 마운트 단위로 레이블을 적용 → 재귀 relabel 불필요
+- 수 기가바이트 볼륨도 즉시 마운트 가능
+
+제약: RWO 접근 모드 + SELinux 인식 CSI 드라이버가 필요하다.
 
 ---
 

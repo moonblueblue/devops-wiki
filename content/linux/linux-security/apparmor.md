@@ -215,7 +215,13 @@ docker run --security-opt "apparmor=my-container-profile" nginx
 docker run --security-opt apparmor=unconfined nginx
 ```
 
-### Kubernetes (1.30 GA)
+### Kubernetes (1.31 GA)
+
+> **버전 이력**: 1.30에서 `securityContext.appArmorProfile`
+> **필드 기반 API가 Beta로 도입**되었고, **1.31에서 GA로 승격**되었다.
+> 이와 함께 기존 annotation
+> `container.apparmor.security.beta.kubernetes.io/<container>`
+> 는 **1.30 이후 deprecated**되었으므로 신규 작성 시 사용하지 않는다.
 
 ```yaml
 apiVersion: v1
@@ -281,7 +287,7 @@ spec:
           privileged: true       # apparmor_parser는 CAP_MAC_ADMIN 필요
       containers:
       - name: pause
-        image: gcr.io/google_containers/pause:3.9
+        image: registry.k8s.io/pause:3.9
       volumes:
       - name: profiles
         configMap:

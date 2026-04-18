@@ -343,7 +343,7 @@ sysctl vm.overcommit_ratio
 | `2` | `CommitLimit` 초과 불허 | 금융, DB 서버 |
 
 ```bash
-# 안전한 운영 서버 설정 (overcommit 제한)
+# overcommit 엄격화 (특정 워크로드 한정, 전체 적용 주의)
 sysctl -w vm.overcommit_memory=2
 sysctl -w vm.overcommit_ratio=80   # RAM의 80% + swap까지만 커밋 허용
 
@@ -354,6 +354,20 @@ vm.overcommit_ratio = 80
 EOF
 sysctl --system
 ```
+
+> **⚠ `vm.overcommit_memory=2` 적용 전 반드시 검증**:
+> - **Redis**: `fork()` 기반 RDB 스냅샷이 실패할 수 있다.
+>   `maybe_allow_vmoverflow` 경고 로그 발생 → 공식 문서는
+>   overcommit을 허용하라고 안내한다(`vm.overcommit_memory=1`).
+> - **JVM**: 초기 힙보다 큰 `-Xmx` 지정 시 `mmap` 실패
+>   (`Committed_AS` 초과)로 프로세스 시작 불가.
+> - **PostgreSQL/Python/Ruby**: `fork()` 사용하는 프로세스가
+>   부모 크기만큼 커밋 필요 → 큰 부모 프로세스에서 fork 실패.
+>
+> 금융·DB 전용 노드처럼 메모리 경계가 명확하고 OOM을 절대
+> 용납할 수 없는 환경에만 제한적으로 적용한다. 범용 쿠버
+> 네티스 노드에서는 기본값(`0`) 또는 Redis·ML 노드에서
+> `1`을 쓰는 편이 안전하다.
 
 ---
 
@@ -491,8 +505,11 @@ sysctl vm.swappiness
 # 서버/데이터베이스: 10~20
 sysctl -w vm.swappiness=10
 
-# Kubernetes 노드: 일부 배포판은 0 권장
-# K8s 1.28 beta → 1.34 GA. swap 활성 시 swappiness 설정 검토 필요
+# Kubernetes 노드: swap 모드에 따라 권장값이 다름
+# K8s 1.22 alpha → 1.28 beta → 1.34 GA (2025)
+# - NoSwap 모드 (기본): 워크로드 swap 금지 → vm.swappiness=0 무방
+# - LimitedSwap 모드: Burstable Pod만 swap 사용 가능 →
+#   워크로드 특성에 따라 10~60 범위에서 조정 검토
 sysctl -w vm.swappiness=0
 
 # 영구 적용
@@ -502,10 +519,18 @@ sysctl --system
 
 | swappiness 값 | 커널 동작 | 적합한 환경 |
 |:---:|------|------|
-| `0` | swap 최소화 (완전 금지 아님) | K8s 노드, 레이턴시 민감 서비스 |
+| `0` | swap 최소화 (완전 금지 아님) | K8s NoSwap 모드, 레이턴시 민감 서비스 |
 | `10` ~ `20` | Page Cache 선호, swap 후순위 | 데이터베이스, 운영 서버 |
-| `60` | 기본값 | 범용 워크스테이션 |
+| `60` | 기본값 | 범용 워크스테이션, K8s LimitedSwap 기본 |
 | `100` | anonymous와 Page Cache 동등 취급 | 비용 없는 메모리 |
+
+> **K8s 1.34 swap 모드 요약 (2025 GA)**:
+> - **NoSwap** (기본): 워크로드가 swap을 쓰지 못함. 시스템
+>   데몬만 swap 사용 가능. 기존 동작과 호환.
+> - **LimitedSwap**: Burstable QoS Pod 한해 자동 할당량만큼
+>   swap 사용. 메모리 요청 비율에 따라 커널이 자동 결정.
+> - `failSwapOn: false` + `memorySwap.swapBehavior: LimitedSwap`
+>   를 kubelet에 설정해야 활성화된다.
 
 ---
 
@@ -658,6 +683,34 @@ cat /sys/fs/cgroup${CGROUP_PATH}/memory.events
 # oom 3
 # oom_kill 1
 ```
+
+---
+
+### cgroup v2 메모리 제어 인터페이스
+
+cgroup v2는 `memory.max` 하나만이 아니라 **단계별 압박 제어**
+인터페이스를 제공한다. hard limit 도달 전에 부드럽게 회수·
+경고를 유도할 수 있다.
+
+| 파일 | 의미 | 동작 |
+|------|------|------|
+| `memory.min` | 회수 불가 하한 | 이 값까지는 전역 OOM 상황에도 절대 회수되지 않음 |
+| `memory.low` | 회수 후순위 경계 | 메모리 여유 있는 한 회수 대상에서 제외 |
+| `memory.high` | 소프트 상한 | 초과 시 allocator throttle + 적극 회수 (OOM 없이) |
+| `memory.max` | 하드 상한 | 초과 시 OOM Kill |
+
+```bash
+# 예시: 보장 256MB, 목표 512MB, 상한 1GB
+echo "256M"  > /sys/fs/cgroup/myapp/memory.min
+echo "512M"  > /sys/fs/cgroup/myapp/memory.high
+echo "1G"    > /sys/fs/cgroup/myapp/memory.max
+```
+
+> **K8s 연동**: kubelet의 `memoryQoS` 기능(1.22 alpha →
+> 1.34 시점 여전히 alpha)을 활성화하면 Pod `requests.memory`
+> → `memory.min`, `limits.memory` → `memory.max` 매핑에
+> 더해 `memory.high`가 자동 설정되어 throttle 기반 회수가
+> 가능해진다.
 
 ---
 

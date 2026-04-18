@@ -24,9 +24,15 @@ rsyslog 데몬, systemd-journald를 깊이 있게 다룬다.
 
 | 컴포넌트 | 최신 버전 | 비고 |
 |---------|---------|------|
-| rsyslog | **8.2510.0** | 2025-10 릴리즈, OTLP 출력 모듈 추가 |
+| rsyslog | **8.2602.0** | 2026-02 릴리즈 (ROSI, 실험적 OCSP) |
+| rsyslog (omotlp 포함) | **8.2512.0** | 2025-12, OTLP 출력 모듈 첫 포함 |
 | systemd (journald) | **260** | 2026-03, SysV init 완전 제거 |
 | RFC 5424 | 2009년 표준 | 현재까지 유효한 syslog 프로토콜 표준 |
+
+> **배포판 채택 시차**: systemd 260은 상류(upstream) 기준이며,
+> 2026년 상반기 현재 대부분의 LTS·엔터프라이즈 배포판은
+> systemd 252~256 범위를 사용한다 (RHEL 9: 252, Ubuntu 24.04: 255).
+> 롤링 릴리즈(Arch, Fedora, openSUSE Tumbleweed)에서 먼저 도입된다.
 
 ---
 
@@ -90,7 +96,7 @@ flowchart TD
 | `imtcp / imrelp` | 네트워크 수신 |
 | `omfile` | 파일 출력 |
 | `omfwd / omrelp` | 원격 전송 |
-| `omotlp` | OTLP 출력 (v8.2510+) |
+| `omotlp` | OTLP 출력 (2025-12 개발 브랜치 merge, 8.2512.0부터 정식 포함) |
 
 ### 1.2 전통 syslog vs systemd-journald 비교
 
@@ -283,8 +289,10 @@ template(name="json_lines" type="list") {
 
 ### 3.4 중앙 집중 로그 서버 — TLS 암호화
 
-rsyslog 8.2602.0부터 기본 TLS 인증서 체인 검증이 강화됐다.
-`x509/name` 모드 사용을 권장한다.
+rsyslog 8.2602.0에서 OpenSSL 네트워크 스트림 드라이버가
+개선됐다 — 실험적 OCSP 인증서 폐기 검증(RFC 6960) 지원과
+context double-free·설정 문자열 누수 수정이 포함된다.
+어느 경우든 TLS 인증 모드는 `x509/name`을 권장한다.
 
 ```bash
 # ── 서버 측: /etc/rsyslog.d/50-server-tls.conf ────
@@ -788,10 +796,11 @@ ruleset(name="k8s_logs") {
 }
 ```
 
-### 6.3 OpenTelemetry 연동 (rsyslog 8.2510+)
+### 6.3 OpenTelemetry 연동 (rsyslog 8.2512+)
 
-rsyslog 8.2510.0에서 네이티브 OTLP 출력 모듈 `omotlp`가 추가됐다.
-syslog → OTLP 파이프라인을 사이드카 없이 구성할 수 있다.
+네이티브 OTLP 출력 모듈 `omotlp`는 2025-12-11 rsyslog 개발
+브랜치에 merge되었고, 2025-12 릴리즈인 **8.2512.0부터** 정식
+배포된다. syslog → OTLP 파이프라인을 사이드카 없이 구성할 수 있다.
 
 ```bash
 # /etc/rsyslog.d/60-otlp.conf
@@ -934,7 +943,7 @@ journalctl --since "1 hour ago" | \
 | 원격 전송 재연결 시 로그 유실 | DA 큐 미설정 | `queue.filename` 추가 |
 | journald 재시작 후 rsyslog 로그 누락 | `imjournal` StateFile 없음 | `StateFile` 경로 지정 |
 | 구형 장비 로그 파싱 실패 | RFC 3164 날짜 형식 불일치 | `pmrfc3164` 파서 사용 |
-| TLS 인증 실패 (8.2602+) | 인증서 체인 검증 강화 | CA chain 완전히 포함 |
+| TLS 인증 실패 (8.2602+) | OpenSSL 드라이버 수정·OCSP 옵션 | CA chain 완전히 포함, OCSP 옵션 확인 |
 
 ---
 
@@ -958,7 +967,7 @@ journalctl --since "1 hour ago" | \
 **보안**
 
 - [ ] TLS: `x509/name` 모드, 허용 peer 명시
-- [ ] rsyslog 8.2602.0 이상 업데이트 (인증서 검증 강화)
+- [ ] rsyslog 8.2602.0 이상 업데이트 (OpenSSL 드라이버 수정·실험적 OCSP)
 - [ ] `/var/log/secure`, `/var/log/auth.log` 권한 0640
 - [ ] authpriv 로그 별도 파일 분리
 
