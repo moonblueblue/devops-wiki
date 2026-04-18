@@ -1,113 +1,96 @@
 ---
 title: "Linux"
-date: 2026-04-16
+sidebar_label: "Linux"
+sidebar_position: 1
+date: 2026-04-18
+last_verified: 2026-04-18
 tags:
   - linux
-  - roadmap
-sidebar_label: "Linux"
+  - index
 ---
 
-# 01. Linux
+# Linux
 
-모든 인프라의 기반. OS를 이해하지 못하면 위에 올라가는
-컨테이너·쿠버네티스·네트워크 모두 표면적으로만 다루게 된다.
+> **티어**: 서브 (기반) — **작성 원칙**: 필수만
+>
+> 모든 인프라의 기반이자 트러블슈팅의 최종 도달 레이어.
+> K8s·Observability 학습의 선행 지식이다.
 
-글로벌 스탠다드 DevOps 엔지니어는 커널, 리소스 격리, 보안,
-성능 분석까지 깊이 있게 이해한다.
+---
+
+## 학습 경로
+
+```
+기본기         Distro → Boot/Init → Shell
+컨테이너 기반   cgroups · namespaces · Capabilities
+성능·관측      USE 방법론 · perf · eBPF
+보안           SELinux · AppArmor · auditd · LUKS
+스토리지       Filesystem · LVM · I/O scheduler
+```
+
+---
 
 ## 목차
 
-### 배포판과 기초
+### 배포판·기본기
 
-- [x] [리눅스 배포판 비교 (Ubuntu, RHEL, Alpine, AL2023)](distro-basics/linux-distro-comparison.md)
-- [x] [Immutable OS (Flatcar, Bottlerocket, Talos Linux, Fedora CoreOS)](distro-basics/immutable-os.md)
-- [x] [파일시스템 계층 구조 (FHS)](distro-basics/filesystem-hierarchy.md)
-- [x] [사용자·그룹·퍼미션 (ACL, setuid)](distro-basics/user-group-permission.md)
-- [x] [패키지 관리 (apt, dnf, apk, pacman)](distro-basics/package-management.md)
-- [x] [Nix와 NixOS (선언적 패키지 관리)](distro-basics/nix-nixos.md)
+- [ ] linux-distro-comparison — RHEL·Ubuntu·Alpine·SUSE 계열 비교
+- [ ] filesystem-hierarchy — `/usr`, `/var`, `/etc`, `/run` 등 표준 구조
+- [ ] user-group-permission — rwx, SUID/SGID, sticky, ACL
+- [ ] immutable-os — Talos, Bottlerocket, Flatcar, Fedora Silverblue
 
-### 부팅과 시스템 초기화
+### Boot & Init
 
-- [x] [부팅 프로세스 (BIOS/UEFI → GRUB → systemd)](boot-init/boot-process.md)
-- [x] [systemd 서비스 관리](boot-init/systemd.md)
-- [x] [systemd-timer와 crontab](boot-init/scheduled-tasks.md)
-- [x] [커널 파라미터 (sysctl, /proc, /sys)](boot-init/kernel-parameters.md)
-- [x] [커널 모듈 관리 (modprobe, lsmod)](boot-init/kernel-modules.md)
+- [ ] boot-process — BIOS/UEFI → shim → GRUB → initramfs → systemd
+- [ ] systemd — unit, target, cgroup 통합, journald, systemd-cryptenroll
 
-### 프로세스와 리소스 격리
+### Process Isolation (컨테이너 기반)
 
-- [x] [프로세스 관리와 시그널](process-isolation/process-management.md)
-- [x] [리소스 제한 (ulimit, PAM limits)](process-isolation/resource-limits.md)
-- [x] [cgroups v1 vs v2](process-isolation/cgroups.md)
-- [x] [Linux Namespaces 전종 (PID, Mount, Net, UTS, IPC, User, Cgroup, Time)](process-isolation/namespaces.md)
-- [x] [IPC 메커니즘 (pipe, socket, shared memory)](process-isolation/ipc-mechanisms.md)
+- [ ] namespaces — pid, mnt, net, user, ipc, uts, cgroup, time
+- [ ] cgroups — v1 vs v2, CPU/Memory/IO 컨트롤러, PSI
+- [ ] process-management — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
+- [ ] resource-limits — ulimit, PAM limits, RLIMIT_* vs cgroup
 
-### Linux 보안
+### Performance
 
-- [x] [Linux Capabilities](linux-security/linux-capabilities.md)
-- [x] [SELinux 기본과 운영](linux-security/selinux.md)
-- [x] [AppArmor 기본과 운영](linux-security/apparmor.md)
-- [x] [seccomp-bpf와 시스템콜 필터링](linux-security/seccomp.md)
-- [x] [auditd 감사 로깅](linux-security/auditd.md)
-- [x] [PAM (Pluggable Authentication Modules)](linux-security/pam.md)
-- [x] [LUKS/dm-crypt 디스크 암호화](linux-security/luks-dm-crypt.md)
+- [ ] cpu-performance — USE 방법론, run queue, context switch, perf
+- [ ] memory-oom — MemAvailable, swap, OOM killer, THP
+- [ ] disk-io-performance — iostat, I/O scheduler, fsync 병목
+- [ ] ebpf-performance — bpftrace, BPF CO-RE, Brendan Gregg 툴킷
 
-### 파일시스템과 스토리지
+### Filesystem & Storage
 
-- [x] [파일시스템 선택 (ext4, xfs, btrfs, zfs)](filesystem-storage/filesystem-comparison.md)
-- [x] [LVM 관리 (PV, VG, LV, 스냅샷)](filesystem-storage/lvm.md)
-- [x] [RAID 기초 (소프트웨어/하드웨어)](filesystem-storage/raid.md)
-- [x] [디스크 I/O 스케줄러 (none, mq-deadline, kyber, bfq)](filesystem-storage/io-scheduler.md)
-- [x] [마운트 옵션 튜닝 (noatime, barrier)](filesystem-storage/mount-tuning.md)
+- [ ] filesystem-comparison — ext4 · XFS · Btrfs · ZFS · EROFS
+- [ ] lvm — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
+- [ ] io-scheduler — none, mq-deadline, bfq, io_uring
 
-### 셸과 자동화
+### Security
 
-- [x] [Bash 고급 문법 (배열, 함수, 파라미터 확장)](shell-automation/bash-advanced.md)
-- [x] [텍스트 처리 도구 (awk, sed, grep, cut, sort, uniq)](shell-automation/text-processing.md)
-- [x] [셸 스크립트 베스트 프랙티스 (set -euo pipefail)](shell-automation/shell-best-practices.md)
-- [x] [실무 자동화 스크립트 패턴](shell-automation/automation-patterns.md)
+- [ ] linux-capabilities — CAP_*, 바운딩·앰비언트·인헤리터블
+- [ ] seccomp — Mode 1/2, BPF 필터, Docker/K8s 프로파일
+- [ ] apparmor-selinux — 두 MAC 모델 비교와 사용 시점
+- [ ] pam — 인증 체인, 2FA, pam_faillock
+- [ ] luks-dm-crypt — LUKS2, TPM2, Clevis+Tang HA
+- [ ] auditd — 규칙 우선순위, audisp-remote, laurel
 
-### 네트워크 기초 (Linux 관점)
+### Logging
 
-- [x] [iproute2 명령어 (ip, ss, tc)](network-basics/iproute2.md)
-- [x] [DNS 설정 (resolv.conf, systemd-resolved, NSS)](network-basics/dns-config.md)
-- [x] [방화벽 (iptables, nftables, firewalld, ufw)](network-basics/firewall.md)
-- [x] [SSH 설정과 키 관리 (ssh-agent, ProxyJump)](network-basics/ssh.md)
-
-### 로깅
-
-- [x] [syslog, rsyslog, journald](logging/system-logging.md)
-- [x] [로그 로테이션 (logrotate)](logging/log-rotation.md)
-- [x] [대규모 로그 관리 전략](logging/log-management.md)
-
-### 성능 분석
-
-- [x] [CPU 성능 분석 (perf, top, pidstat, mpstat)](performance/cpu-performance.md)
-- [x] [메모리 관리와 OOM (free, vmstat, slabtop)](performance/memory-oom.md)
-- [x] [디스크 I/O 분석 (iostat, iotop, blktrace)](performance/disk-io-performance.md)
-- [x] [io_uring과 비동기 I/O](performance/io-uring.md)
-- [x] [네트워크 성능 분석 (ss, iftop, nethogs, sar)](performance/network-performance.md)
-- [x] [eBPF 기반 성능 분석 (bpftrace, BCC, libbpf)](performance/ebpf-performance.md)
-- [x] [BPF CO-RE (Compile Once, Run Everywhere)](performance/bpf-co-re.md)
-- [x] [플레임 그래프 (Flame Graph)](performance/flame-graph.md)
-- [x] [USE 방법론과 Brendan Gregg 도구](performance/use-methodology.md)
-
-### 터미널 환경
-
-- [x] [tmux와 screen](terminal/tmux-screen.md)
-- [x] [셸 환경 개선 (zsh, fish, oh-my-zsh, starship)](terminal/shell-environment.md)
-
-### 가상화와 경량 격리
-
-- [x] [KVM과 QEMU 개념](virtualization/kvm-qemu.md)
-- [x] [libvirt와 virsh](virtualization/libvirt.md)
-- [x] [systemd-nspawn (경량 격리)](virtualization/systemd-nspawn.md)
+- [ ] system-logging — rsyslog vs journald, 저널 포워딩
+- [ ] log-management — 로테이션, 원격 전송, 압축·보존
 
 ---
 
-## 참고 레퍼런스
+## 이 카테고리의 경계
 
-- [The Linux Programming Interface (Michael Kerrisk)](https://man7.org/tlpi/)
-- [Linux Performance (Brendan Gregg)](https://www.brendangregg.com/linuxperf.html)
-- [Arch Linux Wiki](https://wiki.archlinux.org/)
-- [Red Hat System Administrator's Guide](https://access.redhat.com/documentation/)
+- Docker/K8s의 namespace·cgroup **사용 사례**는 `container/`·`kubernetes/`에 맡긴다
+- eBPF 응용 중 네트워킹은 `network/`, 관측은 `observability/`, 보안은 `security/`로
+- 가상화(KVM·vSphere·Proxmox) 심화는 별도 필요 시 추가
+
+---
+
+## 참고 표준
+
+- CIS Linux Benchmarks
+- Brendan Gregg, *Systems Performance* (2nd ed.)
+- man7.org 공식 man 페이지
+- kernel.org 공식 문서

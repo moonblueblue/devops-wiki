@@ -1,146 +1,139 @@
 ---
 title: "Observability"
-date: 2026-04-16
+sidebar_label: "Observability"
+sidebar_position: 5
+date: 2026-04-18
+last_verified: 2026-04-18
 tags:
   - observability
-  - prometheus
-  - grafana
-  - opentelemetry
-  - profiling
-  - roadmap
-sidebar_label: "Observability"
+  - index
 ---
 
-# 08. Observability
+# Observability
 
-배포 후 시스템을 보는 눈. Metrics·Logs·Traces 3 Pillars에
-Continuous Profiling이 4번째 기둥으로 추가되었다.
-Prometheus·OpenTelemetry·eBPF 기반 관측까지 다룬다.
+> **티어**: 메인 (핵심) — **작성 원칙**: 빠짐없이
+>
+> "보이지 않으면 고칠 수 없다." 장애 대응 = 관측 싸움.
+> 메트릭·로그·트레이스·프로파일 네 신호와 SLO 기반 운영 전반을 다룬다.
+
+---
+
+## 학습 경로
+
+```
+개념       Signals · Semantic Conventions
+메트릭     Prometheus · PromQL · Storage · Cardinality
+로그       Loki · Elastic · Sampling · Structured
+트레이스    OTel · Jaeger/Tempo · Sampling
+프로파일    OTel Profiles · Pyroscope
+SLO 도구    Sloth · Pyrra · OpenSLO
+알림       Burn Rate · Multi-window · 경보 피로
+```
+
+---
 
 ## 목차
 
 ### 개념
 
-- [ ] [모니터링 vs 옵저버빌리티](concepts/observability-vs-monitoring.md)
-- [ ] [3 Pillars + Profiling (4th Pillar)](concepts/four-pillars.md)
-- [ ] [시그널 유형 (RED, USE, Golden Signals)](concepts/monitoring-signals.md)
-- [ ] [모니터링 안티패턴 (알림 피로, 카디널리티 폭발)](concepts/anti-patterns.md)
-- [ ] [SLI/SLO와 관측의 관계](concepts/observability-slo.md)
+- [ ] three-pillars-vs-signals — 3 Pillars → 4 Signals (프로파일 포함)
+- [ ] observability-vs-monitoring — 관측성의 정의, Charity Majors
+- [ ] semantic-conventions — OTel 표준 속성, 일관성의 가치
+- [ ] exemplars — 메트릭→트레이스 연결, OpenMetrics
 
-### Prometheus (메트릭 코어)
+### Prometheus
 
-- [ ] [Prometheus 아키텍처와 설치](prometheus/prometheus-install.md)
-- [ ] [Scrape 모델과 Service Discovery](prometheus/prometheus-scrape.md)
-- [ ] [PromQL 기초](prometheus/promql-basics.md)
-- [ ] [PromQL 심화 (히스토그램, 퀀타일, rate)](prometheus/promql-advanced.md)
-- [ ] [Recording Rules와 Alerting Rules](prometheus/prometheus-rules.md)
-- [ ] [Prometheus Operator](prometheus/prometheus-operator.md)
-- [ ] [Pushgateway (배치 메트릭)](prometheus/pushgateway.md)
-- [ ] [Alertmanager 설정과 라우팅](prometheus/alertmanager.md)
+- [ ] prometheus-architecture — scrape, WAL, HA 전략
+- [ ] promql-advanced — rate vs increase, subquery, 함정
+- [ ] recording-rules — 집계 사전 계산, 쿼리 성능
+- [ ] remote-write — Receiver, 네트워크 이슈, 중복 제거
+- [ ] alertmanager — routing, silencing, grouping
 
-### 메트릭 장기 저장
+### Metric Storage (장기)
 
-- [ ] [Thanos (장기 저장, 글로벌 쿼리)](metric-storage/thanos.md)
-- [ ] [Grafana Mimir](metric-storage/mimir.md)
-- [ ] [Cortex](metric-storage/cortex.md)
-- [ ] [VictoriaMetrics](metric-storage/victoriametrics.md)
-- [ ] [장기 저장소 선택 기준](metric-storage/long-term-storage-comparison.md)
+- [ ] mimir-thanos-cortex — 비교, 아키텍처, 운영 특성
+- [ ] exponential-histograms — Native Histograms, cardinality 감소
+- [ ] cardinality-management — 원인·탐지·제어
 
-### Grafana
+### Logging
 
-- [ ] [Grafana 설치와 Data Source 설정](grafana/grafana-basics.md)
-- [ ] [대시보드 구성과 베스트 프랙티스](grafana/grafana-dashboard.md)
-- [ ] [Templating과 Variables](grafana/grafana-templating.md)
-- [ ] [Panel 타입 (Time series, Stat, Table, Heatmap)](grafana/grafana-panels.md)
-- [ ] [Grafana Alerting](grafana/grafana-alerting.md)
+- [ ] loki — 인덱싱 철학, 비용, chunk·label 전략
+- [ ] elastic-stack — Elasticsearch·Kibana·Logstash 현실적 운영
+- [ ] log-sampling — 우선순위 기반, rate limiting
+- [ ] log-structured — JSON 구조화, 필드 표준
 
-### 로깅
+### Tracing
 
-- [ ] [로깅 아키텍처 패턴 (sidecar, node-level, agent)](logging/logging-patterns.md)
-- [ ] [ELK Stack (Elasticsearch, Logstash, Kibana)](logging/elk-stack.md)
-- [ ] [OpenSearch (ELK 포크)](logging/opensearch.md)
-- [ ] [Grafana Loki와 LogQL](logging/loki.md)
-- [ ] [Fluentd](logging/fluentd.md)
-- [ ] [Fluent Bit](logging/fluent-bit.md)
-- [ ] [Vector (by Datadog)](logging/vector.md)
-- [ ] [Grafana Alloy (구 Grafana Agent)](logging/grafana-alloy.md)
-- [ ] [Kubernetes 로깅 전략](logging/k8s-logging-strategy.md)
-- [ ] [구조화 로깅과 로그 레벨](logging/structured-logging.md)
+- [ ] jaeger-tempo — 비교, 스토리지, 조회 패턴
+- [ ] sampling-strategies — Head vs Tail, probabilistic, adaptive
+- [ ] otel-collector — pipeline, processor, batch/memory
+- [ ] trace-context — W3C Trace Context, 전파 규격
 
-### 분산 트레이싱
+### Profiling
 
-- [ ] [분산 트레이싱 개념 (Span, Trace, Context Propagation)](tracing/tracing-concepts.md)
-- [ ] [OpenTelemetry 개요 (SDK, API, Collector)](tracing/opentelemetry-overview.md)
-- [ ] [OpenTelemetry Collector 아키텍처와 파이프라인](tracing/otel-collector.md)
-- [ ] [OTel Collector 배포 패턴 (DaemonSet vs Sidecar vs Gateway)](tracing/otel-collector-patterns.md)
-- [ ] [OpenTelemetry Auto-Instrumentation](tracing/otel-auto-instrument.md)
-- [ ] [Jaeger](tracing/jaeger.md)
-- [ ] [Grafana Tempo](tracing/tempo.md)
-- [ ] [Zipkin](tracing/zipkin.md)
-- [ ] [Exemplars (Metric → Trace 드릴다운)](tracing/exemplars.md)
+- [ ] otel-profiles — Public Alpha (2026), 도입 전략
+- [ ] pyroscope — 연속 프로파일링, flame graph 분석
+- [ ] continuous-profiling — 프로덕션 오버헤드, Parca
 
-### Continuous Profiling (4번째 기둥)
+### Grafana Ecosystem
 
-- [ ] [Continuous Profiling 개념과 의의](profiling/profiling-overview.md)
-- [ ] [OpenTelemetry Profiling Signal (2026 Alpha)](profiling/otel-profiling-signal.md)
-- [ ] [Grafana Pyroscope](profiling/pyroscope.md)
-- [ ] [Parca](profiling/parca.md)
-- [ ] [eBPF 기반 프로파일링 (Parca Agent)](profiling/ebpf-profiling.md)
+- [ ] grafana-dashboards — 패널 표준, 변수, 룩앤필
+- [ ] grafana-alloy — Agent 후속, 구성 패턴
+- [ ] grafana-oncall — OnCall, 알림 라우팅
 
-### eBPF 기반 관측
+### Cloud-Native Stack
 
-- [ ] [Pixie (K8s용)](ebpf-observability/pixie.md)
-- [ ] [Beyla (auto-instrumentation)](ebpf-observability/beyla.md)
-- [ ] [Hubble (Cilium 플로우 모니터링)](ebpf-observability/hubble.md)
-- [ ] [Inspektor Gadget](ebpf-observability/inspektor-gadget.md)
+- [ ] opentelemetry-overview — SDK·Collector·Spec
+- [ ] prometheus-opentelemetry — 상호 운용, OTLP push
+- [ ] otel-operator — K8s 자동 계측, instrumentation CR
 
-### 알림 전략
+### eBPF Observability
 
-- [ ] [알림 설계 원칙 (Actionable, Symptom-based)](alerting/alerting-principles.md)
-- [ ] [SLO 기반 알림 (Burn Rate)](alerting/slo-alerting.md)
-- [ ] [Multi-window Multi-burn-rate](alerting/multi-window-alerting.md)
-- [ ] [Runbook 연결](alerting/alert-runbook.md)
-- [ ] [PagerDuty, Opsgenie 연동](alerting/alert-integrations.md)
-- [ ] [Grafana OnCall (오픈소스 on-call 관리)](alerting/grafana-oncall.md)
+- [ ] hubble — Cilium 관측, 서비스 의존성 맵
+- [ ] pixie — 자동 계측, Edge 분석
+- [ ] retina — Microsoft 2024 OSS, 네트워크 관측
 
-### AIOps / AI-assisted Observability
+### SLO as Code (도구)
 
-- [ ] [AIOps 개념과 2026 트렌드](aiops/aiops-overview.md)
-- [ ] [LLM 기반 로그 분석과 이상 탐지](aiops/llm-log-analysis.md)
-- [ ] [자동 RCA (Root Cause Analysis)](aiops/automated-rca.md)
-- [ ] [상용 도구 (Datadog Bits AI, Dynatrace Davis, New Relic AI)](aiops/commercial-aiops.md)
+- [ ] sloth — PromQL 기반 SLO 생성
+- [ ] pyrra — 선언적 SLO, Prometheus Rule
+- [ ] openslo — SLO 명세 표준
 
-### Real User Monitoring과 Synthetic
+### Alerting
 
-- [ ] [Real User Monitoring (RUM)](rum-synthetic/rum.md)
-- [ ] [Synthetic Monitoring (Grafana Synthetic, Blackbox Exporter)](rum-synthetic/synthetic-monitoring.md)
+- [ ] alerting-strategy — Symptom vs Cause, 알림 설계 원칙
+- [ ] multi-window-alerting — 빠른 감지 + 긴 창 조합
+- [ ] slo-alerting — Burn Rate 기반, 에러 버짓 소진률
+- [ ] alert-fatigue — 감축 전략, SRE 워크북
+- [ ] anomaly-detection — 통계·ML 기반, 함정
 
-### SLO 도구
+### RUM & Synthetic
 
-- [ ] [Sloth (SLO as Code)](slo-tools/sloth.md)
-- [ ] [Pyrra](slo-tools/pyrra.md)
-- [ ] [OpenSLO 표준](slo-tools/openslo.md)
+- [ ] rum-basics — Core Web Vitals, 프라이버시
+- [ ] synthetic-monitoring — 경로·지역·주기, 예산
 
-### 비용과 운영
+### Cost Operations
 
-- [ ] [카디널리티 관리 전략](cost-operations/cardinality-management.md)
-- [ ] [메트릭 다운샘플링과 보존](cost-operations/metric-retention.md)
-- [ ] [로그 보존 정책과 비용](cost-operations/log-retention.md)
-- [ ] [관측 스택 운영 비용 최적화](cost-operations/observability-cost.md)
+- [ ] observability-cost — 카디널리티·샘플링으로 비용 관리
+- [ ] budget-alerts — 관측 비용 초과 경보 (FinOps 통합)
 
-### 클라우드 네이티브 스택
+### AIOps
 
-- [ ] [Kubernetes 모니터링 스택 (kube-prometheus-stack)](cloud-native-stack/k8s-monitoring-stack.md)
-- [ ] [3-tier 앱 모니터링 구성](cloud-native-stack/three-tier-monitoring.md)
-- [ ] [마이크로서비스 관측 패턴](cloud-native-stack/microservices-observability.md)
+- [ ] aiops-overview — LLM 기반 RCA, 주의할 함정
 
 ---
 
-## 참고 레퍼런스
+## 이 카테고리의 경계
 
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
-- [Grafana Documentation](https://grafana.com/docs/)
-- [Observability Engineering (Charity Majors et al.)](https://www.oreilly.com/library/view/observability-engineering/9781492076438/)
-- [Distributed Systems Observability (Cindy Sridharan)](https://www.oreilly.com/library/view/distributed-systems-observability/9781492033431/)
-- [Google SRE Book - Monitoring](https://sre.google/sre-book/monitoring-distributed-systems/)
+- **SLO 개념·수학** 자체는 `sre/`가 주인공 — 여기는 도구·알림 구현만
+- **Feature Flag**는 `cicd/` — 여기는 "카나리 분석의 메트릭"만
+- **보안 감사 로그 전략**은 `security/` — 여기는 "로그 수집·파이프라인"
+
+---
+
+## 참고 표준
+
+- OpenTelemetry Specification
+- Prometheus 공식 문서
+- Google SRE Book (Alerting 챕터)
+- Charity Majors, *Observability Engineering*

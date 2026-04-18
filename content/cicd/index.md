@@ -1,126 +1,140 @@
 ---
 title: "CI/CD"
-date: 2026-04-16
+sidebar_label: "CI/CD"
+sidebar_position: 6
+date: 2026-04-18
+last_verified: 2026-04-18
 tags:
   - cicd
-  - jenkins
-  - github-actions
-  - gitlab-ci
-  - tekton
-  - roadmap
-sidebar_label: "CI/CD"
+  - gitops
+  - index
 ---
 
-# 06. CI/CD
+# CI/CD
 
-코드에서 배포까지 자동화. DORA 메트릭 기반으로 성숙도를 측정하고,
-Jenkins·GitHub Actions·GitLab CI·Tekton 등 글로벌 스탠다드 플랫폼을
-중립적으로 다룬다.
+> **티어**: 메인 (핵심) — **작성 원칙**: 빠짐없이
+>
+> 코드 → 빌드 → 테스트 → 배포의 전체 여정.
+> **GitOps(ArgoCD, Flux)를 흡수**하여 CD 방법론의 한 섹션으로 통합한다.
+
+---
+
+## 학습 경로
+
+```
+개념        Pipeline as Code · 배포 전략 · GitOps · DORA
+CI 플랫폼   GitHub Actions · GitLab CI · Jenkins
+K8s-native  Tekton · Argo Workflows · Dagger
+CD (GitOps) ArgoCD · Flux · Progressive Delivery
+DevSecOps   SAST · SCA · 이미지 스캔 · SLSA
+운영        Artifact · 의존성 · 테스트 자동화 · 릴리즈
+```
+
+---
 
 ## 목차
 
 ### 개념
 
-- [ ] [CI vs CD (Continuous Delivery vs Continuous Deployment)](concepts/ci-cd-definitions.md)
-- [ ] [CI/CD 파이프라인 구조와 설계](concepts/pipeline-design.md)
-- [ ] [배포 전략 (Rolling, Blue-Green, Canary, A/B, Shadow)](concepts/deployment-strategies.md)
-- [ ] [브랜치 전략 (Trunk-Based, GitFlow, GitHub Flow)](concepts/branching-strategy.md)
-- [ ] [DORA 메트릭 (Deploy Frequency, Lead Time, MTTR, Change Failure Rate)](concepts/dora-metrics.md)
-- [ ] [Accelerate의 4가지 핵심 DevOps 역량](concepts/accelerate-capabilities.md)
-
-### Jenkins
-
-- [ ] [Jenkins 설치와 초기 설정](jenkins/jenkins-install.md)
-- [ ] [Job과 Pipeline 개요](jenkins/jenkins-job-pipeline.md)
-- [ ] [Jenkinsfile (Declarative vs Scripted)](jenkins/jenkins-jenkinsfile.md)
-- [ ] [Multibranch Pipeline](jenkins/jenkins-multibranch.md)
-- [ ] [Agents (분산 빌드, K8s 에이전트)](jenkins/jenkins-agents.md)
-- [ ] [주요 플러그인과 선택 기준](jenkins/jenkins-plugins.md)
-- [ ] [JCasC (Configuration as Code)](jenkins/jenkins-jcasc.md)
-- [ ] [Jenkins 운영 (백업, 모니터링, 업그레이드)](jenkins/jenkins-operations.md)
+- [ ] pipeline-as-code — 선언적 파이프라인, 버전 관리 가치
+- [ ] deployment-strategies — Blue/Green · Canary · Rolling · Shadow · A/B
+- [ ] gitops-concepts — OpenGitOps 원칙, pull vs push
+- [ ] repo-structure — 모노레포 vs 폴리레포, 앱-인프라 분리
+- [ ] dora-metrics — Lead time, Change failure rate, MTTR, Deployment frequency
 
 ### GitHub Actions
 
-- [ ] [GitHub Actions 구조와 기본 개념](github-actions/github-actions-basics.md)
-- [ ] [트리거 (on) 완전 정리](github-actions/github-actions-triggers.md)
-- [ ] [Secrets와 OIDC Federation](github-actions/github-actions-security.md)
-- [ ] [빌드·테스트·배포 워크플로우](github-actions/github-actions-workflow.md)
-- [ ] [컨테이너 이미지 빌드·푸시](github-actions/github-actions-container.md)
-- [ ] [Reusable Workflow와 Composite Action](github-actions/github-actions-reusable.md)
-- [ ] [Matrix Build 전략](github-actions/github-actions-matrix.md)
-- [ ] [Self-hosted Runner (K8s ARC)](github-actions/github-actions-self-hosted.md)
-- [ ] [캐시와 Artifact](github-actions/github-actions-cache.md)
+- [ ] gha-basics — workflow, job, step, matrix
+- [ ] gha-advanced — reusable workflow, composite action, caching
+- [ ] self-hosted-runner — 보안 격리, ephemeral runner
+- [ ] gha-security — OIDC, permissions, artifact attestation
 
 ### GitLab CI
 
-- [ ] [.gitlab-ci.yml 구조](gitlab-ci/gitlab-ci-basics.md)
-- [ ] [Runner (Shared, Group, Specific)](gitlab-ci/gitlab-runner.md)
-- [ ] [Stages, Jobs, DAG](gitlab-ci/gitlab-ci-dag.md)
-- [ ] [GitLab Auto DevOps](gitlab-ci/gitlab-auto-devops.md)
-- [ ] [멀티프로젝트 파이프라인](gitlab-ci/gitlab-multi-project.md)
+- [ ] gitlab-ci-basics — pipeline 구조, stages, runners
+- [ ] gitlab-ci-advanced — parent-child, dynamic, environments
 
-### 기타 CI/CD 플랫폼
+### Jenkins
 
-- [ ] [CircleCI](other-platforms/circleci.md)
-- [ ] [Drone CI, Woodpecker CI](other-platforms/drone-woodpecker.md)
+- [ ] jenkins-basics — controller/agent, JCasC
+- [ ] jenkinsfile — declarative vs scripted, shared library
+- [ ] jenkins-k8s — kubernetes plugin, Jenkins Operator
 
-### Kubernetes-native CI/CD
+### K8s-native CI/CD
 
-- [ ] [Tekton (CNCF Incubating)](k8s-native-cicd/tekton.md)
-- [ ] [Argo Workflows (DAG 기반)](k8s-native-cicd/argo-workflows.md)
-- [ ] [Dagger (코드로 표현하는 CI)](k8s-native-cicd/dagger.md)
+- [ ] tekton — Task·Pipeline·Trigger, CEL
+- [ ] argo-workflows — DAG, artifact, 이벤트 트리거
+- [ ] dagger — 코드로 CI, BuildKit 기반
 
-### 테스트 자동화
+### ArgoCD (GitOps)
 
-- [ ] [단위 테스트 자동화](test-automation/unit-test.md)
-- [ ] [통합 테스트 자동화](test-automation/integration-test.md)
-- [ ] [Testcontainers (통합 테스트 표준)](test-automation/testcontainers.md)
-- [ ] [E2E 테스트 (Playwright, Cypress)](test-automation/e2e-test.md)
-- [ ] [성능 테스트 (k6, Locust, JMeter)](test-automation/performance-test.md)
-- [ ] [Contract Testing (Pact)](test-automation/contract-testing.md)
-- [ ] [코드 품질 (SonarQube, CodeClimate)](test-automation/code-quality.md)
+- [ ] argocd-install — HA 구성, 프로젝트 분리
+- [ ] argocd-apps — Application, ApplicationSet, generator
+- [ ] argocd-projects — AppProject, SSO/RBAC
+- [ ] argocd-sync — sync policy, hooks, pruning
+- [ ] argocd-operations — upgrade, backup, DR
+- [ ] argocd-advanced — PreDelete Hooks, Shallow Git Clone (3.3), Agent
 
-### 보안 통합 (DevSecOps in CI)
+### Flux (GitOps)
 
-- [ ] [SAST (SonarQube, CodeQL, Semgrep)](devsecops-ci/sast.md)
-- [ ] [SCA (Snyk, Dependency-Check)](devsecops-ci/sca.md)
-- [ ] [Secret Scanning (gitleaks, trufflehog)](devsecops-ci/secret-scanning.md)
-- [ ] [Container Image Scanning (Trivy, Grype)](devsecops-ci/image-scanning-cicd.md)
-- [ ] [IaC Scanning (Checkov, tfsec, kics)](devsecops-ci/iac-scanning.md)
-- [ ] [SLSA Provenance를 CI에서 생성 (GHA Attestation, Tekton Chains)](devsecops-ci/slsa-in-ci.md)
-- [ ] [빌드 아티팩트 서명 (cosign, Sigstore)](devsecops-ci/build-signing.md)
+- [ ] flux-install — HelmRelease, Kustomization
+- [ ] flux-kustomization — 의존성, health check
+- [ ] flux-helm — HelmRelease, chart source
 
-### 아티팩트 관리
+### Progressive Delivery
 
-- [ ] [Container Registry in CI](artifact-management/registry-ci.md)
-- [ ] [Nexus Repository Manager](artifact-management/nexus.md)
-- [ ] [JFrog Artifactory](artifact-management/artifactory.md)
-- [ ] [npm, Maven, PyPI 프라이빗 저장소](artifact-management/private-package-registry.md)
+- [ ] argo-rollouts — Rollout CR, Analysis, 트래픽 분할
+- [ ] flagger — AnalysisTemplate, 자동 판단 로직
+- [ ] feature-flag — OpenFeature, LaunchDarkly, Flagsmith, Unleash
+- [ ] traffic-splitting — Istio·Gateway API·Envoy 연동
 
-### 릴리즈 관리
+### Artifact Management
 
-- [ ] [Semantic Versioning](release-management/semver.md)
-- [ ] [semantic-release로 자동화](release-management/semantic-release.md)
-- [ ] [Changelog 자동 생성](release-management/changelog-automation.md)
-- [ ] [Release Notes 자동화](release-management/release-notes.md)
+- [ ] harbor — 이미지·차트·OCI Artifacts
+- [ ] artifactory — 범용 바이너리 저장소
+- [ ] oci-artifacts-registry — SBOM·서명 저장 표준
 
-### 실전 패턴
+### DevSecOps in CI
 
-- [ ] [모노레포 CI/CD (Nx, Turborepo, Bazel)](practical-patterns/monorepo-cicd.md)
-- [ ] [마이크로서비스 CI/CD](practical-patterns/microservices-cicd.md)
-- [ ] [빌드 캐시 전략](practical-patterns/build-cache.md)
-- [ ] [파이프라인 최적화 (병렬화, 선택적 실행)](practical-patterns/pipeline-optimization.md)
-- [ ] [알림 (Slack, PagerDuty, Email)](practical-patterns/cicd-notifications.md)
-- [ ] [CI/CD 트러블슈팅](practical-patterns/cicd-troubleshooting.md)
+- [ ] sast-sca — 코드·의존성 스캔 통합
+- [ ] image-scanning-cicd — Trivy, Grype, CVE 정책
+- [ ] secret-scanning — git-secrets, gitleaks, pre-commit
+- [ ] slsa-in-ci — Provenance, attestation, Level 상향
+
+### Dependency Management
+
+- [ ] renovate — 자동 PR, 그룹핑·스케줄
+- [ ] dependabot — GitHub 통합, 보안 업데이트
+
+### Test Automation
+
+- [ ] test-strategy — Unit·Integration·E2E·Contract 배분
+- [ ] contract-testing — Pact, provider-consumer
+
+### Release Management
+
+- [ ] semantic-versioning — SemVer, conventional commits
+- [ ] release-notes — 자동 생성, changelog 도구
+
+### Practical Patterns
+
+- [ ] monorepo-cicd — Bazel, Nx, affected 감지
+- [ ] pipeline-templates — 재사용 가능한 템플릿 설계
 
 ---
 
-## 참고 레퍼런스
+## 이 카테고리의 경계
 
-- [DORA Research](https://dora.dev/)
-- [Accelerate (Nicole Forsgren et al.)](https://itrevolution.com/product/accelerate/)
-- [Jenkins Documentation](https://www.jenkins.io/doc/)
-- [GitHub Actions Documentation](https://docs.github.com/actions)
-- [GitLab CI Documentation](https://docs.gitlab.com/ee/ci/)
-- [Tekton Documentation](https://tekton.dev/docs/)
-- [Continuous Delivery (Jez Humble, David Farley)](https://continuousdelivery.com/)
+- **Helm/Kustomize 도구 자체**는 `kubernetes/` — 여기는 "GitOps 맥락 활용"만
+- **Secrets 도구(Vault, ESO)**는 `security/` — 여기는 "CI에서 주입" 패턴만
+- **SLO 기반 자동 롤백**은 `sre/` — 여기는 "Progressive Delivery 도구"만
+
+---
+
+## 참고 표준
+
+- DORA Report (State of DevOps)
+- OpenGitOps WG
+- SLSA Framework
+- Accelerate (Nicole Forsgren)
+- Argo CD / Flux 공식 문서
