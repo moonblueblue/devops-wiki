@@ -48,7 +48,7 @@ tags:
 
 - [ ] DNS 아키텍처 — Authoritative vs Recursive, DNSSEC
 - [ ] DNS 운영 — TTL, SRV, 클러스터 DNS 동작
-- [x] [DNS 설정](dns-config.md) — Linux 리졸버, systemd-resolved, resolv.conf
+- [x] [DNS 설정](dns/dns-config.md) — Linux 리졸버, systemd-resolved, resolv.conf
 
 ### TLS·PKI (기본)
 
@@ -79,9 +79,9 @@ tags:
 
 ### 호스트 네트워크 도구 (Linux)
 
-- [x] [iproute2](iproute2.md) — ip, ss, tc 명령어 실전
-- [x] [방화벽](firewall.md) — iptables, nftables, firewalld, ufw
-- [x] [SSH 설정](ssh.md) — 키 관리, 터널, 포트 포워딩, 보안
+- [x] [iproute2](host-tools/iproute2.md) — ip, ss, tc 명령어 실전
+- [x] [방화벽](host-tools/firewall.md) — iptables, nftables, firewalld, ufw
+- [x] [SSH 설정](host-tools/ssh.md) — 키 관리, 터널, 포트 포워딩, 보안
 
 ### 트러블슈팅
 
