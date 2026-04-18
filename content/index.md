@@ -14,9 +14,7 @@ displayed_sidebar: wikiSidebar
 
 # Moon Blue's DevOps Wiki
 
-DevOps 엔지니어를 위한 **글로벌 스탠다드 기술 위키**./n
-Google, Netflix, Cloudflare, Stripe 같은 탑티어 엔지니어가 당연하게 아는 개념을/n
-공식 문서·CNCF·SRE Book·Accelerate 기준으로 정리한다.
+> DevOps 엔지니어를 위한 **글로벌 스탠다드 기술 위키**.
 
 ---
 
