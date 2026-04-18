@@ -35,53 +35,53 @@ SLO         SLI 선정 → SLO → Burn Rate → Error Budget
 
 ### 원칙·개념
 
-- [ ] sre-principles — Google SRE 원칙, Dickerson Pyramid
-- [ ] sli-slo-sla — 정의와 관계, 현실 함정
+- [ ] SRE 원칙 — Google SRE 원칙, Dickerson Pyramid
+- [ ] SLI·SLO·SLA — 정의와 관계, 현실 함정
 
-### SLI / SLO / Error Budget
+### SLI·SLO·에러 버짓
 
-- [ ] sli-selection — CUJ (Critical User Journey), 4 Golden Signals
-- [ ] slo-burn-rate — Burn Rate 수학, 다중 창 판단
-- [ ] error-budget-policy — 소진 시 조치 (배포 동결, 롤백 강제)
+- [ ] SLI 선정 — CUJ (Critical User Journey), 4 Golden Signals
+- [ ] SLO Burn Rate — Burn Rate 수학, 다중 창 판단
+- [ ] Error Budget 정책 — 소진 시 조치 (배포 동결, 롤백 강제)
 
-### Incident Management
+### 장애 대응
 
-- [ ] incident-response — IRT, Commander, 커뮤니케이션
-- [ ] on-call-rotation — 로테이션, 휴식, 핸드오프
-- [ ] war-room — 런칭, 로그·타임라인
+- [ ] Incident Response — IRT, Commander, 커뮤니케이션
+- [ ] On-call 로테이션 — 로테이션, 휴식, 핸드오프
+- [ ] War Room — 런칭, 로그·타임라인
 
-### Postmortem & RCA
+### 포스트모템·RCA
 
-- [ ] blameless-postmortem — Google 템플릿, 실무 포맷
-- [ ] rca-methods — 5 Whys, Fishbone, Causal Graph
+- [ ] Blameless Postmortem — Google 템플릿, 실무 포맷
+- [ ] RCA 방법론 — 5 Whys, Fishbone, Causal Graph
 
-### Runbook & Playbook
+### Runbook·Playbook
 
-- [ ] runbook-template — 호출·진단·복구 구조
-- [ ] automation — 런북 → 자동화, Ansible·PagerDuty
+- [ ] Runbook 템플릿 — 호출·진단·복구 구조
+- [ ] 자동화 — 런북 → 자동화, Ansible·PagerDuty
 
-### Progressive Delivery (SRE 관점)
+### 점진적 배포 (SRE 관점)
 
-- [ ] slo-based-rollback — 에러 버짓 기반 자동 롤백 정책
+- [ ] SLO 기반 롤백 — 에러 버짓 기반 자동 롤백 정책
 
-### Chaos Engineering
+### 카오스 엔지니어링
 
-- [ ] chaos-principles — Netflix 원칙, 가설 기반
-- [ ] chaos-tools — Chaos Mesh, LitmusChaos, Gremlin 비교
+- [ ] 카오스 원칙 — Netflix 원칙, 가설 기반
+- [ ] 카오스 도구 — Chaos Mesh, LitmusChaos, Gremlin 비교
 
-### Reliability Design
+### 신뢰성 설계
 
-- [ ] failure-modes — 단일 장애점, Blast Radius, Cell-based
-- [ ] dependency-mapping — Upstream/Downstream, 영향 분석
+- [ ] Failure Modes — 단일 장애점, Blast Radius, Cell-based
+- [ ] 의존성 매핑 — Upstream/Downstream, 영향 분석
 
 ### Toil
 
-- [ ] toil-reduction — 측정·제거 전략, 자동화 우선순위
+- [ ] Toil 감축 — 측정·제거 전략, 자동화 우선순위
 
 ### 조직·문화 (PE 흡수)
 
-- [ ] team-topologies — Stream·Platform·Enabling·Subsystem
-- [ ] devex-metrics — DORA + SPACE + DevEx (Core 4)
+- [ ] Team Topologies — Stream·Platform·Enabling·Subsystem
+- [ ] DevEx 메트릭 — DORA + SPACE + DevEx (Core 4)
 
 ---
 

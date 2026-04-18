@@ -36,47 +36,47 @@ tags:
 
 ### 원칙·개념
 
-- [ ] zero-trust — 원칙, 실무 적용, BeyondCorp
-- [ ] defense-in-depth — 다층 방어, 실무 체크리스트
+- [ ] Zero Trust — 원칙, 실무 적용, BeyondCorp
+- [ ] Defense in Depth — 다층 방어, 실무 체크리스트
 
 ### 인증·인가 (AuthN/AuthZ)
 
-- [ ] iam-basics — 주체·리소스·정책, 최소 권한
-- [ ] oidc-saml — SSO 프로토콜 비교, 실무 구현
-- [ ] workload-identity — IRSA, GKE WI, Azure AD WI, SPIFFE/SPIRE
+- [ ] IAM 기본 — 주체·리소스·정책, 최소 권한
+- [ ] OIDC·SAML — SSO 프로토콜 비교, 실무 구현
+- [ ] Workload Identity — IRSA, GKE WI, Azure AD WI, SPIFFE/SPIRE
 
-### Secrets Management (주인공 통합)
+### 시크릿 관리 (주인공 통합)
 
-- [ ] vault-basics — Vault 아키텍처, Dynamic Secrets, Transit
-- [ ] external-secrets-operator — ESO, SecretStore, 주요 provider
-- [ ] sealed-secrets — Bitnami Sealed Secrets, 키 관리
-- [ ] sops — SOPS + age/GPG, KSOPS, Helm 통합
+- [ ] Vault 기본 — Vault 아키텍처, Dynamic Secrets, Transit
+- [ ] External Secrets Operator — ESO, SecretStore, 주요 provider
+- [ ] Sealed Secrets — Bitnami Sealed Secrets, 키 관리
+- [ ] SOPS — SOPS + age/GPG, KSOPS, Helm 통합
 
-### Network Security (전략)
+### 네트워크 보안 (전략)
 
-- [ ] mtls-strategy — Service Mesh·직접 구현 트레이드오프
-- [ ] network-policy-strategy — Default Deny, 계층별 정책
-- [ ] service-mesh-security — Istio/Linkerd 보안 모델 비교
+- [ ] mTLS 전략 — Service Mesh·직접 구현 트레이드오프
+- [ ] Network Policy 전략 — Default Deny, 계층별 정책
+- [ ] Service Mesh 보안 — Istio/Linkerd 보안 모델 비교
 
-### Container Security
+### 컨테이너 보안
 
-- [ ] image-signing — Cosign, Notary v2, sigstore
-- [ ] sbom — CycloneDX, SPDX, 생성·저장
-- [ ] runtime-security — Falco, Tracee, Tetragon 비교
+- [ ] 이미지 서명 — Cosign, Notary v2, sigstore
+- [ ] SBOM — CycloneDX, SPDX, 생성·저장
+- [ ] 런타임 보안 — Falco, Tracee, Tetragon 비교
 
-### Supply Chain (공급망)
+### 공급망 보안
 
-- [ ] slsa — Level 1~4, provenance, builder trust
-- [ ] sigstore — Rekor, Fulcio, Cosign keyless
-- [ ] vex — Vulnerability Exchange, 노이즈 감축
+- [ ] SLSA — Level 1~4, provenance, builder trust
+- [ ] Sigstore — Rekor, Fulcio, Cosign keyless
+- [ ] VEX — Vulnerability Exchange, 노이즈 감축
 
 ### Policy as Code
 
-- [ ] opa-gatekeeper — ConstraintTemplate, Rego, 실무 정책
+- [ ] OPA·Gatekeeper — ConstraintTemplate, Rego, 실무 정책
 
-### PKI & Cryptography
+### PKI·암호
 
-- [ ] post-quantum-crypto — ML-KEM·ML-DSA, 2026 전환 전략
+- [ ] 포스트 양자 암호 — ML-KEM·ML-DSA, 2026 전환 전략
 
 ---
 

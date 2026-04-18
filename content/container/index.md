@@ -33,28 +33,28 @@ tags:
 
 ### 기본 개념
 
-- [ ] container-concepts — namespace·cgroup 기반, VM과의 실제 차이
+- [ ] 컨테이너 개념 — namespace·cgroup 기반, VM과의 실제 차이
 
 ### Docker & OCI
 
-- [ ] docker-architecture — dockerd, containerd, runc 계층
-- [ ] oci-spec — Image Spec, Runtime Spec, Distribution Spec, Referrers
+- [ ] Docker 아키텍처 — dockerd, containerd, runc 계층
+- [ ] OCI 스펙 — Image Spec, Runtime Spec, Distribution Spec, Referrers
 
-### Image Build
+### 이미지 빌드
 
-- [ ] buildkit-basics — BuildKit 아키텍처, 캐시 마운트, SBOM 생성
-- [ ] image-optimization — 레이어 전략, 멀티스테이지, Distroless, Chainguard
-- [ ] reproducible-builds — 재현 가능한 빌드, 해시 안정성
+- [ ] BuildKit 기본 — BuildKit 아키텍처, 캐시 마운트, SBOM 생성
+- [ ] 이미지 최적화 — 레이어 전략, 멀티스테이지, Distroless, Chainguard
+- [ ] 재현 가능 빌드 — 재현 가능한 빌드, 해시 안정성
 
-### Runtime
+### 런타임
 
-- [ ] containerd-runc — containerd 2.x, CRI, sandbox API
-- [ ] runtime-alternatives — gVisor, Kata, Firecracker, Wasm 런타임
+- [ ] containerd·runc — containerd 2.x, CRI, sandbox API
+- [ ] 런타임 대안 — gVisor, Kata, Firecracker, Wasm 런타임
 
-### Registry
+### 레지스트리
 
-- [ ] registry-comparison — Harbor, Zot, Distribution, ECR/GCR/ACR
-- [ ] oci-artifacts — OCI Artifacts, Referrers API, SBOM·서명 저장
+- [ ] 레지스트리 비교 — Harbor, Zot, Distribution, ECR/GCR/ACR
+- [ ] OCI Artifacts — OCI Artifacts, Referrers API, SBOM·서명 저장
 
 ---
 

@@ -35,57 +35,57 @@ tags:
 
 ### 기본기
 
-- [ ] osi-tcp-ip — OSI 7 layer, TCP/IP 4 layer, 실무 매핑
-- [ ] packet-analysis — tcpdump, Wireshark, tshark 실전
-- [ ] mtu-mss — Path MTU Discovery, 오버레이에서의 MTU 함정
+- [ ] OSI·TCP/IP — OSI 7 layer, TCP/IP 4 layer, 실무 매핑
+- [ ] 패킷 분석 — tcpdump, Wireshark, tshark 실전
+- [ ] MTU·MSS — Path MTU Discovery, 오버레이에서의 MTU 함정
 
-### IP & Routing
+### IP·라우팅
 
-- [ ] routing-basics — 라우팅 테이블, ECMP, 기본 게이트웨이
-- [ ] bgp-basics — AS, peering, route reflector, BGP in DC
+- [ ] 라우팅 기본 — 라우팅 테이블, ECMP, 기본 게이트웨이
+- [ ] BGP 기본 — AS, peering, route reflector, BGP in DC
 
 ### DNS
 
-- [ ] dns-architecture — Authoritative vs Recursive, DNSSEC
-- [ ] dns-operations — TTL, SRV, 클러스터 DNS 동작
-- [ ] [dns-config](dns-config.md) — Linux 리졸버, systemd-resolved, resolv.conf
+- [ ] DNS 아키텍처 — Authoritative vs Recursive, DNSSEC
+- [ ] DNS 운영 — TTL, SRV, 클러스터 DNS 동작
+- [x] [DNS 설정](dns-config.md) — Linux 리졸버, systemd-resolved, resolv.conf
 
-### TLS & PKI (기본)
+### TLS·PKI (기본)
 
-- [ ] tls-basics — 핸드셰이크, 인증서 체인, SNI, ALPN
-- [ ] mtls-basics — 상호 인증, 인증서 발급 흐름
-- [ ] post-quantum-tls — ML-KEM (Kyber), X25519Kyber768, 전환 전략
+- [ ] TLS 기본 — 핸드셰이크, 인증서 체인, SNI, ALPN
+- [ ] mTLS 기본 — 상호 인증, 인증서 발급 흐름
+- [ ] 포스트 양자 TLS — ML-KEM (Kyber), X25519Kyber768, 전환 전략
 
 ### HTTP 프로토콜
 
-- [ ] http-versions — HTTP/1.1 · HTTP/2 · HTTP/3 비교
-- [ ] http3-quic — QUIC, 0-RTT, UDP 차단·NAT 함정
+- [ ] HTTP 버전 — HTTP/1.1 · HTTP/2 · HTTP/3 비교
+- [ ] HTTP/3·QUIC — QUIC, 0-RTT, UDP 차단·NAT 함정
 
-### Load Balancer & Proxy
+### 로드밸런서·프록시
 
-- [ ] l4-l7-basics — L4 vs L7, 알고리즘, 세션 유지
-- [ ] reverse-proxy — Nginx·HAProxy·Envoy 비교
-- [ ] cdn-edge — CDN 계층, origin shielding, edge compute
+- [ ] L4·L7 기본 — L4 vs L7, 알고리즘, 세션 유지
+- [ ] 리버스 프록시 — Nginx·HAProxy·Envoy 비교
+- [ ] CDN·Edge — CDN 계층, origin shielding, edge compute
 
-### VPC & VPN
+### VPC·VPN
 
-- [ ] vpc-design — 서브넷, NAT, VPC peering, Transit Gateway 개념
-- [ ] vpn-wireguard — IPsec vs WireGuard, mesh VPN
+- [ ] VPC 설계 — 서브넷, NAT, VPC peering, Transit Gateway 개념
+- [ ] VPN·WireGuard — IPsec vs WireGuard, mesh VPN
 
-### Container/K8s Network
+### 컨테이너·K8s 네트워크
 
-- [ ] cni-comparison — Calico · Cilium · Flannel · AWS VPC CNI
-- [ ] service-mesh — Istio · Linkerd · Cilium Mesh · Ambient Mode
+- [ ] CNI 비교 — Calico · Cilium · Flannel · AWS VPC CNI
+- [ ] Service Mesh — Istio · Linkerd · Cilium Mesh · Ambient Mode
 
 ### 호스트 네트워크 도구 (Linux)
 
-- [ ] [iproute2](iproute2.md) — ip, ss, tc 명령어 실전
-- [ ] [firewall](firewall.md) — iptables, nftables, firewalld, ufw
-- [ ] [ssh](ssh.md) — 키 관리, 터널, 포트 포워딩, 보안
+- [x] [iproute2](iproute2.md) — ip, ss, tc 명령어 실전
+- [x] [방화벽](firewall.md) — iptables, nftables, firewalld, ufw
+- [x] [SSH 설정](ssh.md) — 키 관리, 터널, 포트 포워딩, 보안
 
 ### 트러블슈팅
 
-- [ ] network-troubleshooting — mtr, ss, iperf3, eBPF 기반 진단
+- [ ] 네트워크 트러블슈팅 — mtr, ss, iperf3, eBPF 기반 진단
 
 ---
 
