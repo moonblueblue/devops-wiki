@@ -1,7 +1,7 @@
 ---
 title: "cgroups v1 vs v2: 리소스 격리의 핵심"
 sidebar_label: "cgroups"
-sidebar_position: 3
+sidebar_position: 2
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

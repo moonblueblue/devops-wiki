@@ -1,7 +1,7 @@
 ---
 title: "Linux Namespaces 전종 (PID, Mount, Net, UTS, IPC, User, Cgroup, Time)"
 sidebar_label: "Namespaces"
-sidebar_position: 4
+sidebar_position: 1
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

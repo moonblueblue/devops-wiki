@@ -1,7 +1,7 @@
 ---
 title: "프로세스 관리와 시그널"
 sidebar_label: "프로세스·시그널"
-sidebar_position: 1
+sidebar_position: 3
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

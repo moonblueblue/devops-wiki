@@ -1,7 +1,7 @@
 ---
 title: "Immutable OS (Flatcar, Bottlerocket, Talos Linux, Fedora CoreOS)"
 sidebar_label: "Immutable OS"
-sidebar_position: 2
+sidebar_position: 4
 date: 2026-04-16
 last_verified: 2026-04-16
 tags:

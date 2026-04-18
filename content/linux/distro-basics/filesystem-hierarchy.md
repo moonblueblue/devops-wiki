@@ -1,7 +1,7 @@
 ---
 title: "파일시스템 계층 구조 (FHS)"
 sidebar_label: "FHS"
-sidebar_position: 3
+sidebar_position: 2
 date: 2026-04-16
 last_verified: 2026-04-16
 tags:

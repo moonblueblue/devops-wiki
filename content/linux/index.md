@@ -41,38 +41,38 @@ tags:
 - [ ] user-group-permission — rwx, SUID/SGID, sticky, ACL
 - [ ] immutable-os — Talos, Bottlerocket, Flatcar (K8s 노드 OS)
 
-### Boot & Init
+### 부팅·초기화
 
 - [ ] boot-process — BIOS/UEFI → shim → GRUB → initramfs → systemd
 - [ ] systemd — unit, target, cgroup 통합, journald
 
-### Process Isolation (컨테이너 기반)
+### 프로세스·리소스 격리
 
 - [ ] namespaces — pid, mnt, net, user, ipc, uts, cgroup, time
 - [ ] cgroups — v1 vs v2, CPU/Memory/IO 컨트롤러, PSI
 - [ ] process-management — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
 - [ ] resource-limits — ulimit, PAM limits, RLIMIT\_\* vs cgroup
 
-### Performance
+### 성능 분석
 
 - [ ] cpu-performance — USE 방법론, run queue, context switch, perf
 - [ ] memory-oom — MemAvailable, swap, OOM killer, THP
 - [ ] disk-io-performance — iostat, I/O scheduler, fsync 병목
 - [ ] ebpf-performance — bpftrace, BPF CO-RE, Brendan Gregg 툴킷
 
-### Filesystem & Storage
+### 파일시스템·스토리지
 
 - [ ] filesystem-comparison — ext4 · XFS · Btrfs · ZFS · EROFS
 - [ ] lvm — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
 
-### Security
+### 보안
 
 - [ ] linux-capabilities — CAP\_\*, 바운딩·앰비언트·인헤리터블
 - [ ] seccomp — Mode 1/2, BPF 필터, Docker/K8s 프로파일
 - [ ] apparmor — 프로파일 기반 MAC (Ubuntu/SUSE)
 - [ ] selinux — 레이블 기반 MAC (RHEL 계열)
 
-### Logging
+### 로깅
 
 - [ ] system-logging — rsyslog vs journald, 저널 포워딩
 - [ ] log-management — 로테이션, 원격 전송, 압축·보존

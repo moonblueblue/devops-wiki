@@ -1,7 +1,7 @@
 ---
 title: "seccomp-bpf와 시스템콜 필터링"
 sidebar_label: "seccomp-bpf"
-sidebar_position: 4
+sidebar_position: 2
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

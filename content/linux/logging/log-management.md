@@ -1,7 +1,7 @@
 ---
 title: "대규모 로그 관리 전략 (ELK, Loki, Fluentd, OpenTelemetry)"
 sidebar_label: "대규모 로그 관리"
-sidebar_position: 3
+sidebar_position: 2
 date: 2026-04-17
 tags:
   - linux

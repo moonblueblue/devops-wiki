@@ -1,7 +1,7 @@
 ---
 title: "리소스 제한 (ulimit, PAM limits, systemd)"
 sidebar_label: "리소스 제한"
-sidebar_position: 2
+sidebar_position: 4
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

@@ -1,7 +1,7 @@
 ---
 title: "SELinux 기본과 운영"
 sidebar_label: "SELinux"
-sidebar_position: 2
+sidebar_position: 4
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

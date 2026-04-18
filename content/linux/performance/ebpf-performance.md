@@ -1,7 +1,7 @@
 ---
 title: "eBPF 기반 성능 분석 완전 가이드 (bpftrace, BCC, libbpf)"
 sidebar_label: "eBPF 성능 분석"
-sidebar_position: 6
+sidebar_position: 4
 date: 2026-04-17
 last_verified: 2026-04-17
 tags:

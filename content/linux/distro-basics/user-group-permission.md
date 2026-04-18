@@ -1,7 +1,7 @@
 ---
 title: "사용자·그룹·퍼미션 (ACL, setuid)"
 sidebar_label: "사용자·그룹·퍼미션"
-sidebar_position: 4
+sidebar_position: 3
 date: 2026-04-16
 last_verified: 2026-04-16
 tags:
