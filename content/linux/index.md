@@ -36,46 +36,46 @@ tags:
 
 ### 배포판·기본기
 
-- [ ] linux-distro-comparison — RHEL·Ubuntu·Alpine·SUSE 계열 비교
-- [ ] filesystem-hierarchy — `/usr`, `/var`, `/etc`, `/run` 등 표준 구조
-- [ ] user-group-permission — rwx, SUID/SGID, sticky, ACL
-- [ ] immutable-os — Talos, Bottlerocket, Flatcar (K8s 노드 OS)
+- [ ] 배포판 비교 — RHEL·Ubuntu·Alpine·SUSE 계열 비교
+- [ ] FHS — `/usr`, `/var`, `/etc`, `/run` 등 표준 구조
+- [ ] 사용자·그룹·퍼미션 — rwx, SUID/SGID, sticky, ACL
+- [ ] Immutable OS — Talos, Bottlerocket, Flatcar (K8s 노드 OS)
 
 ### 부팅·초기화
 
-- [ ] boot-process — BIOS/UEFI → shim → GRUB → initramfs → systemd
-- [ ] systemd — unit, target, cgroup 통합, journald
+- [ ] 부팅 프로세스 — BIOS/UEFI → shim → GRUB → initramfs → systemd
+- [ ] systemd 서비스 관리 — unit, target, cgroup 통합, journald
 
 ### 프로세스·리소스 격리
 
-- [ ] namespaces — pid, mnt, net, user, ipc, uts, cgroup, time
+- [ ] Namespaces — pid, mnt, net, user, ipc, uts, cgroup, time
 - [ ] cgroups — v1 vs v2, CPU/Memory/IO 컨트롤러, PSI
-- [ ] process-management — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
-- [ ] resource-limits — ulimit, PAM limits, RLIMIT\_\* vs cgroup
+- [ ] 프로세스·시그널 — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
+- [ ] 리소스 제한 — ulimit, PAM limits, RLIMIT\_\* vs cgroup
 
 ### 성능 분석
 
-- [ ] cpu-performance — USE 방법론, run queue, context switch, perf
-- [ ] memory-oom — MemAvailable, swap, OOM killer, THP
-- [ ] disk-io-performance — iostat, I/O scheduler, fsync 병목
-- [ ] ebpf-performance — bpftrace, BPF CO-RE, Brendan Gregg 툴킷
+- [ ] CPU 성능 분석 — USE 방법론, run queue, context switch, perf
+- [ ] 메모리 관리·OOM — MemAvailable, swap, OOM killer, THP
+- [ ] 디스크 I/O 분석 — iostat, I/O scheduler, fsync 병목
+- [ ] eBPF 성능 분석 — bpftrace, BPF CO-RE, Brendan Gregg 툴킷
 
 ### 파일시스템·스토리지
 
-- [ ] filesystem-comparison — ext4 · XFS · Btrfs · ZFS · EROFS
-- [ ] lvm — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
+- [ ] 파일시스템 — ext4 · XFS · Btrfs · ZFS · EROFS
+- [ ] LVM — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
 
 ### 보안
 
-- [ ] linux-capabilities — CAP\_\*, 바운딩·앰비언트·인헤리터블
-- [ ] seccomp — Mode 1/2, BPF 필터, Docker/K8s 프로파일
-- [ ] apparmor — 프로파일 기반 MAC (Ubuntu/SUSE)
-- [ ] selinux — 레이블 기반 MAC (RHEL 계열)
+- [ ] Capabilities — CAP\_\*, 바운딩·앰비언트·인헤리터블
+- [ ] seccomp-bpf — Mode 1/2, BPF 필터, Docker/K8s 프로파일
+- [ ] AppArmor — 프로파일 기반 MAC (Ubuntu/SUSE)
+- [ ] SELinux — 레이블 기반 MAC (RHEL 계열)
 
 ### 로깅
 
-- [ ] system-logging — rsyslog vs journald, 저널 포워딩
-- [ ] log-management — 로테이션, 원격 전송, 압축·보존
+- [ ] syslog/rsyslog — rsyslog vs journald, 저널 포워딩
+- [ ] 대규모 로그 관리 — 로테이션, 원격 전송, 압축·보존
 
 ---
 
