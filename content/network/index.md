@@ -14,7 +14,7 @@ tags:
 > **티어**: 서브 (기반) — **작성 원칙**: 필수만
 >
 > 장애 원인의 절반은 네트워크다.
-> K8s·Observability·Security 학습의 선행 지식.
+> Kubernetes · Observability · Security 학습의 선행 지식.
 
 ---
 
@@ -26,6 +26,7 @@ tags:
 이름·보안    DNS · TLS · mTLS
 애플리케이션 HTTP/2/3 · LB · Proxy
 현대         CNI · Service Mesh · Post-Quantum
+호스트 도구   iproute2 · firewall · SSH · DNS 설정
 ```
 
 ---
@@ -47,6 +48,7 @@ tags:
 
 - [ ] dns-architecture — Authoritative vs Recursive, DNSSEC
 - [ ] dns-operations — TTL, SRV, 클러스터 DNS 동작
+- [ ] [dns-config](dns-config.md) — Linux 리졸버, systemd-resolved, resolv.conf
 
 ### TLS & PKI (기본)
 
@@ -74,6 +76,12 @@ tags:
 
 - [ ] cni-comparison — Calico · Cilium · Flannel · AWS VPC CNI
 - [ ] service-mesh — Istio · Linkerd · Cilium Mesh · Ambient Mode
+
+### 호스트 네트워크 도구 (Linux)
+
+- [ ] [iproute2](iproute2.md) — ip, ss, tc 명령어 실전
+- [ ] [firewall](firewall.md) — iptables, nftables, firewalld, ufw
+- [ ] [ssh](ssh.md) — 키 관리, 터널, 포트 포워딩, 보안
 
 ### 트러블슈팅
 

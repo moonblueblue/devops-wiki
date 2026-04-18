@@ -13,20 +13,21 @@ tags:
 
 > **티어**: 서브 (기반) — **작성 원칙**: 필수만
 >
-> 모든 인프라의 기반이자 트러블슈팅의 최종 도달 레이어.
-> K8s·Observability 학습의 선행 지식이다.
+> Kubernetes · Observability · CI/CD 메인 카테고리를 받쳐주는 기반 지식.
+> 트러블슈팅 시 반드시 도달하는 레이어와, 컨테이너·보안 이해의
+> 선행 개념만 엄선해 22개 글로 구성한다.
 
 ---
 
-## 학습 경로
+## 메인 카테고리와의 연결
 
-```
-기본기         Distro → Boot/Init → Shell
-컨테이너 기반   cgroups · namespaces · Capabilities
-성능·관측      USE 방법론 · perf · eBPF
-보안           SELinux · AppArmor · auditd · LUKS
-스토리지       Filesystem · LVM · I/O scheduler
-```
+| 이 카테고리의 글 | 받쳐주는 메인 |
+|---|---|
+| namespaces, cgroups | Kubernetes (Pod·컨테이너 기반) |
+| performance 4종, logging 2종 | Observability (노드 메트릭·로그) |
+| systemd, boot-process | Kubernetes (kubelet·부팅 장애) |
+| linux-capabilities, seccomp, apparmor, selinux | Security (Pod securityContext) |
+| memory-oom, process-management | 장애 대응 (K8s에서 가장 흔한 증상) |
 
 ---
 
@@ -37,12 +38,12 @@ tags:
 - [ ] linux-distro-comparison — RHEL·Ubuntu·Alpine·SUSE 계열 비교
 - [ ] filesystem-hierarchy — `/usr`, `/var`, `/etc`, `/run` 등 표준 구조
 - [ ] user-group-permission — rwx, SUID/SGID, sticky, ACL
-- [ ] immutable-os — Talos, Bottlerocket, Flatcar, Fedora Silverblue
+- [ ] immutable-os — Talos, Bottlerocket, Flatcar (K8s 노드 OS)
 
 ### Boot & Init
 
 - [ ] boot-process — BIOS/UEFI → shim → GRUB → initramfs → systemd
-- [ ] systemd — unit, target, cgroup 통합, journald, systemd-cryptenroll
+- [ ] systemd — unit, target, cgroup 통합, journald
 
 ### Process Isolation (컨테이너 기반)
 
@@ -62,16 +63,13 @@ tags:
 
 - [ ] filesystem-comparison — ext4 · XFS · Btrfs · ZFS · EROFS
 - [ ] lvm — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
-- [ ] io-scheduler — none, mq-deadline, bfq, io_uring
 
 ### Security
 
 - [ ] linux-capabilities — CAP_*, 바운딩·앰비언트·인헤리터블
 - [ ] seccomp — Mode 1/2, BPF 필터, Docker/K8s 프로파일
-- [ ] apparmor-selinux — 두 MAC 모델 비교와 사용 시점
-- [ ] pam — 인증 체인, 2FA, pam_faillock
-- [ ] luks-dm-crypt — LUKS2, TPM2, Clevis+Tang HA
-- [ ] auditd — 규칙 우선순위, audisp-remote, laurel
+- [ ] apparmor — 프로파일 기반 MAC (Ubuntu/SUSE)
+- [ ] selinux — 레이블 기반 MAC (RHEL 계열)
 
 ### Logging
 
@@ -84,7 +82,8 @@ tags:
 
 - Docker/K8s의 namespace·cgroup **사용 사례**는 `container/`·`kubernetes/`에 맡긴다
 - eBPF 응용 중 네트워킹은 `network/`, 관측은 `observability/`, 보안은 `security/`로
-- 가상화(KVM·vSphere·Proxmox) 심화는 별도 필요 시 추가
+- 네트워크 도구(iproute2, firewall, DNS, SSH)는 `network/` 카테고리로
+- 가상화·쉘 스크립트 심화·커널 개발 영역은 범위 밖
 
 ---
 
