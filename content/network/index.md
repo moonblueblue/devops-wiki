@@ -52,7 +52,7 @@ tags:
 
 ### TLS·PKI (기본)
 
-- [ ] TLS 기본 — 핸드셰이크, 인증서 체인, SNI, ALPN
+- [x] [TLS 기본](tls-pki/tls-basics.md) — 핸드셰이크, 인증서 체인, SNI, ALPN
 - [ ] mTLS 기본 — 상호 인증, 인증서 발급 흐름
 - [ ] 포스트 양자 TLS — ML-KEM (Kyber), X25519Kyber768, 전환 전략
 
