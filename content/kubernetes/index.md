@@ -34,7 +34,7 @@ tags:
 
 ### 아키텍처
 
-- [ ] K8s 개요 — 전체 구성, 컨트롤 루프 개념
+- [x] [K8s 개요](./architecture/k8s-overview.md) — 전체 구성, 컨트롤 루프 개념
 - [ ] API Server — API versioning, aggregation, watch
 - [ ] etcd — Raft, consistency, compaction, 백업·복구
 - [ ] Scheduler — 스케줄링 사이클, 플러그인, 가중치
