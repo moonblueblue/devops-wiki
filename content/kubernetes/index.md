@@ -38,7 +38,7 @@ tags:
 - [x] [API Server](./architecture/api-server.md) — API versioning, aggregation, watch
 - [x] [etcd](./architecture/etcd.md) — Raft, consistency, compaction, 백업·복구
 - [x] [Scheduler](./architecture/scheduler.md) — 스케줄링 사이클, 플러그인, 가중치
-- [ ] Controller·kubelet — 컨트롤러 매니저, kubelet, kube-proxy
+- [x] [Controller·kubelet](./architecture/controller-kubelet.md) — 컨트롤러 매니저, kubelet, kube-proxy
 - [ ] Reconciliation Loop — 선언적 모델, desired vs actual
 
 ### 워크로드

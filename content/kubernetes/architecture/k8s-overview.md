@@ -163,7 +163,7 @@ Service의 **가상 IP를 실제 Pod IP로 분기**시키는 데이터 플레인
 |---|---|
 | iptables | 기본값. 작은·중간 규모 |
 | nftables | **1.33 GA**. 대규모 서비스 성능·업데이트 지연 개선 |
-| IPVS | **1.35 deprecated, 1.36 제거** |
+| IPVS | **1.35 deprecated**. 1.36에도 존재하나 제거 시점 미확정 |
 | eBPF (Cilium kube-proxy replacement) | kube-proxy 자체를 대체 |
 
 ### 4-3. Container Runtime (CRI)
@@ -295,7 +295,7 @@ sequenceDiagram
 
 | 변경 | 영향 |
 |---|---|
-| **IPVS 모드 제거** (kube-proxy) | 1.35 deprecated → **1.36 제거**. nftables·iptables·eBPF로 전환 |
+| **IPVS 모드 deprecated** (kube-proxy) | 1.35부터 경고 출력, 1.36에도 존재하나 제거 시점 미확정. nftables·iptables·eBPF로 이전 권장 |
 | **`gitRepo` Volume 제거** | 보안 취약점. Init Container + git clone 사용 |
 | **`externalIPs` 필드** deprecation 시작 | 1.36: feature gate 추가(기본 on) → 1.40경 기본 off → **1.46경 완전 제거**. MITM 경로 차단 |
 | **Ingress-NGINX 프로젝트 은퇴** (2026-03-24) | 대안: Gateway API + Envoy Gateway, Contour, HAProxy Ingress |
