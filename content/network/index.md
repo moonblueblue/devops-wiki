@@ -37,7 +37,7 @@ tags:
 
 - [x] [OSI·TCP/IP](basics/osi-tcp-ip.md) — OSI 7 layer, TCP/IP 4 layer, 실무 매핑
 - [x] [패킷 분석](basics/packet-analysis.md) — tcpdump, Wireshark, tshark 실전
-- [ ] MTU·MSS — Path MTU Discovery, 오버레이에서의 MTU 함정
+- [x] [MTU·MSS](basics/mtu-mss.md) — Path MTU Discovery, 오버레이에서의 MTU 함정
 
 ### IP·라우팅
 
