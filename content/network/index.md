@@ -35,7 +35,7 @@ tags:
 
 ### 기본기
 
-- [ ] OSI·TCP/IP — OSI 7 layer, TCP/IP 4 layer, 실무 매핑
+- [x] [OSI·TCP/IP](basics/osi-tcp-ip.md) — OSI 7 layer, TCP/IP 4 layer, 실무 매핑
 - [ ] 패킷 분석 — tcpdump, Wireshark, tshark 실전
 - [ ] MTU·MSS — Path MTU Discovery, 오버레이에서의 MTU 함정
 
