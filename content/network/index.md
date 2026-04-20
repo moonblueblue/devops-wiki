@@ -47,7 +47,7 @@ tags:
 ### DNS
 
 - [x] [DNS 아키텍처](dns/dns-architecture.md) — Authoritative vs Recursive, DNSSEC
-- [ ] DNS 운영 — TTL, SRV, 클러스터 DNS 동작
+- [x] [DNS 운영](dns/dns-operations.md) — TTL, SRV, 클러스터 DNS 동작
 - [x] [DNS 설정](dns/dns-config.md) — Linux 리졸버, systemd-resolved, resolv.conf
 
 ### TLS·PKI (기본)
