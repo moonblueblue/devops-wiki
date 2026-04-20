@@ -70,7 +70,7 @@ tags:
 ### VPC·VPN
 
 - [x] [VPC 설계](vpc-vpn/vpc-design.md) — 서브넷, NAT, VPC peering, Transit Gateway 개념
-- [ ] VPN·WireGuard — IPsec vs WireGuard, mesh VPN
+- [x] [VPN·WireGuard](vpc-vpn/vpn-wireguard.md) — IPsec vs WireGuard, mesh VPN
 
 ### 컨테이너·K8s 네트워크
 
