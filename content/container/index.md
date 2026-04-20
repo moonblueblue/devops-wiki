@@ -54,7 +54,7 @@ tags:
 ### 레지스트리
 
 - [x] [레지스트리 비교](registry/registry-comparison.md) — Harbor, Zot, Distribution, ECR/GCR/ACR
-- [ ] OCI Artifacts — OCI Artifacts, Referrers API, SBOM·서명 저장
+- [x] [OCI Artifacts](registry/oci-artifacts.md) — OCI Artifacts, Referrers API, SBOM·서명 저장
 
 ---
 
