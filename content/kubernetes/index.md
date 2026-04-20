@@ -36,7 +36,7 @@ tags:
 
 - [x] [K8s 개요](./architecture/k8s-overview.md) — 전체 구성, 컨트롤 루프 개념
 - [x] [API Server](./architecture/api-server.md) — API versioning, aggregation, watch
-- [ ] etcd — Raft, consistency, compaction, 백업·복구
+- [x] [etcd](./architecture/etcd.md) — Raft, consistency, compaction, 백업·복구
 - [ ] Scheduler — 스케줄링 사이클, 플러그인, 가중치
 - [ ] Controller·kubelet — 컨트롤러 매니저, kubelet, kube-proxy
 - [ ] Reconciliation Loop — 선언적 모델, desired vs actual
