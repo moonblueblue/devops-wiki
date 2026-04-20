@@ -33,7 +33,7 @@ tags:
 
 ### 기본 개념
 
-- [ ] 컨테이너 개념 — namespace·cgroup 기반, VM과의 실제 차이
+- [x] [컨테이너 개념](concepts/container-concepts.md) — namespace·cgroup 기반, VM과의 실제 차이
 
 ### Docker & OCI
 
