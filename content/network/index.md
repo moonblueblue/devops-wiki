@@ -41,7 +41,7 @@ tags:
 
 ### IP·라우팅
 
-- [ ] 라우팅 기본 — 라우팅 테이블, ECMP, 기본 게이트웨이
+- [x] [라우팅 기본](ip-routing/routing-basics.md) — 라우팅 테이블, ECMP, 기본 게이트웨이
 - [ ] BGP 기본 — AS, peering, route reflector, BGP in DC
 
 ### DNS
