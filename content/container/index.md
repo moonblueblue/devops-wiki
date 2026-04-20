@@ -53,7 +53,7 @@ tags:
 
 ### 레지스트리
 
-- [ ] 레지스트리 비교 — Harbor, Zot, Distribution, ECR/GCR/ACR
+- [x] [레지스트리 비교](registry/registry-comparison.md) — Harbor, Zot, Distribution, ECR/GCR/ACR
 - [ ] OCI Artifacts — OCI Artifacts, Referrers API, SBOM·서명 저장
 
 ---
