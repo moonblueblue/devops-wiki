@@ -59,7 +59,7 @@ tags:
 ### HTTP 프로토콜
 
 - [x] [HTTP 버전](http/http-versions.md) — HTTP/1.1 · HTTP/2 · HTTP/3 비교
-- [ ] HTTP/3·QUIC — QUIC, 0-RTT, UDP 차단·NAT 함정
+- [x] [HTTP/3·QUIC](http/http3-quic.md) — QUIC, 0-RTT, UDP 차단·NAT 함정
 
 ### 로드밸런서·프록시
 
