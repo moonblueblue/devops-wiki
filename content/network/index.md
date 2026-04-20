@@ -54,7 +54,7 @@ tags:
 
 - [x] [TLS 기본](tls-pki/tls-basics.md) — 핸드셰이크, 인증서 체인, SNI, ALPN
 - [x] [mTLS 기본](tls-pki/mtls-basics.md) — 상호 인증, 인증서 발급 흐름
-- [ ] 포스트 양자 TLS — ML-KEM (Kyber), X25519Kyber768, 전환 전략
+- [x] [포스트 양자 TLS](tls-pki/post-quantum-tls.md) — ML-KEM (Kyber), X25519Kyber768, 전환 전략
 
 ### HTTP 프로토콜
 
