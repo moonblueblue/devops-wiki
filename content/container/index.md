@@ -37,7 +37,7 @@ tags:
 
 ### Docker & OCI
 
-- [ ] Docker 아키텍처 — dockerd, containerd, runc 계층
+- [x] [Docker 아키텍처](docker-oci/docker-architecture.md) — dockerd, containerd, runc 계층
 - [ ] OCI 스펙 — Image Spec, Runtime Spec, Distribution Spec, Referrers
 
 ### 이미지 빌드
