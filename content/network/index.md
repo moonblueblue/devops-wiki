@@ -74,7 +74,7 @@ tags:
 
 ### 컨테이너·K8s 네트워크
 
-- [ ] CNI 비교 — Calico · Cilium · Flannel · AWS VPC CNI
+- [x] [CNI 비교](container-k8s-network/cni-comparison.md) — Calico · Cilium · Flannel · AWS VPC CNI
 - [ ] Service Mesh — Istio · Linkerd · Cilium Mesh · Ambient Mode
 
 ### 호스트 네트워크 도구 (Linux)
