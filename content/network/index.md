@@ -64,7 +64,7 @@ tags:
 ### 로드밸런서·프록시
 
 - [x] [L4·L7 기본](lb-proxy/l4-l7-basics.md) — L4 vs L7, 알고리즘, 세션 유지
-- [ ] 리버스 프록시 — Nginx·HAProxy·Envoy 비교
+- [x] [리버스 프록시](lb-proxy/reverse-proxy.md) — Nginx·HAProxy·Envoy·Traefik 비교
 - [ ] CDN·Edge — CDN 계층, origin shielding, edge compute
 
 ### VPC·VPN
