@@ -48,7 +48,7 @@ tags:
 
 ### 런타임
 
-- [ ] containerd·runc — containerd 2.x, CRI, sandbox API
+- [x] [containerd·runc](runtime/containerd-runc.md) — containerd 2.x, CRI, sandbox API
 - [ ] 런타임 대안 — gVisor, Kata, Firecracker, Wasm 런타임
 
 ### 레지스트리
