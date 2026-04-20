@@ -85,7 +85,7 @@ tags:
 
 ### 트러블슈팅
 
-- [ ] 네트워크 트러블슈팅 — mtr, ss, iperf3, eBPF 기반 진단
+- [x] [네트워크 트러블슈팅](troubleshooting/network-troubleshooting.md) — mtr, ss, iperf3, eBPF 기반 진단
 
 ---
 
