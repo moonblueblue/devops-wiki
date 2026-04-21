@@ -44,7 +44,7 @@ tags:
 ### 워크로드
 
 - [x] [Pod 라이프사이클](./workloads/pod-lifecycle.md) — phases, probes, init/sidecar, graceful shutdown
-- [ ] Deployment — 롤링 전략, revision, rollback
+- [x] [Deployment](./workloads/deployment.md) — 롤링 전략, revision, rollback
 - [ ] StatefulSet — 순서·네트워크 ID, PVC 템플릿
 - [ ] DaemonSet — 노드 단위 배포, 업데이트 전략
 - [ ] Job·CronJob — completion, parallelism, history limits
