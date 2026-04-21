@@ -46,9 +46,9 @@ tags:
 - [x] [Pod 라이프사이클](./workloads/pod-lifecycle.md) — phases, probes, init/sidecar, graceful shutdown
 - [x] [Deployment](./workloads/deployment.md) — 롤링 전략, revision, rollback
 - [x] [StatefulSet](./workloads/statefulset.md) — 순서·네트워크 ID, PVC 템플릿
-- [ ] DaemonSet — 노드 단위 배포, 업데이트 전략
-- [ ] Job·CronJob — completion, parallelism, history limits
-- [ ] ReplicaSet — Deployment와의 관계
+- [x] [DaemonSet](./workloads/daemonset.md) — 노드 단위 배포, 업데이트 전략
+- [x] [Job·CronJob](./workloads/job-cronjob.md) — completion, parallelism, history limits
+- [x] [ReplicaSet](./workloads/replicaset.md) — Deployment와의 관계
 
 ### 설정
 
