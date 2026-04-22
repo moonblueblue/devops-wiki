@@ -55,7 +55,7 @@ tags:
 - [x] [ConfigMap](./configuration/configmap.md) — 주입 패턴, 재배포 트리거
 - [x] [Secret](./configuration/secret.md) — Opaque·TLS·Docker, immutable, 암호화 저장
 - [x] [Downward API](./configuration/downward-api.md) — Pod 정보 주입
-- [ ] Projected Volume — 복합 볼륨, SA token projection
+- [x] [Projected Volume](./configuration/projected-volume.md) — 복합 볼륨, SA token projection
 
 ### 리소스 관리
 
