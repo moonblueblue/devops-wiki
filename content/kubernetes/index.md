@@ -69,7 +69,7 @@ tags:
 - [x] [Taint·Toleration](./scheduling/taint-toleration.md) — taint 효과, dedicated node 패턴
 - [x] [Topology Spread](./scheduling/topology-spread.md) — 존·노드 분산, skew 제어
 - [x] [Priority·Preemption](./scheduling/priority-preemption.md) — PriorityClass, preemption 비용
-- [ ] Scheduler 내부 — extender, 커스텀 스케줄러
+- [x] [Scheduler 내부](./scheduling/scheduler-internals.md) — extender, 커스텀 스케줄러
 
 ### 오토스케일링
 
