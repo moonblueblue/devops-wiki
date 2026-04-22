@@ -60,7 +60,7 @@ tags:
 ### 리소스 관리
 
 - [x] [Requests·Limits](./resource-management/requests-limits.md) — QoS, eviction, overcommit
-- [ ] LimitRange·ResourceQuota — 네임스페이스 제한
+- [x] [LimitRange·ResourceQuota](./resource-management/limitrange-resourcequota.md) — 네임스페이스 제한
 - [ ] 네임스페이스 설계 — 테넌시·환경 분리 패턴
 
 ### 스케줄링
