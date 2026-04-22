@@ -61,7 +61,7 @@ tags:
 
 - [x] [Requests·Limits](./resource-management/requests-limits.md) — QoS, eviction, overcommit
 - [x] [LimitRange·ResourceQuota](./resource-management/limitrange-resourcequota.md) — 네임스페이스 제한
-- [ ] 네임스페이스 설계 — 테넌시·환경 분리 패턴
+- [x] [네임스페이스 설계](./resource-management/namespace-design.md) — 테넌시·환경 분리 패턴
 
 ### 스케줄링
 
