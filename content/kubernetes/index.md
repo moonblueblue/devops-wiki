@@ -66,7 +66,7 @@ tags:
 ### 스케줄링
 
 - [x] [NodeSelector·Affinity](./scheduling/node-selector-affinity.md) — nodeSelector, node/pod affinity, preferred
-- [ ] Taint·Toleration — taint 효과, dedicated node 패턴
+- [x] [Taint·Toleration](./scheduling/taint-toleration.md) — taint 효과, dedicated node 패턴
 - [ ] Topology Spread — 존·노드 분산, skew 제어
 - [ ] Priority·Preemption — PriorityClass, preemption 비용
 - [ ] Scheduler 내부 — extender, 커스텀 스케줄러
