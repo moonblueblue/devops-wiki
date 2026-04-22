@@ -52,7 +52,7 @@ tags:
 
 ### 설정
 
-- [ ] ConfigMap — 주입 패턴, 재배포 트리거
+- [x] [ConfigMap](./configuration/configmap.md) — 주입 패턴, 재배포 트리거
 - [ ] Secret — Opaque·TLS·Docker, immutable, 암호화 저장
 - [ ] Downward API — Pod 정보 주입
 - [ ] Projected Volume — 복합 볼륨, SA token projection
