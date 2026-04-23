@@ -108,7 +108,7 @@ tags:
 - [x] [Runtime Class](./security/runtime-class.md) — gVisor·Kata·UserNS 격리 스펙트럼
 - [x] [Secret 암호화](./security/secret-encryption.md) — etcd 암호화, KMS provider
 - [x] [Audit Logging](./security/audit-logging.md) — audit policy, 로그 포워딩
-- [ ] [Cluster Hardening](./security/cluster-hardening.md) — CIS Benchmark, kubelet·apiserver·etcd 플래그
+- [x] [Cluster Hardening](./security/cluster-hardening.md) — CIS Benchmark, kubelet·apiserver·etcd 플래그
 
 ### 확장성
 
