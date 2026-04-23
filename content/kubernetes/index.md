@@ -81,7 +81,7 @@ tags:
 
 ### 서비스 네트워킹
 
-- [ ] Service — ClusterIP·NodePort·LoadBalancer, sessionAffinity
+- [x] [Service](./service-networking/service.md) — ClusterIP·NodePort·LoadBalancer, sessionAffinity
 - [ ] EndpointSlice — 엔드포인트 분할, 대규모 서비스
 - [ ] Headless Service — StatefulSet, 개별 DNS
 - [ ] CoreDNS — 플러그인 체인, 튜닝, NodeLocal DNS
