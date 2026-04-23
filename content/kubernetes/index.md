@@ -93,7 +93,7 @@ tags:
 
 - [x] [PV·PVC](./storage/pv-pvc.md) — 바인딩, reclaim policy, 리사이즈, VolumeAttributesClass
 - [x] [StorageClass](./storage/storageclass.md) — provisioner, volumeBindingMode, default SC, 암호화
-- [ ] CSI Driver — CSI 아키텍처, 주요 드라이버
+- [x] [CSI Driver](./storage/csi-driver.md) — CSI 아키텍처, 사이드카, CSIDriver 리소스, Volume Limits
 - [ ] Volume Snapshot — VolumeSnapshot API, CSI
 - [ ] 분산 스토리지 — Rook-Ceph, Longhorn, OpenEBS
 
