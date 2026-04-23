@@ -104,7 +104,7 @@ tags:
 - [x] [Pod Security Admission](./security/pod-security-admission.md) — baseline·restricted 프로파일
 - [x] [Security Context](./security/security-context.md) — runAsNonRoot, seccomp, capabilities
 - [x] [Secret 암호화](./security/secret-encryption.md) — etcd 암호화, KMS provider
-- [ ] Audit Logging — audit policy, 로그 포워딩
+- [x] [Audit Logging](./security/audit-logging.md) — audit policy, 로그 포워딩
 
 ### 확장성
 
