@@ -3,7 +3,7 @@ title: "Linux"
 sidebar_label: "Linux"
 sidebar_position: 1
 date: 2026-04-18
-last_verified: 2026-04-18
+last_verified: 2026-04-23
 tags:
   - linux
   - index
@@ -36,46 +36,46 @@ tags:
 
 ### 배포판·기본기
 
-- [ ] 배포판 비교 — RHEL·Ubuntu·Alpine·SUSE 계열 비교
-- [ ] FHS — `/usr`, `/var`, `/etc`, `/run` 등 표준 구조
-- [ ] 사용자·그룹·퍼미션 — rwx, SUID/SGID, sticky, ACL
-- [ ] Immutable OS — Talos, Bottlerocket, Flatcar (K8s 노드 OS)
+- [x] [배포판 비교](./distro-basics/linux-distro-comparison.md) — RHEL·Ubuntu·Alpine·SUSE 계열 비교
+- [x] [FHS](./distro-basics/filesystem-hierarchy.md) — `/usr`, `/var`, `/etc`, `/run` 등 표준 구조
+- [x] [사용자·그룹·퍼미션](./distro-basics/user-group-permission.md) — rwx, SUID/SGID, sticky, ACL
+- [x] [Immutable OS](./distro-basics/immutable-os.md) — Talos, Bottlerocket, Flatcar (K8s 노드 OS)
 
 ### 부팅·초기화
 
-- [ ] 부팅 프로세스 — BIOS/UEFI → shim → GRUB → initramfs → systemd
-- [ ] systemd 서비스 관리 — unit, target, cgroup 통합, journald
+- [x] [부팅 프로세스](./boot-init/boot-process.md) — BIOS/UEFI → shim → GRUB → initramfs → systemd
+- [x] [systemd 서비스 관리](./boot-init/systemd.md) — unit, target, cgroup 통합, journald
 
 ### 프로세스·리소스 격리
 
-- [ ] Namespaces — pid, mnt, net, user, ipc, uts, cgroup, time
-- [ ] cgroups — v1 vs v2, CPU/Memory/IO 컨트롤러, PSI
-- [ ] 프로세스·시그널 — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
-- [ ] 리소스 제한 — ulimit, PAM limits, RLIMIT\_\* vs cgroup
+- [x] [Namespaces](./process-isolation/namespaces.md) — pid, mnt, net, user, ipc, uts, cgroup, time
+- [x] [cgroups](./process-isolation/cgroups.md) — v1 vs v2, CPU/Memory/IO 컨트롤러, PSI
+- [x] [프로세스·시그널](./process-isolation/process-management.md) — 상태(R/S/D/Z), fork/exec, SIGTERM/KILL
+- [x] [리소스 제한](./process-isolation/resource-limits.md) — ulimit, PAM limits, RLIMIT\_\* vs cgroup
 
 ### 성능 분석
 
-- [ ] CPU 성능 분석 — USE 방법론, run queue, context switch, perf
-- [ ] 메모리 관리·OOM — MemAvailable, swap, OOM killer, THP
-- [ ] 디스크 I/O 분석 — iostat, I/O scheduler, fsync 병목
-- [ ] eBPF 성능 분석 — bpftrace, BPF CO-RE, Brendan Gregg 툴킷
+- [x] [CPU 성능 분석](./performance/cpu-performance.md) — USE 방법론, run queue, context switch, perf
+- [x] [메모리 관리·OOM](./performance/memory-oom.md) — MemAvailable, swap, OOM killer, THP
+- [x] [디스크 I/O 분석](./performance/disk-io-performance.md) — iostat, I/O scheduler, fsync 병목
+- [x] [eBPF 성능 분석](./performance/ebpf-performance.md) — bpftrace, BPF CO-RE, Brendan Gregg 툴킷
 
 ### 파일시스템·스토리지
 
-- [ ] 파일시스템 — ext4 · XFS · Btrfs · ZFS · EROFS
-- [ ] LVM — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
+- [x] [파일시스템](./filesystem-storage/filesystem-comparison.md) — ext4 · XFS · Btrfs · ZFS · EROFS
+- [x] [LVM](./filesystem-storage/lvm.md) — PV/VG/LV, Thin Pool, 스냅샷, 온라인 확장
 
 ### 보안
 
-- [ ] Capabilities — CAP\_\*, 바운딩·앰비언트·인헤리터블
-- [ ] seccomp-bpf — Mode 1/2, BPF 필터, Docker/K8s 프로파일
-- [ ] AppArmor — 프로파일 기반 MAC (Ubuntu/SUSE)
-- [ ] SELinux — 레이블 기반 MAC (RHEL 계열)
+- [x] [Capabilities](./linux-security/linux-capabilities.md) — CAP\_\*, 바운딩·앰비언트·인헤리터블
+- [x] [seccomp-bpf](./linux-security/seccomp.md) — Mode 1/2, BPF 필터, Docker/K8s 프로파일
+- [x] [AppArmor](./linux-security/apparmor.md) — 프로파일 기반 MAC (Ubuntu/SUSE)
+- [x] [SELinux](./linux-security/selinux.md) — 레이블 기반 MAC (RHEL 계열)
 
 ### 로깅
 
-- [ ] syslog/rsyslog — rsyslog vs journald, 저널 포워딩
-- [ ] 대규모 로그 관리 — 로테이션, 원격 전송, 압축·보존
+- [x] [syslog/rsyslog](./logging/system-logging.md) — rsyslog vs journald, 저널 포워딩
+- [x] [대규모 로그 관리](./logging/log-management.md) — 로테이션, 원격 전송, 압축·보존
 
 ---
 
