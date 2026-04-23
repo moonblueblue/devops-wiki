@@ -116,7 +116,7 @@ tags:
 - [x] [Operator 패턴](./extensibility/operator-pattern.md) — controller-runtime, Level/Edge-driven
 - [x] [Admission Webhook 개발](./extensibility/admission-controllers.md) — Validating·Mutating Webhook 구현 관점
 - [x] [VAP 저작 관점](./extensibility/validating-admission-policy.md) — CEL 문법·파라미터 CRD·테스트
-- [ ] API Aggregation — extension apiserver 패턴
+- [x] [API Aggregation](./extensibility/api-aggregation.md) — extension apiserver 패턴
 - [ ] kro — Kube Resource Orchestrator, ResourceGroups
 
 ### 신뢰성
