@@ -219,6 +219,10 @@ draft: true                  # 스텁 상태. 본문 완성 시 제거
 
 - 페이지 제목 (`title`): 내용을 명확히 설명
 - 사이드바 제목 (`sidebar_label`): 최대 10자
+  - **예외**: 업계 표준 기술 용어·고유명사는 10자를 초과해도 원형 유지 허용
+    (예: `Immutable OS`, `Capabilities`, `seccomp-bpf`, `syslog/rsyslog`, `systemd 서비스 관리`)
+  - 단, 축약이 의미를 훼손하지 않으면 축약을 우선 (예: `systemd-resolved` → `resolved` 불가, `systemd 서비스 관리` → `systemd` 가능)
+  - 사이드바 가로폭을 넘기지 않는 선까지만 허용 (줄바꿈은 여전히 금지)
 - 사이드바에서 줄바꿈 금지
 
 ### 가독성 규칙
