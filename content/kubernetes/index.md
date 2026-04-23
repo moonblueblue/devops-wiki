@@ -99,7 +99,7 @@ tags:
 
 ### 보안
 
-- [ ] [Authentication](./security/authentication.md) — x509·OIDC·Structured Authn·Bootstrap Token
+- [x] [Authentication](./security/authentication.md) — x509·OIDC·Structured Authn·Bootstrap Token
 - [x] [RBAC](./security/rbac.md) — Role·ClusterRole, 최소 권한, RBAC 점검 도구
 - [x] [ServiceAccount](./security/serviceaccount.md) — SA token, bound token, projected
 - [ ] [Admission Controllers](./security/admission-controllers.md) — 내장 admission, VAP, MAP
