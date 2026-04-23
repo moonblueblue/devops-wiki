@@ -75,7 +75,7 @@ tags:
 
 - [x] [HPA](./autoscaling/hpa.md) — 메트릭 소스, 안정화, custom metrics
 - [x] [VPA](./autoscaling/vpa.md) — 모드, Pod Resize(In-Place VPA)
-- [ ] Cluster Autoscaler — 노드 그룹, scale-down, expander
+- [x] [Cluster Autoscaler](./autoscaling/cluster-autoscaler.md) — 노드 그룹, scale-down, expander
 - [ ] Karpenter — NodePool, 통합 최적화, Spot 활용
 - [ ] KEDA — 이벤트 기반 스케일, scaler 목록
 
