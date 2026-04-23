@@ -101,7 +101,7 @@ tags:
 
 - [x] [RBAC](./security/rbac.md) — Role·ClusterRole, 최소 권한, RBAC 점검 도구
 - [x] [ServiceAccount](./security/serviceaccount.md) — SA token, bound token, projected
-- [ ] Pod Security Admission — baseline·restricted 프로파일
+- [x] [Pod Security Admission](./security/pod-security-admission.md) — baseline·restricted 프로파일
 - [ ] Security Context — runAsNonRoot, seccomp, capabilities
 - [ ] Secret 암호화 — etcd 암호화, KMS provider
 - [ ] Audit Logging — audit policy, 로그 포워딩
