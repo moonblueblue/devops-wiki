@@ -115,7 +115,7 @@ tags:
 - [x] [CRD](./extensibility/crd.md) — OpenAPI schema, conversion, 서브리소스
 - [x] [Operator 패턴](./extensibility/operator-pattern.md) — controller-runtime, Level/Edge-driven
 - [x] [Admission Webhook 개발](./extensibility/admission-controllers.md) — Validating·Mutating Webhook 구현 관점
-- [ ] Validating Admission Policy — CEL 기반, Webhook 대비 장단
+- [x] [VAP 저작 관점](./extensibility/validating-admission-policy.md) — CEL 문법·파라미터 CRD·테스트
 - [ ] API Aggregation — extension apiserver 패턴
 - [ ] kro — Kube Resource Orchestrator, ResourceGroups
 
