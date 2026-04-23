@@ -95,7 +95,7 @@ tags:
 - [x] [StorageClass](./storage/storageclass.md) — provisioner, volumeBindingMode, default SC, 암호화
 - [x] [CSI Driver](./storage/csi-driver.md) — CSI 아키텍처, 사이드카, CSIDriver 리소스, Volume Limits
 - [x] [Volume Snapshot](./storage/volume-snapshot.md) — VolumeSnapshot API, GroupSnapshot, 복원·일관성
-- [ ] 분산 스토리지 — Rook-Ceph, Longhorn, OpenEBS
+- [x] [분산 스토리지](./storage/distributed-storage.md) — Rook-Ceph, Longhorn, OpenEBS, 선택·마이그레이션
 
 ### 보안
 
