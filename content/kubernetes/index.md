@@ -102,7 +102,7 @@ tags:
 - [x] [Authentication](./security/authentication.md) — x509·OIDC·Structured Authn·Bootstrap Token
 - [x] [RBAC](./security/rbac.md) — Role·ClusterRole, 최소 권한, RBAC 점검 도구
 - [x] [ServiceAccount](./security/serviceaccount.md) — SA token, bound token, projected
-- [ ] [Admission Controllers](./security/admission-controllers.md) — 내장 admission, VAP, MAP
+- [x] [Admission Controllers](./security/admission-controllers.md) — 내장 admission, VAP, MAP
 - [x] [Pod Security Admission](./security/pod-security-admission.md) — baseline·restricted 프로파일
 - [x] [Security Context](./security/security-context.md) — runAsNonRoot, seccomp, capabilities
 - [ ] [Runtime Class](./security/runtime-class.md) — gVisor·Kata·UserNS 격리 스펙트럼
