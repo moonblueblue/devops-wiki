@@ -91,7 +91,7 @@ tags:
 
 ### 스토리지
 
-- [ ] PV·PVC — 바인딩, reclaim policy, 리사이즈
+- [x] [PV·PVC](./storage/pv-pvc.md) — 바인딩, reclaim policy, 리사이즈, VolumeAttributesClass
 - [ ] StorageClass — provisioner, volumeBindingMode
 - [ ] CSI Driver — CSI 아키텍처, 주요 드라이버
 - [ ] Volume Snapshot — VolumeSnapshot API, CSI
