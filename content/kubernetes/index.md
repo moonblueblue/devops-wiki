@@ -99,7 +99,7 @@ tags:
 
 ### 보안
 
-- [ ] RBAC — Role·ClusterRole, 최소 권한, RBAC 점검 도구
+- [x] [RBAC](./security/rbac.md) — Role·ClusterRole, 최소 권한, RBAC 점검 도구
 - [ ] ServiceAccount — SA token, bound token, projected
 - [ ] Pod Security Admission — baseline·restricted 프로파일
 - [ ] Security Context — runAsNonRoot, seccomp, capabilities
