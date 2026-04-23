@@ -121,7 +121,7 @@ tags:
 
 ### 신뢰성
 
-- [ ] PDB — PodDisruptionBudget 설계
+- [x] [PDB](./reliability/pdb.md) — PodDisruptionBudget 설계
 - [ ] Graceful Shutdown — preStop, terminationGracePeriod
 - [ ] Eviction — API-initiated, 노드 드레인, DisruptionTarget
 
