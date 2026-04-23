@@ -87,7 +87,7 @@ tags:
 - [x] [CoreDNS](./service-networking/coredns.md) — 플러그인 체인, 튜닝, NodeLocal DNS
 - [x] [Ingress](./service-networking/ingress.md) — Ingress API, EOL 흐름, 컨트롤러 비교
 - [x] [Gateway API](./service-networking/gateway-api.md) — GAMMA, HTTPRoute, 마이그레이션 경로
-- [ ] Network Policy — Calico·Cilium 구현 차이, default deny
+- [x] [Network Policy](./service-networking/network-policy.md) — Calico·Cilium 구현 차이, default deny
 
 ### 스토리지
 
