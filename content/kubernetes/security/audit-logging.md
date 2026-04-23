@@ -1,7 +1,7 @@
 ---
 title: "Audit Logging"
 sidebar_label: "Audit"
-sidebar_position: 6
+sidebar_position: 9
 date: 2026-04-18
 last_verified: 2026-04-23
 tags:

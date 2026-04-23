@@ -1,7 +1,7 @@
 ---
 title: "RBAC"
 sidebar_label: "RBAC"
-sidebar_position: 1
+sidebar_position: 2
 date: 2026-04-18
 last_verified: 2026-04-23
 tags:

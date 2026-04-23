@@ -1,7 +1,7 @@
 ---
 title: "Secret 암호화"
 sidebar_label: "Secret 암호화"
-sidebar_position: 5
+sidebar_position: 8
 date: 2026-04-18
 last_verified: 2026-04-23
 tags:

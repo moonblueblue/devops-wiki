@@ -1,7 +1,7 @@
 ---
 title: "Pod Security Admission"
 sidebar_label: "PSA"
-sidebar_position: 3
+sidebar_position: 5
 date: 2026-04-18
 last_verified: 2026-04-23
 tags:

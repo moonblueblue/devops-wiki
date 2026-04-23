@@ -1,7 +1,7 @@
 ---
 title: "Security Context"
 sidebar_label: "SecContext"
-sidebar_position: 4
+sidebar_position: 6
 date: 2026-04-18
 last_verified: 2026-04-23
 tags:
