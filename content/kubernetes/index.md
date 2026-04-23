@@ -73,7 +73,7 @@ tags:
 
 ### 오토스케일링
 
-- [ ] HPA — 메트릭 소스, 안정화, custom metrics
+- [x] [HPA](./autoscaling/hpa.md) — 메트릭 소스, 안정화, custom metrics
 - [ ] VPA — 모드, Pod Resize(In-Place VPA)
 - [ ] Cluster Autoscaler — 노드 그룹, scale-down, expander
 - [ ] Karpenter — NodePool, 통합 최적화, Spot 활용
