@@ -103,7 +103,7 @@ tags:
 - [x] [ServiceAccount](./security/serviceaccount.md) — SA token, bound token, projected
 - [x] [Pod Security Admission](./security/pod-security-admission.md) — baseline·restricted 프로파일
 - [x] [Security Context](./security/security-context.md) — runAsNonRoot, seccomp, capabilities
-- [ ] Secret 암호화 — etcd 암호화, KMS provider
+- [x] [Secret 암호화](./security/secret-encryption.md) — etcd 암호화, KMS provider
 - [ ] Audit Logging — audit policy, 로그 포워딩
 
 ### 확장성
