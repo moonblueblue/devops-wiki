@@ -84,7 +84,7 @@ tags:
 - [x] [Service](./service-networking/service.md) — ClusterIP·NodePort·LoadBalancer, sessionAffinity
 - [x] [EndpointSlice](./service-networking/endpointslice.md) — 엔드포인트 분할, 대규모 서비스
 - [x] [Headless Service](./service-networking/headless-service.md) — StatefulSet, 개별 DNS
-- [ ] CoreDNS — 플러그인 체인, 튜닝, NodeLocal DNS
+- [x] [CoreDNS](./service-networking/coredns.md) — 플러그인 체인, 튜닝, NodeLocal DNS
 - [ ] Ingress — Ingress API, EOL 흐름, 컨트롤러 비교
 - [ ] Gateway API — GAMMA, HTTPRoute, 마이그레이션 경로
 - [ ] Network Policy — Calico·Cilium 구현 차이, default deny
