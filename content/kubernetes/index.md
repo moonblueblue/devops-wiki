@@ -112,7 +112,7 @@ tags:
 
 ### 확장성
 
-- [ ] CRD — OpenAPI schema, conversion, 서브리소스
+- [x] [CRD](./extensibility/crd.md) — OpenAPI schema, conversion, 서브리소스
 - [ ] Operator 패턴 — controller-runtime, Level/Edge-driven
 - [ ] Admission Controller — Validating·Mutating Webhook
 - [ ] Validating Admission Policy — CEL 기반, Webhook 대비 장단
