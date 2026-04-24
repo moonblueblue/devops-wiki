@@ -124,6 +124,7 @@ tags:
 - [x] [PDB](./reliability/pdb.md) — PodDisruptionBudget 설계
 - [x] [Graceful Shutdown](./reliability/graceful-shutdown.md) — preStop, terminationGracePeriod
 - [x] [Eviction](./reliability/eviction.md) — API-initiated, 노드 드레인, DisruptionTarget
+- [x] [Pod Failure·Backoff](./reliability/pod-failure-backoff.md) — restartPolicy, CrashLoopBackOff, Job backoffLimit, PodFailurePolicy
 
 ### 클러스터 구축
 
