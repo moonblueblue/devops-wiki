@@ -71,7 +71,7 @@ tags:
 - [x] [ArgoCD 운영](argocd/argocd-operations.md) — upgrade, backup, DR
 - [x] [ArgoCD 고급](argocd/argocd-advanced.md) — PreDelete Hooks, Shallow Git Clone (3.3), Agent
 - [x] [Notifications](argocd/argocd-notifications.md) — 알림 설정, Webhook 연동
-- [ ] [Image Updater](argocd/argocd-image-updater.md) — 이미지 태그 자동 감지, Git 반영
+- [x] [Image Updater](argocd/argocd-image-updater.md) — 이미지 태그 자동 감지, Git 반영
 
 ### Flux (GitOps)
 
