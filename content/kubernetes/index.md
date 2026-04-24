@@ -139,7 +139,7 @@ tags:
 
 ### 백업·복구
 
-- [ ] etcd 백업 — snapshot, restore, 정기성
+- [x] [etcd 백업](./backup-recovery/etcd-backup.md) — snapshot, restore, 정기성
 - [ ] Velero — 백업 전략, DR 테스트
 - [ ] 재해 복구 — 리전 장애, PITR
 
