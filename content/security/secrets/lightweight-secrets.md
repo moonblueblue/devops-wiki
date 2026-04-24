@@ -1,6 +1,6 @@
 ---
-title: "IAM 기본"
-sidebar_label: "IAM 기본"
+title: "경량 시크릿 도구 (Sealed Secrets·SOPS)"
+sidebar_label: "경량 시크릿"
 sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# IAM 기본
+# 경량 시크릿 도구 (Sealed Secrets·SOPS)
 
 > 🚧 작성 예정
 

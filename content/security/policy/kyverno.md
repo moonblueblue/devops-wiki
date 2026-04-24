@@ -1,6 +1,6 @@
 ---
-title: "포스트 양자 암호"
-sidebar_label: "PQ 암호"
+title: "Kyverno"
+sidebar_label: "Kyverno"
 sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# 포스트 양자 암호
+# Kyverno
 
 > 🚧 작성 예정
 
