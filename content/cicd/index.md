@@ -55,7 +55,7 @@ tags:
 ### Jenkins
 
 - [x] [Jenkins 기본](jenkins/jenkins-basics.md) — controller/agent, JCasC
-- [ ] [Jenkins Pipeline](jenkins/jenkins-pipeline.md) — Jenkinsfile, declarative vs scripted, shared library, K8s 플러그인
+- [x] [Jenkins Pipeline](jenkins/jenkins-pipeline.md) — Jenkinsfile, declarative vs scripted, shared library, K8s 플러그인
 
 ### K8s 네이티브 CI/CD
 
