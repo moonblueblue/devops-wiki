@@ -39,7 +39,7 @@ tags:
 - [x] [Pipeline as Code](concepts/pipeline-as-code.md) — 선언적 파이프라인, 버전 관리 가치
 - [x] [배포 전략](concepts/deployment-strategies.md) — Blue/Green · Canary · Rolling · Shadow · A/B
 - [x] [GitOps 개념](concepts/gitops-concepts.md) — OpenGitOps 원칙, pull vs push
-- [ ] [DORA 메트릭](concepts/dora-metrics.md) — Lead time, Change failure rate, MTTR, Deployment frequency
+- [x] [DORA 메트릭](concepts/dora-metrics.md) — Lead time, Change failure rate, MTTR, Deployment frequency
 
 ### GitHub Actions
 
