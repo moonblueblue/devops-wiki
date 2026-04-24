@@ -123,7 +123,7 @@ tags:
 
 - [x] [PDB](./reliability/pdb.md) — PodDisruptionBudget 설계
 - [x] [Graceful Shutdown](./reliability/graceful-shutdown.md) — preStop, terminationGracePeriod
-- [ ] Eviction — API-initiated, 노드 드레인, DisruptionTarget
+- [x] [Eviction](./reliability/eviction.md) — API-initiated, 노드 드레인, DisruptionTarget
 
 ### 클러스터 구축
 
