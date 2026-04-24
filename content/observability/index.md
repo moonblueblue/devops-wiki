@@ -39,7 +39,7 @@ tags:
 
 - [x] [관측성 개념](concepts/observability-concepts.md) — 3 Pillars → 4 Signals, Charity Majors의 관측성 정의 통합
 - [x] [Semantic Conventions](concepts/semantic-conventions.md) — OTel 표준 속성, 일관성의 가치
-- [ ] [Exemplars](concepts/exemplars.md) — 메트릭→트레이스 연결, OpenMetrics
+- [x] [Exemplars](concepts/exemplars.md) — 메트릭→트레이스 연결, OpenMetrics
 - [ ] [APM과 관측성](concepts/apm-overview.md) — APM 용어 정리, OTel 시대로의 수렴
 
 ### Prometheus
