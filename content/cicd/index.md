@@ -50,7 +50,7 @@ tags:
 
 ### GitLab CI
 
-- [ ] [GitLab CI](gitlab-ci/gitlab-ci.md) — pipeline 구조, stages, runners, parent-child, dynamic, environments
+- [x] [GitLab CI](gitlab-ci/gitlab-ci.md) — pipeline 구조, stages, runners, parent-child, dynamic, environments
 
 ### Jenkins
 
