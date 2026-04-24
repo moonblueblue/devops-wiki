@@ -154,7 +154,7 @@ tags:
 ### 멀티테넌시·멀티클러스터
 
 - [x] [멀티테넌시 개요](./multi-tenancy/multi-tenancy-overview.md) — hard vs soft, 적합 모델 선택
-- [ ] vCluster·Capsule — 가상 클러스터 vs 네임스페이스 오케스트레이션
+- [x] [vCluster·Capsule](./multi-tenancy/vcluster-capsule.md) — 가상 클러스터 vs 네임스페이스 오케스트레이션
 - [ ] 멀티클러스터 패턴 — Karmada, Fleet, Cluster API
 
 ### 관리 도구
