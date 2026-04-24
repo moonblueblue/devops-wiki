@@ -68,7 +68,7 @@ tags:
 - [x] [ArgoCD App](argocd/argocd-apps.md) — Application, ApplicationSet, generator
 - [x] [ArgoCD 프로젝트](argocd/argocd-projects.md) — AppProject, SSO/RBAC
 - [x] [ArgoCD Sync](argocd/argocd-sync.md) — sync policy, hooks, pruning
-- [ ] [ArgoCD 운영](argocd/argocd-operations.md) — upgrade, backup, DR
+- [x] [ArgoCD 운영](argocd/argocd-operations.md) — upgrade, backup, DR
 - [ ] [ArgoCD 고급](argocd/argocd-advanced.md) — PreDelete Hooks, Shallow Git Clone (3.3), Agent
 - [ ] [Notifications](argocd/argocd-notifications.md) — 알림 설정, Webhook 연동
 - [ ] [Image Updater](argocd/argocd-image-updater.md) — 이미지 태그 자동 감지, Git 반영
