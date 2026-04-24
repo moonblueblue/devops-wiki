@@ -127,7 +127,7 @@ tags:
 
 ### 클러스터 구축
 
-- [ ] 클러스터 구축 방법 — kubeadm, Kubespray, RKE2, managed
+- [x] [클러스터 구축 방법](./cluster-setup/cluster-setup-methods.md) — kubeadm, Kubespray, RKE2, managed
 - [ ] HA 클러스터 설계 — etcd 토폴로지, multi-AZ
 - [ ] 경량 K8s — k3s, k0s, MicroK8s
 
