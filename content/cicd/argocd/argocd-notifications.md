@@ -1,6 +1,6 @@
 ---
-title: "GitLab CI 기본"
-sidebar_label: "GitLab 기본"
+title: "ArgoCD Notifications·Webhook"
+sidebar_label: "Notifications"
 sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# GitLab CI 기본
+# ArgoCD Notifications·Webhook
 
 > 🚧 작성 예정
 

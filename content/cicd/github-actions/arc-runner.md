@@ -1,7 +1,7 @@
 ---
-title: "Artifactory"
-sidebar_label: "Artifactory"
-sidebar_position: 2
+title: "ARC (Actions Runner Controller)"
+sidebar_label: "ARC 러너"
+sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
 tags:
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# Artifactory
+# ARC (Actions Runner Controller)
 
 > 🚧 작성 예정
 

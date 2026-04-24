@@ -1,7 +1,7 @@
 ---
-title: "Contract 테스트"
-sidebar_label: "Contract"
-sidebar_position: 2
+title: "GitLab CI/CD"
+sidebar_label: "GitLab CI"
+sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
 tags:
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# Contract 테스트
+# GitLab CI/CD
 
 > 🚧 작성 예정
 

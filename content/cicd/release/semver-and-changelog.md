@@ -1,7 +1,7 @@
 ---
-title: "Jenkinsfile"
-sidebar_label: "Jenkinsfile"
-sidebar_position: 2
+title: "SemVer와 Changelog 자동화"
+sidebar_label: "SemVer·Changelog"
+sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
 tags:
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# Jenkinsfile
+# SemVer와 Changelog 자동화
 
 > 🚧 작성 예정
 

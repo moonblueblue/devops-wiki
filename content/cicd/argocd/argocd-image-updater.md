@@ -1,7 +1,7 @@
 ---
-title: "Dagger"
-sidebar_label: "Dagger"
-sidebar_position: 3
+title: "ArgoCD Image Updater"
+sidebar_label: "Image Updater"
+sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
 tags:
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# Dagger
+# ArgoCD Image Updater
 
 > 🚧 작성 예정
 

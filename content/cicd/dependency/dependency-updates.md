@@ -1,7 +1,7 @@
 ---
-title: "Flux Kustomize"
-sidebar_label: "Flux Kustomize"
-sidebar_position: 2
+title: "의존성 자동 업데이트 (Renovate·Dependabot)"
+sidebar_label: "의존성 업데이트"
+sidebar_position: 1
 date: 2026-04-18
 last_verified: 2026-04-18
 tags:
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# Flux Kustomize
+# 의존성 자동 업데이트 (Renovate·Dependabot)
 
 > 🚧 작성 예정
 

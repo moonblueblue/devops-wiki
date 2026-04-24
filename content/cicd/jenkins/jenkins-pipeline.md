@@ -1,7 +1,7 @@
 ---
-title: "리포 구조"
-sidebar_label: "리포 구조"
-sidebar_position: 4
+title: "Jenkins 파이프라인 (Jenkinsfile·K8s 플러그인)"
+sidebar_label: "Jenkins Pipeline"
+sidebar_position: 2
 date: 2026-04-18
 last_verified: 2026-04-18
 tags:
@@ -9,7 +9,7 @@ tags:
 draft: true
 ---
 
-# 리포 구조
+# Jenkins 파이프라인 (Jenkinsfile·K8s 플러그인)
 
 > 🚧 작성 예정
 
