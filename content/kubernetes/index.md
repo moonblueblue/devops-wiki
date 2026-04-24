@@ -134,7 +134,7 @@ tags:
 ### 업그레이드·운영
 
 - [x] [클러스터 업그레이드](./upgrade-ops/cluster-upgrade.md) — skip version 금지, skew 정책
-- [ ] 노드 유지보수 — drain, cordon, surge
+- [x] [노드 유지보수](./upgrade-ops/node-maintenance.md) — drain, cordon, surge
 - [ ] Version Skew — 컴포넌트별 허용 범위
 
 ### 백업·복구
