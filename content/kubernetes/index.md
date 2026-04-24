@@ -160,7 +160,7 @@ tags:
 ### 관리 도구
 
 - [x] [kubectl 팁](./tools/kubectl-tips.md) — context, jsonpath, debug, krew
-- [ ] Helm — 차트 구조, values, subchart, OCI
+- [x] [Helm](./tools/helm.md) — 차트 구조, values, subchart, OCI
 - [ ] Kustomize — base/overlay, patch, generator
 
 ### 특수 워크로드
