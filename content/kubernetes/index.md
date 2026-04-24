@@ -176,7 +176,7 @@ tags:
 
 ### 비용 (FinOps 통합)
 
-- [ ] Kubecost·OpenCost — 네임스페이스·워크로드별 비용 분석
+- [x] [Kubecost·OpenCost](./cost/kubecost-opencost.md) — 네임스페이스·워크로드별 비용 분석
 
 ### 릴리스 추적
 
