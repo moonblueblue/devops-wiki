@@ -147,7 +147,7 @@ tags:
 
 - [x] [Pod 디버깅](./troubleshooting/pod-debugging.md) — CrashLoopBackOff, ImagePullBackOff, OOMKilled
 - [x] [etcd 트러블슈팅](./troubleshooting/etcd-troubleshooting.md) — 성능, 조각화, defrag
-- [ ] 컨트롤 플레인 장애 — API server 장애, 증상·복구
+- [x] [컨트롤 플레인 장애](./troubleshooting/control-plane-failure.md) — API server 장애, 증상·복구
 - [ ] K8s 에러 메시지 — 자주 보는 에러 해석
 - [ ] Finalizer Stuck — 리소스 삭제 불가 증상
 
