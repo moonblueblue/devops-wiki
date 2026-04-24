@@ -129,7 +129,7 @@ tags:
 
 - [x] [클러스터 구축 방법](./cluster-setup/cluster-setup-methods.md) — kubeadm, Kubespray, RKE2, managed
 - [x] [HA 클러스터 설계](./cluster-setup/ha-cluster-design.md) — etcd 토폴로지, multi-AZ
-- [ ] 경량 K8s — k3s, k0s, MicroK8s
+- [x] [경량 K8s](./cluster-setup/lightweight-k8s.md) — k3s, k0s, MicroK8s
 
 ### 업그레이드·운영
 
