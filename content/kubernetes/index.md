@@ -165,7 +165,7 @@ tags:
 
 ### 특수 워크로드
 
-- [ ] GPU 스케줄링 — NVIDIA device plugin, MIG, time-slicing
+- [x] [GPU 스케줄링](./special-workloads/gpu-scheduling.md) — NVIDIA device plugin, MIG, time-slicing
 - [ ] 배치 워크로드 — Kueue, JobSet, queueing
 
 ### AI/ML 워크로드
