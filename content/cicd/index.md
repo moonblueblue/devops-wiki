@@ -112,7 +112,7 @@ tags:
 ### 실전 패턴
 
 - [x] [모노레포 CI/CD](patterns/monorepo-cicd.md) — Bazel, Nx, affected 감지, 모노/폴리레포 구조
-- [ ] [파이프라인 템플릿](patterns/pipeline-templates.md) — 재사용 가능한 템플릿 설계
+- [x] [파이프라인 템플릿](patterns/pipeline-templates.md) — 재사용 가능한 템플릿 설계
 
 ---
 
