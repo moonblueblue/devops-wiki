@@ -171,7 +171,7 @@ tags:
 ### AI/ML 워크로드
 
 - [x] [AI 워크로드 스케줄링](./ai-ml/ai-workload-scheduling.md) — Volcano·KAI·Koordinator·Kueue, Gang, TAS, InferencePool
-- [ ] DRA — Dynamic Resource Allocation, structured parameters
+- [x] [DRA](./ai-ml/dra.md) — Dynamic Resource Allocation, Structured Parameters, ComputeDomain
 - [ ] LWS·JobSet — LeaderWorkerSet, JobSet, 분산 학습
 
 ### 비용 (FinOps 통합)
