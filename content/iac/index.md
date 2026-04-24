@@ -37,7 +37,7 @@ tags:
 
 ### 개념
 
-- [ ] [IaC 개요](concepts/iac-overview.md) — Declarative vs Imperative, 전제 조건
+- [x] [IaC 개요](concepts/iac-overview.md) — Declarative vs Imperative, 전제 조건
 - [ ] [State 관리](concepts/state-management.md) — state 저장소, lock, 원격 백엔드, drift 감지 포함
 
 ### Terraform / OpenTofu
