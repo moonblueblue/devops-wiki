@@ -37,10 +37,10 @@ tags:
 
 ### 개념
 
-- [ ] [3 Pillars vs Signals](concepts/three-pillars-vs-signals.md) — 3 Pillars → 4 Signals (프로파일 포함)
-- [ ] [관측성 vs 모니터링](concepts/observability-vs-monitoring.md) — 관측성의 정의, Charity Majors
+- [ ] [관측성 개념](concepts/observability-concepts.md) — 3 Pillars → 4 Signals, Charity Majors의 관측성 정의 통합
 - [ ] [Semantic Conventions](concepts/semantic-conventions.md) — OTel 표준 속성, 일관성의 가치
 - [ ] [Exemplars](concepts/exemplars.md) — 메트릭→트레이스 연결, OpenMetrics
+- [ ] [APM과 관측성](concepts/apm-overview.md) — APM 용어 정리, OTel 시대로의 수렴
 
 ### Prometheus
 
@@ -61,8 +61,7 @@ tags:
 - [ ] [Loki](logging/loki.md) — 인덱싱 철학, 비용, chunk·label 전략
 - [ ] [Elastic Stack](logging/elastic-stack.md) — Elasticsearch·Kibana·Logstash 현실적 운영
 - [ ] [로그 파이프라인](logging/log-pipeline.md) — Vector·Fluent Bit·OTel Collector 비교
-- [ ] [로그 샘플링](logging/log-sampling.md) — 우선순위 기반, rate limiting
-- [ ] [로그 구조화](logging/log-structured.md) — JSON 구조화, 필드 표준
+- [ ] [로그 운영 정책](logging/log-operations.md) — JSON 구조화·필드 표준·우선순위 샘플링·Rate Limiting
 
 ### 트레이싱
 
@@ -73,8 +72,7 @@ tags:
 
 ### 프로파일링
 
-- [ ] [OTel Profiles](profiling/otel-profiles.md) — Public Alpha (2026), 도입 전략
-- [ ] [Pyroscope·Parca](profiling/pyroscope.md) — 연속 프로파일링, flame graph 분석
+- [ ] [연속 프로파일링](profiling/continuous-profiling.md) — Pyroscope·Parca 현재 구현 + OTel Profiles(Public Alpha 2026) 통합
 
 ### 클라우드 네이티브 스택
 
@@ -98,10 +96,9 @@ tags:
 
 ### 알림
 
-- [ ] [알림 전략](alerting/alerting-strategy.md) — Symptom vs Cause, 알림 설계 원칙
+- [ ] [알림 설계·피로 감축](alerting/alerting-design.md) — Symptom vs Cause 설계 + 피로 감축 전략 통합
 - [ ] [Multi-window 알림](alerting/multi-window-alerting.md) — 빠른 감지 + 긴 창 조합
 - [ ] [SLO 알림](alerting/slo-alerting.md) — Burn Rate 기반, 에러 버짓 소진률
-- [ ] [알림 피로](alerting/alert-fatigue.md) — 감축 전략, SRE 워크북
 - [ ] [Grafana OnCall](alerting/grafana-oncall.md) — 알림 라우팅, 온콜 스케줄링
 
 ### Synthetic 모니터링
