@@ -145,7 +145,7 @@ tags:
 
 ### 트러블슈팅
 
-- [ ] Pod 디버깅 — CrashLoopBackOff, ImagePullBackOff, OOMKilled
+- [x] [Pod 디버깅](./troubleshooting/pod-debugging.md) — CrashLoopBackOff, ImagePullBackOff, OOMKilled
 - [ ] etcd 트러블슈팅 — 성능, 조각화, defrag
 - [ ] 컨트롤 플레인 장애 — API server 장애, 증상·복구
 - [ ] K8s 에러 메시지 — 자주 보는 에러 해석
