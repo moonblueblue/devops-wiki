@@ -1,7 +1,7 @@
 ---
 title: "Observability"
 sidebar_label: "Observability"
-sidebar_position: 5
+sidebar_position: 6
 date: 2026-04-18
 last_verified: 2026-04-24
 tags:

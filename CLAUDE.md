@@ -41,8 +41,8 @@ DevOps 엔지니어를 위한 **글로벌 스탠다드 공개 기술 위키**.
 | 02 | `network/` | 서브 | TCP/IP, DNS, TLS, 라우팅, LB |
 | 03 | `container/` | 서브 | Docker, OCI, BuildKit, 런타임 |
 | 04 | `kubernetes/` | 메인 | 아키텍처, 리소스, 스케줄링, 운영 |
-| 05 | `observability/` | 메인 | 메트릭, 로그, 트레이스, SLO 도구 |
-| 06 | `cicd/` | 메인 | GitHub Actions, Jenkins, ArgoCD, Flux |
+| 05 | `cicd/` | 메인 | GitHub Actions, Jenkins, ArgoCD, Flux |
+| 06 | `observability/` | 메인 | 메트릭, 로그, 트레이스, SLO 도구 |
 | 07 | `iac/` | 성장 | Terraform, Ansible, Crossplane |
 | 08 | `security/` | 성장 | DevSecOps, 공급망, Zero Trust |
 | 09 | `sre/` | 성장 | SLO, 포스트모템, 런북, 카오스 |

@@ -1,6 +1,6 @@
 {
-  "label": "06. CI/CD",
-  "position": 6,
+  "label": "05. CI/CD",
+  "position": 5,
   "link": {
     "type": "doc",
     "id": "index"

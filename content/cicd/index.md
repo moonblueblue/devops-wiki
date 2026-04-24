@@ -1,7 +1,7 @@
 ---
 title: "CI/CD"
 sidebar_label: "CI/CD"
-sidebar_position: 6
+sidebar_position: 5
 date: 2026-04-18
 last_verified: 2026-04-24
 tags:
