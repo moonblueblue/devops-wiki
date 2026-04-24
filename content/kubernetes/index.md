@@ -172,7 +172,7 @@ tags:
 
 - [x] [AI 워크로드 스케줄링](./ai-ml/ai-workload-scheduling.md) — Volcano·KAI·Koordinator·Kueue, Gang, TAS, InferencePool
 - [x] [DRA](./ai-ml/dra.md) — Dynamic Resource Allocation, Structured Parameters, ComputeDomain
-- [ ] LWS·JobSet — LeaderWorkerSet, JobSet, 분산 학습
+- [x] [LWS·JobSet](./ai-ml/lws-jobset.md) — LeaderWorkerSet, JobSet, 분산 학습·추론
 
 ### 비용 (FinOps 통합)
 
