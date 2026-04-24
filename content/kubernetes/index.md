@@ -141,7 +141,7 @@ tags:
 
 - [x] [etcd 백업](./backup-recovery/etcd-backup.md) — snapshot, restore, 정기성
 - [x] [Velero](./backup-recovery/velero.md) — 백업 전략, DR 테스트
-- [ ] 재해 복구 — 리전 장애, PITR
+- [x] [재해 복구](./backup-recovery/disaster-recovery.md) — 리전 장애, PITR
 
 ### 트러블슈팅
 
