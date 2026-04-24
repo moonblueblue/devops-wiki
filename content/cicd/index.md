@@ -66,7 +66,7 @@ tags:
 
 - [x] [ArgoCD 설치](argocd/argocd-install.md) — HA 구성, 프로젝트 분리
 - [x] [ArgoCD App](argocd/argocd-apps.md) — Application, ApplicationSet, generator
-- [ ] [ArgoCD 프로젝트](argocd/argocd-projects.md) — AppProject, SSO/RBAC
+- [x] [ArgoCD 프로젝트](argocd/argocd-projects.md) — AppProject, SSO/RBAC
 - [ ] [ArgoCD Sync](argocd/argocd-sync.md) — sync policy, hooks, pruning
 - [ ] [ArgoCD 운영](argocd/argocd-operations.md) — upgrade, backup, DR
 - [ ] [ArgoCD 고급](argocd/argocd-advanced.md) — PreDelete Hooks, Shallow Git Clone (3.3), Agent
