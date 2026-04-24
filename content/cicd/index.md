@@ -59,7 +59,7 @@ tags:
 
 ### K8s 네이티브 CI/CD
 
-- [ ] [Tekton](k8s-native/tekton.md) — Task·Pipeline·Trigger, CEL
+- [x] [Tekton](k8s-native/tekton.md) — Task·Pipeline·Trigger, CEL
 - [ ] [Argo Workflows](k8s-native/argo-workflows.md) — DAG, artifact, 이벤트 트리거
 
 ### ArgoCD (GitOps)
