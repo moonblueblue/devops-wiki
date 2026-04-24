@@ -84,8 +84,8 @@ displayed_sidebar: wikiSidebar
 | 02  | 서브 | [Network](network/index.md)             | TCP/IP, DNS, TLS, 라우팅, LB          |
 | 03  | 서브 | [Container](container/index.md)         | Docker, OCI, BuildKit, 런타임         |
 | 04  | 메인 | [Kubernetes](kubernetes/index.md)       | 아키텍처, 리소스, 스케줄링, 운영 전반 |
-| 05  | 메인 | [Observability](observability/index.md) | 메트릭, 로그, 트레이스, SLO 도구      |
-| 06  | 메인 | [CI/CD](cicd/index.md)                  | GitHub Actions, Jenkins, ArgoCD, Flux |
+| 05  | 메인 | [CI/CD](cicd/index.md)                  | GitHub Actions, Jenkins, ArgoCD, Flux |
+| 06  | 메인 | [Observability](observability/index.md) | 메트릭, 로그, 트레이스, SLO 도구      |
 | 07  | 성장 | [IaC](iac/index.md)                     | Terraform, Ansible, Crossplane        |
 | 08  | 성장 | [Security](security/index.md)           | DevSecOps, 공급망, Zero Trust         |
 | 09  | 성장 | [SRE](sre/index.md)                     | SLO, 포스트모템, 런북                 |
