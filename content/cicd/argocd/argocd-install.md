@@ -293,7 +293,8 @@ repo-server HPA를 크게 잡을수록 **Git provider rate limit**이 병목이
 
 - **GitHub App 기반 인증** (PAT 대신) — 속도 제한 3배
 - **Webhook** 으로 polling 간격 늘리기 (`timeout.reconciliation: 3m` → `10m`)
-- **Shallow clone** (3.3+ 기본 활성) — `reposerver.git.shallow-clone`
+- **Shallow clone** (3.3+ **opt-in**) — `argocd repo add <url> --depth N`
+  으로 활성. 기본은 full clone. 상세는 [ArgoCD 고급 §3](./argocd-advanced.md)
 - **repo cache 튜닝** — `reposerver.git.lsfiles.cache` 크기 증가
 - **Pull Request Generator** 는 webhook 전환 필수 (polling이면 리밋 즉시 소진)
 
