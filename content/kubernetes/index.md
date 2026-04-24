@@ -19,14 +19,14 @@ tags:
 
 ## 학습 경로
 
-```
-아키텍처   Control Plane · etcd · Reconciliation
-리소스     Workloads · Config · Network · Storage
-스케줄링   Scheduler · Affinity · Autoscaling
-운영       Security · Upgrade · Backup · Troubleshooting
-확장       CRD · Operator · Admission · Multi-cluster
-비용       Kubecost · OpenCost (FinOps 통합)
-```
+| 단계 | 영역 | 핵심 주제 |
+|:-:|---|---|
+| 1 | 아키텍처 | Control Plane · etcd · Reconciliation |
+| 2 | 리소스 | Workloads · Config · Network · Storage |
+| 3 | 스케줄링 | Scheduler · Affinity · Autoscaling |
+| 4 | 운영 | Security · Upgrade · Backup · Troubleshooting |
+| 5 | 확장 | CRD · Operator · Admission · Multi-cluster |
+| 6 | 비용 | Kubecost · OpenCost (FinOps 통합) |
 
 ---
 

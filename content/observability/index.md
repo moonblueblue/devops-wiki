@@ -20,16 +20,16 @@ tags:
 
 ## 학습 경로
 
-| 단계 | 주제 |
-|---|---|
-| 1 | 개념 (Signals · Semantic Conventions) |
-| 2 | 메트릭 (Prometheus · PromQL · Storage · Cardinality) |
-| 3 | 로그 (Loki · Elastic · Pipeline · Structured) |
-| 4 | 트레이스 (OTel · Jaeger/Tempo · Sampling) |
-| 5 | 프로파일 (OTel Profiles · Pyroscope) |
-| 6 | SLO 도구 (Sloth·Pyrra · OpenSLO) |
-| 7 | 알림 (Burn Rate · Multi-window · 경보 피로) |
-| 8 | 운영 (비용 · AIOps) |
+| 단계 | 영역 | 핵심 주제 |
+|:-:|---|---|
+| 1 | 개념 | Signals · Semantic Conventions · APM |
+| 2 | 메트릭 | Prometheus · PromQL · Storage · Cardinality |
+| 3 | 로그 | Loki · Elastic · Pipeline · 운영 정책 |
+| 4 | 트레이스 | OTel · Jaeger/Tempo · Sampling |
+| 5 | 프로파일 | OTel Profiles · Pyroscope |
+| 6 | SLO 도구 | Sloth·Pyrra · OpenSLO |
+| 7 | 알림 | Burn Rate · Multi-window · 경보 피로 |
+| 8 | 운영 | 비용 · AIOps |
 
 ---
 

@@ -22,14 +22,14 @@ tags:
 
 ## 학습 경로
 
-| 단계 | 범위 |
-|---|---|
-| 개념 | IaC 개요 · State 관리 |
-| Terraform | 기초 → State → 모듈 → Providers(온프레) |
-| OpenTofu | Terraform과의 분기 및 마이그레이션 |
-| Ansible | 기본 playbook → 운영 패턴 |
-| K8s-native | Crossplane 중심 |
-| 운영 | IaC 테스트 |
+| 단계 | 영역 | 핵심 주제 |
+|:-:|---|---|
+| 1 | 개념 | IaC 개요 · State 관리 |
+| 2 | Terraform | 기초 · State · 모듈 · Providers(온프레) |
+| 3 | OpenTofu | Terraform과의 분기 · 마이그레이션 |
+| 4 | Ansible | 기본 playbook · 운영 패턴 |
+| 5 | K8s-native | Crossplane 중심 |
+| 6 | 운영 | IaC 테스트 |
 
 ---
 

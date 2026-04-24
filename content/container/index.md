@@ -20,12 +20,12 @@ tags:
 
 ## 학습 경로
 
-```
-개념        컨테이너 vs VM · OCI 표준
-빌드        Dockerfile · BuildKit · 이미지 최적화
-런타임      containerd · runc · 런타임 비교
-레지스트리   Harbor · OCI Artifacts · 서명
-```
+| 단계 | 영역 | 핵심 주제 |
+|:-:|---|---|
+| 1 | 개념 | 컨테이너 vs VM · OCI 표준 |
+| 2 | 빌드 | Dockerfile · BuildKit · 이미지 최적화 |
+| 3 | 런타임 | containerd · runc · 런타임 비교 |
+| 4 | 레지스트리 | Harbor · OCI Artifacts · 서명 |
 
 ---
 

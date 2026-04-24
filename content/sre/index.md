@@ -23,7 +23,7 @@ tags:
 
 ## 학습 경로
 
-| 단계 | 주제 | 핵심 질문 |
+| 단계 | 영역 | 핵심 주제 |
 |:-:|---|---|
 | 1 | 원칙 | Google SRE Principles, Toil |
 | 2 | SLO | SLI 선정 → SLO → Burn Rate → Error Budget |

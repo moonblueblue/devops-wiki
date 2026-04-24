@@ -20,14 +20,14 @@ tags:
 
 ## 학습 경로
 
-```
-기본기       OSI · TCP/IP · 패킷 분석
-주소·라우팅  IP · BGP · VLAN
-이름·보안    DNS · TLS · mTLS
-애플리케이션 HTTP/2/3 · LB · Proxy
-현대         CNI · Service Mesh · Post-Quantum
-호스트 도구   iproute2 · firewall · SSH · DNS 설정
-```
+| 단계 | 영역 | 핵심 주제 |
+|:-:|---|---|
+| 1 | 기본기 | OSI · TCP/IP · 패킷 분석 |
+| 2 | 주소·라우팅 | IP · BGP · VLAN |
+| 3 | 이름·보안 | DNS · TLS · mTLS |
+| 4 | 애플리케이션 | HTTP/2/3 · LB · Proxy |
+| 5 | 현대 | CNI · Service Mesh · Post-Quantum |
+| 6 | 호스트 도구 | iproute2 · firewall · SSH · DNS 설정 |
 
 ---
 

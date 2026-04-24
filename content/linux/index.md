@@ -20,6 +20,20 @@ tags:
 
 ---
 
+## 학습 경로
+
+| 단계 | 영역 | 핵심 주제 |
+|:-:|---|---|
+| 1 | 배포판·기본기 | RHEL·Ubuntu·Alpine · FHS · 퍼미션 · Immutable OS |
+| 2 | 부팅·초기화 | systemd · 부팅 프로세스 · journald |
+| 3 | 프로세스·격리 | namespace · cgroup · 시그널 · 리소스 제한 |
+| 4 | 성능 분석 | CPU · 메모리·OOM · 디스크 I/O · eBPF |
+| 5 | 파일시스템·스토리지 | ext4·XFS·Btrfs·ZFS · LVM |
+| 6 | 보안 | Capabilities · seccomp · AppArmor · SELinux |
+| 7 | 로깅 | syslog/rsyslog · 대규모 로그 관리 |
+
+---
+
 ## 메인 카테고리와의 연결
 
 | 이 카테고리의 글                               | 받쳐주는 메인                      |
