@@ -42,7 +42,7 @@ tags:
 
 ### Terraform / OpenTofu
 
-- [ ] [Terraform 기본](terraform/terraform-basics.md) — HCL, provider, resource, module
+- [x] [Terraform 기본](terraform/terraform-basics.md) — HCL, provider, resource, module
 - [ ] [Terraform State](terraform/terraform-state.md) — remote state, workspace, 분할 전략
 - [ ] [Terraform 모듈](terraform/terraform-modules.md) — 재사용 설계, versioning, registry
 - [ ] [Terraform Providers](terraform/terraform-providers.md) — vSphere·OpenStack·Kubernetes·Helm 등 온프레미스 provider 중심
