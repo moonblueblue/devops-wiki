@@ -46,7 +46,7 @@ tags:
 - [x] [GHA 기본](github-actions/gha-basics.md) — workflow, job, step, matrix
 - [x] [GHA 고급](github-actions/gha-advanced.md) — reusable workflow, composite action, caching
 - [x] [ARC 러너](github-actions/arc-runner.md) — Actions Runner Controller, K8s 기반 ephemeral 러너
-- [ ] [GHA 보안](github-actions/gha-security.md) — OIDC, permissions, artifact attestation
+- [x] [GHA 보안](github-actions/gha-security.md) — OIDC, permissions, artifact attestation
 
 ### GitLab CI
 
