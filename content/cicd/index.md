@@ -107,7 +107,7 @@ tags:
 
 ### 릴리스 관리
 
-- [ ] [SemVer·Changelog](release/semver-and-changelog.md) — SemVer, conventional commits, changelog 자동 생성
+- [x] [SemVer·Changelog](release/semver-and-changelog.md) — SemVer, conventional commits, changelog 자동 생성
 
 ### 실전 패턴
 
