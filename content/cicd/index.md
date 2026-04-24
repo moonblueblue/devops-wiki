@@ -99,7 +99,7 @@ tags:
 
 ### 의존성 관리
 
-- [ ] [의존성 업데이트](dependency/dependency-updates.md) — Renovate·Dependabot, 자동 PR, 그룹핑·스케줄, 보안 업데이트
+- [x] [의존성 업데이트](dependency/dependency-updates.md) — Renovate·Dependabot, 자동 PR, 그룹핑·스케줄, 보안 업데이트
 
 ### 테스트 자동화
 
