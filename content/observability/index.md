@@ -3,7 +3,7 @@ title: "Observability"
 sidebar_label: "Observability"
 sidebar_position: 5
 date: 2026-04-18
-last_verified: 2026-04-18
+last_verified: 2026-04-24
 tags:
   - observability
   - index
@@ -11,7 +11,7 @@ tags:
 
 # Observability
 
-> **티어**: 메인 (핵심) — **작성 원칙**: 빠짐없이
+> **티어**: 메인 — **작성 원칙**: DevOps 엔지니어 실무 빈도 기준
 >
 > "보이지 않으면 고칠 수 없다." 장애 대응 = 관측 싸움.
 > 메트릭·로그·트레이스·프로파일 네 신호와 SLO 기반 운영 전반을 다룬다.
@@ -20,15 +20,16 @@ tags:
 
 ## 학습 경로
 
-```
-개념       Signals · Semantic Conventions
-메트릭     Prometheus · PromQL · Storage · Cardinality
-로그       Loki · Elastic · Sampling · Structured
-트레이스    OTel · Jaeger/Tempo · Sampling
-프로파일    OTel Profiles · Pyroscope
-SLO 도구    Sloth · Pyrra · OpenSLO
-알림       Burn Rate · Multi-window · 경보 피로
-```
+| 단계 | 주제 |
+|---|---|
+| 1 | 개념 (Signals · Semantic Conventions) |
+| 2 | 메트릭 (Prometheus · PromQL · Storage · Cardinality) |
+| 3 | 로그 (Loki · Elastic · Pipeline · Structured) |
+| 4 | 트레이스 (OTel · Jaeger/Tempo · Sampling) |
+| 5 | 프로파일 (OTel Profiles · Pyroscope) |
+| 6 | SLO 도구 (Sloth·Pyrra · OpenSLO) |
+| 7 | 알림 (Burn Rate · Multi-window · 경보 피로) |
+| 8 | 운영 (비용 · AIOps) |
 
 ---
 
@@ -36,98 +37,94 @@ SLO 도구    Sloth · Pyrra · OpenSLO
 
 ### 개념
 
-- [ ] 3 Pillars vs Signals — 3 Pillars → 4 Signals (프로파일 포함)
-- [ ] 관측성 vs 모니터링 — 관측성의 정의, Charity Majors
-- [ ] Semantic Conventions — OTel 표준 속성, 일관성의 가치
-- [ ] Exemplars — 메트릭→트레이스 연결, OpenMetrics
+- [ ] [3 Pillars vs Signals](concepts/three-pillars-vs-signals.md) — 3 Pillars → 4 Signals (프로파일 포함)
+- [ ] [관측성 vs 모니터링](concepts/observability-vs-monitoring.md) — 관측성의 정의, Charity Majors
+- [ ] [Semantic Conventions](concepts/semantic-conventions.md) — OTel 표준 속성, 일관성의 가치
+- [ ] [Exemplars](concepts/exemplars.md) — 메트릭→트레이스 연결, OpenMetrics
 
 ### Prometheus
 
-- [ ] Prometheus 아키텍처 — scrape, WAL, HA 전략
-- [ ] PromQL 고급 — rate vs increase, subquery, 함정
-- [ ] Recording Rules — 집계 사전 계산, 쿼리 성능
-- [ ] Remote Write — Receiver, 네트워크 이슈, 중복 제거
-- [ ] Alertmanager — routing, silencing, grouping
+- [ ] [Prometheus 아키텍처](prometheus/prometheus-architecture.md) — scrape, WAL, HA 전략
+- [ ] [PromQL 고급](prometheus/promql-advanced.md) — rate vs increase, subquery, 함정
+- [ ] [Recording Rules](prometheus/recording-rules.md) — 집계 사전 계산, 쿼리 성능
+- [ ] [Remote Write](prometheus/remote-write.md) — Receiver, Agent 모드, 중복 제거
+- [ ] [Alertmanager](prometheus/alertmanager.md) — routing, silencing, grouping
 
 ### 메트릭 장기 저장
 
-- [ ] Mimir·Thanos·Cortex — 비교, 아키텍처, 운영 특성
-- [ ] Exponential Histograms — Native Histograms, cardinality 감소
-- [ ] 카디널리티 관리 — 원인·탐지·제어
+- [ ] [Mimir·Thanos·Cortex·VictoriaMetrics](metric-storage/mimir-thanos-cortex.md) — 비교, 아키텍처, 운영 특성
+- [ ] [히스토그램 (Exponential·Native)](metric-storage/exponential-histograms.md) — Prometheus Native Histograms, OTel Exponential
+- [ ] [카디널리티 관리](metric-storage/cardinality-management.md) — 원인·탐지·제어
 
 ### 로깅
 
-- [ ] Loki — 인덱싱 철학, 비용, chunk·label 전략
-- [ ] Elastic Stack — Elasticsearch·Kibana·Logstash 현실적 운영
-- [ ] 로그 샘플링 — 우선순위 기반, rate limiting
-- [ ] 로그 구조화 — JSON 구조화, 필드 표준
+- [ ] [Loki](logging/loki.md) — 인덱싱 철학, 비용, chunk·label 전략
+- [ ] [Elastic Stack](logging/elastic-stack.md) — Elasticsearch·Kibana·Logstash 현실적 운영
+- [ ] [로그 파이프라인](logging/log-pipeline.md) — Vector·Fluent Bit·OTel Collector 비교
+- [ ] [로그 샘플링](logging/log-sampling.md) — 우선순위 기반, rate limiting
+- [ ] [로그 구조화](logging/log-structured.md) — JSON 구조화, 필드 표준
 
 ### 트레이싱
 
-- [ ] Jaeger·Tempo — 비교, 스토리지, 조회 패턴
-- [ ] 샘플링 전략 — Head vs Tail, probabilistic, adaptive
-- [ ] OTel Collector — pipeline, processor, batch/memory
-- [ ] Trace Context — W3C Trace Context, 전파 규격
+- [ ] [Jaeger·Tempo](tracing/jaeger-tempo.md) — 비교, 스토리지, 조회 패턴
+- [ ] [샘플링 전략](tracing/sampling-strategies.md) — Head vs Tail, probabilistic, adaptive
+- [ ] [OTel Collector](tracing/otel-collector.md) — pipeline, processor, batch/memory
+- [ ] [Trace Context](tracing/trace-context.md) — W3C Trace Context, 전파 규격
 
 ### 프로파일링
 
-- [ ] OTel Profiles — Public Alpha (2026), 도입 전략
-- [ ] Pyroscope — 연속 프로파일링, flame graph 분석
-- [ ] 연속 프로파일링 — 프로덕션 오버헤드, Parca
-
-### Grafana 에코시스템
-
-- [ ] Grafana Dashboards — 패널 표준, 변수, 룩앤필
-- [ ] Grafana Alloy — Agent 후속, 구성 패턴
-- [ ] Grafana OnCall — OnCall, 알림 라우팅
+- [ ] [OTel Profiles](profiling/otel-profiles.md) — Public Alpha (2026), 도입 전략
+- [ ] [Pyroscope·Parca](profiling/pyroscope.md) — 연속 프로파일링, flame graph 분석
 
 ### 클라우드 네이티브 스택
 
-- [ ] OpenTelemetry 개요 — SDK·Collector·Spec
-- [ ] Prometheus·OpenTelemetry — 상호 운용, OTLP push
-- [ ] OTel Operator — K8s 자동 계측, instrumentation CR
+- [ ] [OpenTelemetry 개요](cloud-native/opentelemetry-overview.md) — SDK·Collector·Spec
+- [ ] [Prometheus·OpenTelemetry](cloud-native/prometheus-opentelemetry.md) — 상호 운용, OTLP push
+- [ ] [OTel Operator](cloud-native/otel-operator.md) — K8s 자동 계측, instrumentation CR
+
+### Grafana 에코시스템
+
+- [ ] [Grafana Dashboards](grafana/grafana-dashboards.md) — 패널 표준, 변수, 룩앤필
+- [ ] [Grafana Alloy](grafana/grafana-alloy.md) — Agent 후속, 구성 패턴
 
 ### eBPF 관측
 
-- [ ] Hubble — Cilium 관측, 서비스 의존성 맵
-- [ ] Pixie — 자동 계측, Edge 분석
-- [ ] Retina — Microsoft 2024 OSS, 네트워크 관측
+- [ ] [eBPF 관측 (Hubble 중심)](ebpf/ebpf-observability.md) — Cilium Hubble, Pixie·Retina 비교
 
 ### SLO as Code (도구)
 
-- [ ] Sloth — PromQL 기반 SLO 생성
-- [ ] Pyrra — 선언적 SLO, Prometheus Rule
-- [ ] OpenSLO — SLO 명세 표준
+- [ ] [Sloth·Pyrra](slo-as-code/slo-rule-generators.md) — PromQL 기반 SLO 룰 생성 비교
+- [ ] [OpenSLO](slo-as-code/openslo.md) — SLO 명세 표준
 
 ### 알림
 
-- [ ] 알림 전략 — Symptom vs Cause, 알림 설계 원칙
-- [ ] Multi-window 알림 — 빠른 감지 + 긴 창 조합
-- [ ] SLO 알림 — Burn Rate 기반, 에러 버짓 소진률
-- [ ] 알림 피로 — 감축 전략, SRE 워크북
-- [ ] 이상 탐지 — 통계·ML 기반, 함정
+- [ ] [알림 전략](alerting/alerting-strategy.md) — Symptom vs Cause, 알림 설계 원칙
+- [ ] [Multi-window 알림](alerting/multi-window-alerting.md) — 빠른 감지 + 긴 창 조합
+- [ ] [SLO 알림](alerting/slo-alerting.md) — Burn Rate 기반, 에러 버짓 소진률
+- [ ] [알림 피로](alerting/alert-fatigue.md) — 감축 전략, SRE 워크북
+- [ ] [Grafana OnCall](alerting/grafana-oncall.md) — 알림 라우팅, 온콜 스케줄링
 
-### RUM·Synthetic
+### Synthetic 모니터링
 
-- [ ] RUM 기본 — Core Web Vitals, 프라이버시
-- [ ] Synthetic 모니터링 — 경로·지역·주기, 예산
+- [ ] [Synthetic 모니터링](rum-synthetic/synthetic-monitoring.md) — 경로·지역·주기, 예산
 
 ### 비용 운영
 
-- [ ] 관측 비용 — 카디널리티·샘플링으로 비용 관리
-- [ ] 예산 알림 — 관측 비용 초과 경보 (FinOps 통합)
+- [ ] [관측 비용](cost/observability-cost.md) — 카디널리티·샘플링·예산 알림 통합
 
 ### AIOps
 
-- [ ] AIOps 개요 — LLM 기반 RCA, 주의할 함정
+- [ ] [AIOps 개요](aiops/aiops-overview.md) — LLM 기반 RCA, 이상 탐지, 주의할 함정
 
 ---
 
 ## 이 카테고리의 경계
 
 - **SLO 개념·수학** 자체는 `sre/`가 주인공 — 여기는 도구·알림 구현만
+- **알림 도구·규칙**은 여기 — **인시던트 대응 프로세스·포스트모템**은 `sre/`
 - **Feature Flag**는 `cicd/` — 여기는 "카나리 분석의 메트릭"만
 - **보안 감사 로그 전략**은 `security/` — 여기는 "로그 수집·파이프라인"
+- **eBPF 커널 측면**은 `linux/` — 여기는 관측성 응용만
 
 ---
 
