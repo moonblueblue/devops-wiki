@@ -180,7 +180,7 @@ tags:
 
 ### 릴리스 추적
 
-- [ ] Kubernetes 릴리스 개요 — 1.33 ~ 1.36 주요 변경 요약
+- [x] [Kubernetes 릴리스 개요](./release-tracking/kubernetes-release-overview.md) — 1.33 ~ 1.36 주요 변경 요약
 
 ---
 
