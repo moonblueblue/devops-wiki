@@ -118,7 +118,7 @@ DevOps 엔지니어를 위한 **글로벌 스탠다드 공개 기술 위키**.
 - 카테고리 변경 시: index.md 완결성 검수
 - 분기 1회: 전체 뼈대 검수
 
-### commit (PR 없이 `main` 직접 커밋)
+### commit (PR 없이 `main` 직접 커밋 & 푸시까지 진행)
 
 Conventional Commits (subject는 한국어):
 
