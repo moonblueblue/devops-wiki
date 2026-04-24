@@ -103,7 +103,7 @@ tags:
 
 ### 테스트 자동화
 
-- [ ] [테스트 전략](testing/test-strategy.md) — Unit·Integration·E2E·Contract 배분
+- [x] [테스트 전략](testing/test-strategy.md) — Unit·Integration·E2E·Contract 배분
 
 ### 릴리스 관리
 
