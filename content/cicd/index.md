@@ -75,27 +75,27 @@ tags:
 
 ### Flux (GitOps)
 
-- [ ] [Flux 설치](flux/flux-install.md) — Kustomization, 의존성, health check
-- [ ] [Flux Helm](flux/flux-helm.md) — HelmRelease, chart source
+- [x] [Flux 설치](flux/flux-install.md) — Kustomization, 의존성, health check
+- [x] [Flux Helm](flux/flux-helm.md) — HelmRelease, chart source
 
 ### 점진적 배포
 
-- [ ] [Argo Rollouts](progressive-delivery/argo-rollouts.md) — Rollout CR, Analysis, 트래픽 분할
-- [ ] [Flagger](progressive-delivery/flagger.md) — AnalysisTemplate, 자동 판단 로직
-- [ ] [Feature Flag](progressive-delivery/feature-flag.md) — OpenFeature, LaunchDarkly, Flagsmith, Unleash
-- [ ] [트래픽 분할](progressive-delivery/traffic-splitting.md) — Istio·Gateway API·Envoy 연동
+- [x] [Argo Rollouts](progressive-delivery/argo-rollouts.md) — Rollout CR, Analysis, 트래픽 분할
+- [x] [Flagger](progressive-delivery/flagger.md) — AnalysisTemplate, 자동 판단 로직
+- [x] [Feature Flag](progressive-delivery/feature-flag.md) — OpenFeature, LaunchDarkly, Flagsmith, Unleash
+- [x] [트래픽 분할](progressive-delivery/traffic-splitting.md) — Istio·Gateway API·Envoy 연동
 
 ### 아티팩트 관리
 
-- [ ] [Harbor](artifact/harbor.md) — 이미지·차트·OCI Artifacts
-- [ ] [OCI Artifacts 레지스트리](artifact/oci-artifacts-registry.md) — SBOM·서명 저장 표준
+- [x] [Harbor](artifact/harbor.md) — 이미지·차트·OCI Artifacts
+- [x] [OCI Artifacts 레지스트리](artifact/oci-artifacts-registry.md) — SBOM·서명 저장 표준
 
 ### CI의 DevSecOps
 
-- [ ] [SAST/SCA](devsecops/sast-sca.md) — 코드·의존성 스캔 통합
-- [ ] [이미지 스캔](devsecops/image-scanning-cicd.md) — Trivy, Grype, CVE 정책
-- [ ] [시크릿 스캔](devsecops/secret-scanning.md) — git-secrets, gitleaks, pre-commit
-- [ ] [SLSA](devsecops/slsa-in-ci.md) — Provenance, attestation, Level 상향
+- [x] [SAST/SCA](devsecops/sast-sca.md) — 코드·의존성 스캔 통합
+- [x] [이미지 스캔](devsecops/image-scanning-cicd.md) — Trivy, Grype, CVE 정책
+- [x] [시크릿 스캔](devsecops/secret-scanning.md) — git-secrets, gitleaks, pre-commit
+- [x] [SLSA](devsecops/slsa-in-ci.md) — Provenance, attestation, Level 상향
 
 ### 의존성 관리
 
