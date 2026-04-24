@@ -122,7 +122,7 @@ tags:
 ### 신뢰성
 
 - [x] [PDB](./reliability/pdb.md) — PodDisruptionBudget 설계
-- [ ] Graceful Shutdown — preStop, terminationGracePeriod
+- [x] [Graceful Shutdown](./reliability/graceful-shutdown.md) — preStop, terminationGracePeriod
 - [ ] Eviction — API-initiated, 노드 드레인, DisruptionTarget
 
 ### 클러스터 구축
