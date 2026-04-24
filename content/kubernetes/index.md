@@ -170,7 +170,7 @@ tags:
 
 ### AI/ML 워크로드
 
-- [ ] AI 워크로드 스케줄링 — GPU, topology, 고성능 옵션
+- [x] [AI 워크로드 스케줄링](./ai-ml/ai-workload-scheduling.md) — Volcano·KAI·Koordinator·Kueue, Gang, TAS, InferencePool
 - [ ] DRA — Dynamic Resource Allocation, structured parameters
 - [ ] LWS·JobSet — LeaderWorkerSet, JobSet, 분산 학습
 
