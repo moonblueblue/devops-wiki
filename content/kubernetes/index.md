@@ -161,7 +161,7 @@ tags:
 
 - [x] [kubectl 팁](./tools/kubectl-tips.md) — context, jsonpath, debug, krew
 - [x] [Helm](./tools/helm.md) — 차트 구조, values, subchart, OCI
-- [ ] Kustomize — base/overlay, patch, generator
+- [x] [Kustomize](./tools/kustomize.md) — base/overlay, patch, generator
 
 ### 특수 워크로드
 
