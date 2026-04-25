@@ -48,7 +48,7 @@ tags:
 - [x] [PromQL 고급](prometheus/promql-advanced.md) — rate vs increase, subquery, 함정
 - [x] [Recording Rules](prometheus/recording-rules.md) — 집계 사전 계산, 쿼리 성능
 - [x] [Remote Write](prometheus/remote-write.md) — Receiver, Agent 모드, 중복 제거
-- [ ] [Alertmanager](prometheus/alertmanager.md) — routing, silencing, grouping
+- [x] [Alertmanager](prometheus/alertmanager.md) — routing, silencing, grouping
 
 ### 메트릭 장기 저장
 
