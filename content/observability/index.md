@@ -83,7 +83,7 @@ tags:
 ### Grafana 에코시스템
 
 - [x] [Grafana Dashboards](grafana/grafana-dashboards.md) — 패널 표준, 변수, 룩앤필
-- [ ] [Grafana Alloy](grafana/grafana-alloy.md) — Agent 후속, 구성 패턴
+- [x] [Grafana Alloy](grafana/grafana-alloy.md) — Agent 후속, 구성 패턴
 
 ### eBPF 관측
 
