@@ -35,7 +35,7 @@ tags:
 
 ### 원칙·개념
 
-- [ ] [Zero Trust](principles/zero-trust.md) — 원칙, BeyondCorp, 다층 방어를 포함한 실무 적용
+- [x] [Zero Trust](principles/zero-trust.md) — 원칙, BeyondCorp, 다층 방어를 포함한 실무 적용
 
 ### 인증·인가 (AuthN/AuthZ)
 
