@@ -55,7 +55,7 @@ tags:
 
 ### K8s 네이티브 IaC
 
-- [ ] [Crossplane](k8s-native/crossplane.md) — Composition v2, Provider, Claim (kro 비교 포함)
+- [x] [Crossplane](k8s-native/crossplane.md) — Composition v2, Provider, Claim (kro 비교 포함)
 
 ### 운영
 
