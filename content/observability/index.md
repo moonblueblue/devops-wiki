@@ -60,7 +60,7 @@ tags:
 
 - [x] [Loki](logging/loki.md) — 인덱싱 철학, 비용, chunk·label 전략
 - [x] [Elastic Stack](logging/elastic-stack.md) — Elasticsearch·Kibana·Logstash 현실적 운영
-- [ ] [로그 파이프라인](logging/log-pipeline.md) — Vector·Fluent Bit·OTel Collector 비교
+- [x] [로그 파이프라인](logging/log-pipeline.md) — Vector·Fluent Bit·OTel Collector 비교
 - [ ] [로그 운영 정책](logging/log-operations.md) — JSON 구조화·필드 표준·우선순위 샘플링·Rate Limiting
 
 ### 트레이싱
