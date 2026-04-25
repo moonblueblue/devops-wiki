@@ -59,7 +59,7 @@ tags:
 ### 포스트모템·RCA
 
 - [x] [포스트모템](postmortem/postmortem.md) — Blameless 원칙, Google 템플릿, 실무 포맷 통합
-- [ ] [RCA 방법론](postmortem/rca-methods.md) — 5 Whys, Fishbone, Causal Graph
+- [x] [RCA 방법론](postmortem/rca-methods.md) — 5 Whys, Fishbone, Causal Graph
 
 ### Runbook·Playbook
 
