@@ -87,7 +87,7 @@ tags:
 
 ### eBPF 관측
 
-- [ ] [eBPF 관측 (Hubble 중심)](ebpf/ebpf-observability.md) — Cilium Hubble, Pixie·Retina 비교
+- [x] [eBPF 관측 (Hubble 중심)](ebpf/ebpf-observability.md) — Cilium Hubble, Pixie·Retina 비교
 
 ### SLO as Code (도구)
 
