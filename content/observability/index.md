@@ -72,7 +72,7 @@ tags:
 
 ### 프로파일링
 
-- [ ] [연속 프로파일링](profiling/continuous-profiling.md) — Pyroscope·Parca 현재 구현 + OTel Profiles(Public Alpha 2026) 통합
+- [x] [연속 프로파일링](profiling/continuous-profiling.md) — Pyroscope·Parca 현재 구현 + OTel Profiles(Public Alpha 2026) 통합
 
 ### 클라우드 네이티브 스택
 
