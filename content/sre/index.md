@@ -67,7 +67,7 @@ tags:
 
 ### 점진적 배포 (SRE 관점)
 
-- [ ] [SLO 기반 롤백](progressive-delivery/slo-based-rollback.md) — 에러 버짓 기반 자동 롤백 정책
+- [x] [SLO 기반 롤백](progressive-delivery/slo-based-rollback.md) — 에러 버짓 기반 자동 롤백 정책
 
 ### 카오스 엔지니어링
 
