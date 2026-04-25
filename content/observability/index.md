@@ -78,7 +78,7 @@ tags:
 
 - [x] [OpenTelemetry 개요](cloud-native/opentelemetry-overview.md) — SDK·Collector·Spec
 - [x] [Prometheus·OpenTelemetry](cloud-native/prometheus-opentelemetry.md) — 상호 운용, OTLP push
-- [ ] [OTel Operator](cloud-native/otel-operator.md) — K8s 자동 계측, instrumentation CR
+- [x] [OTel Operator](cloud-native/otel-operator.md) — K8s 자동 계측, instrumentation CR
 
 ### Grafana 에코시스템
 
