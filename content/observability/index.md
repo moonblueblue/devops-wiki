@@ -99,7 +99,7 @@ tags:
 - [x] [알림 설계·피로 감축](alerting/alerting-design.md) — Symptom vs Cause 설계 + 피로 감축 전략 통합
 - [x] [Multi-window 알림](alerting/multi-window-alerting.md) — 빠른 감지 + 긴 창 조합
 - [x] [SLO 알림](alerting/slo-alerting.md) — Burn Rate 기반, 에러 버짓 소진률
-- [ ] [Grafana OnCall](alerting/grafana-oncall.md) — 알림 라우팅, 온콜 스케줄링
+- [x] [Grafana OnCall](alerting/grafana-oncall.md) — 알림 라우팅, 온콜 스케줄링
 
 ### Synthetic 모니터링
 
