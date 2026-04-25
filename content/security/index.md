@@ -44,7 +44,7 @@ tags:
 
 ### 시크릿 관리 (주인공 통합)
 
-- [ ] [Vault 기본](secrets/vault-basics.md) — Vault 아키텍처, Dynamic Secrets, Transit
+- [x] [Vault 기본](secrets/vault-basics.md) — Vault 아키텍처, Dynamic Secrets, Transit
 - [ ] [External Secrets Operator](secrets/external-secrets-operator.md) — ESO, SecretStore, 주요 provider
 - [ ] [경량 시크릿 도구](secrets/lightweight-secrets.md) — Sealed Secrets·SOPS, 키 관리, Helm 통합
 
