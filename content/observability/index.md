@@ -111,7 +111,7 @@ tags:
 
 ### AIOps
 
-- [ ] [AIOps 개요](aiops/aiops-overview.md) — LLM 기반 RCA, 이상 탐지, 주의할 함정
+- [x] [AIOps 개요](aiops/aiops-overview.md) — LLM 기반 RCA, 이상 탐지, 주의할 함정
 
 ---
 
