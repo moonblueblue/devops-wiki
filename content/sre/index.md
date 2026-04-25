@@ -63,7 +63,7 @@ tags:
 
 ### Runbook·Playbook
 
-- [ ] [Runbook 템플릿](runbook/runbook-template.md) — 호출·진단·복구 구조, 자동화 연계
+- [x] [Runbook 템플릿](runbook/runbook-template.md) — 호출·진단·복구 구조, 자동화 연계
 
 ### 점진적 배포 (SRE 관점)
 
