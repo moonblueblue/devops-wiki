@@ -51,7 +51,7 @@ tags:
 ### Ansible (구성 관리)
 
 - [x] [Ansible 기본](ansible/ansible-basics.md) — inventory, playbook, role, idempotency, handler, tag
-- [ ] [Ansible 운영](ansible/ansible-operations.md) — AAP(Tower), scale, secret 관리
+- [x] [Ansible 운영](ansible/ansible-operations.md) — AAP(Tower), scale, secret 관리
 
 ### K8s 네이티브 IaC
 
