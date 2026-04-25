@@ -79,7 +79,7 @@ tags:
 
 ### Toil
 
-- [ ] [Toil 감축](toil/toil-reduction.md) — 측정·제거 전략, 자동화 우선순위
+- [x] [Toil 감축](toil/toil-reduction.md) — 측정·제거 전략, 자동화 우선순위
 
 ### Capacity Planning
 
