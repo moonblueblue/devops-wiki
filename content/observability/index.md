@@ -54,7 +54,7 @@ tags:
 
 - [x] [Mimir·Thanos·Cortex·VictoriaMetrics](metric-storage/mimir-thanos-cortex.md) — 비교, 아키텍처, 운영 특성
 - [x] [히스토그램 (Exponential·Native)](metric-storage/exponential-histograms.md) — Prometheus Native Histograms, OTel Exponential
-- [ ] [카디널리티 관리](metric-storage/cardinality-management.md) — 원인·탐지·제어
+- [x] [카디널리티 관리](metric-storage/cardinality-management.md) — 원인·탐지·제어
 
 ### 로깅
 
