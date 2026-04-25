@@ -75,7 +75,7 @@ tags:
 
 ### 신뢰성 설계
 
-- [ ] [Failure Modes](reliability-design/failure-modes.md) — 단일 장애점, Blast Radius, Cell-based, 의존성 영향 분석
+- [x] [Failure Modes](reliability-design/failure-modes.md) — 단일 장애점, Blast Radius, Cell-based, 의존성 영향 분석
 
 ### Toil
 
