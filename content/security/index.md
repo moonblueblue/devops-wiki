@@ -66,7 +66,7 @@ tags:
 
 ### Policy as Code
 
-- [ ] [OPA·Gatekeeper](policy/opa-gatekeeper.md) — ConstraintTemplate, Rego, 실무 정책
+- [x] [OPA·Gatekeeper](policy/opa-gatekeeper.md) — ConstraintTemplate, Rego, 실무 정책
 - [ ] [Kyverno](policy/kyverno.md) — Kubernetes 네이티브 정책 엔진, YAML 기반 정책
 
 ---
