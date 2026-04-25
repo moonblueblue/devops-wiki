@@ -76,7 +76,7 @@ tags:
 
 ### 클라우드 네이티브 스택
 
-- [ ] [OpenTelemetry 개요](cloud-native/opentelemetry-overview.md) — SDK·Collector·Spec
+- [x] [OpenTelemetry 개요](cloud-native/opentelemetry-overview.md) — SDK·Collector·Spec
 - [ ] [Prometheus·OpenTelemetry](cloud-native/prometheus-opentelemetry.md) — 상호 운용, OTLP push
 - [ ] [OTel Operator](cloud-native/otel-operator.md) — K8s 자동 계측, instrumentation CR
 
