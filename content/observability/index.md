@@ -92,7 +92,7 @@ tags:
 ### SLO as Code (도구)
 
 - [x] [Sloth·Pyrra](slo-as-code/slo-rule-generators.md) — PromQL 기반 SLO 룰 생성 비교
-- [ ] [OpenSLO](slo-as-code/openslo.md) — SLO 명세 표준
+- [x] [OpenSLO](slo-as-code/openslo.md) — SLO 명세 표준
 
 ### 알림
 
