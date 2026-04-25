@@ -68,7 +68,7 @@ tags:
 - [x] [Jaeger·Tempo](tracing/jaeger-tempo.md) — 비교, 스토리지, 조회 패턴
 - [x] [샘플링 전략](tracing/sampling-strategies.md) — Head vs Tail, probabilistic, adaptive
 - [x] [OTel Collector](tracing/otel-collector.md) — pipeline, processor, batch/memory
-- [ ] [Trace Context](tracing/trace-context.md) — W3C Trace Context, 전파 규격
+- [x] [Trace Context](tracing/trace-context.md) — W3C Trace Context, 전파 규격
 
 ### 프로파일링
 
