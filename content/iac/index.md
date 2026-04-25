@@ -59,7 +59,7 @@ tags:
 
 ### 운영
 
-- [ ] [IaC 테스트](operations/testing-iac.md) — Terratest, Kitchen-Terraform, OPA conftest
+- [x] [IaC 테스트](operations/testing-iac.md) — Terratest, Kitchen-Terraform, OPA conftest
 
 ---
 
