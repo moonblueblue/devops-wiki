@@ -40,7 +40,7 @@ tags:
 ### 인증·인가 (AuthN/AuthZ)
 
 - [x] [OIDC·SAML](authn-authz/oidc-saml.md) — SSO 프로토콜 비교, 실무 구현
-- [ ] [Workload Identity](authn-authz/workload-identity.md) — IRSA, GKE WI, Azure AD WI, SPIFFE/SPIRE
+- [x] [Workload Identity](authn-authz/workload-identity.md) — IRSA, GKE WI, Azure AD WI, SPIFFE/SPIRE
 
 ### 시크릿 관리 (주인공 통합)
 
