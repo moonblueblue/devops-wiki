@@ -54,7 +54,7 @@ tags:
 ### 장애 대응
 
 - [x] [Incident Response](incident/incident-response.md) — IRT, Commander, War Room 운영, 커뮤니케이션
-- [ ] [On-call 로테이션](incident/on-call-rotation.md) — 로테이션, 휴식, 핸드오프
+- [x] [On-call 로테이션](incident/on-call-rotation.md) — 로테이션, 휴식, 핸드오프
 
 ### 포스트모템·RCA
 
