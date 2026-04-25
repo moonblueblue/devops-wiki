@@ -48,7 +48,7 @@ tags:
 ### SLI·SLO·에러 버짓
 
 - [x] [SLI 선정](slo/sli-selection.md) — CUJ (Critical User Journey), 4 Golden Signals
-- [ ] [SLO Burn Rate](slo/slo-burn-rate.md) — Burn Rate 수학, 다중 창 판단
+- [x] [SLO Burn Rate](slo/slo-burn-rate.md) — Burn Rate 수학, 다중 창 판단
 - [ ] [Error Budget 정책](slo/error-budget-policy.md) — 소진 시 조치 (배포 동결, 롤백 강제)
 
 ### 장애 대응
