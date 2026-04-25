@@ -107,7 +107,7 @@ tags:
 
 ### 비용 운영
 
-- [ ] [관측 비용](cost/observability-cost.md) — 카디널리티·샘플링·예산 알림 통합
+- [x] [관측 비용](cost/observability-cost.md) — 카디널리티·샘플링·예산 알림 통합
 
 ### AIOps
 
