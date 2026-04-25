@@ -83,7 +83,7 @@ tags:
 
 ### Capacity Planning
 
-- [ ] [Capacity Planning](capacity/capacity-planning.md) — 수요 예측, 헤드룸, 리소스 계획
+- [x] [Capacity Planning](capacity/capacity-planning.md) — 수요 예측, 헤드룸, 리소스 계획
 
 ### Change Management
 
