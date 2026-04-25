@@ -304,6 +304,12 @@ mutate:
 
 > `synchronize: true`: 원본 데이터 변경 시 generated 리소스도 자동 갱신.
 
+> **함정**: `synchronize: true`인 generated 리소스를 사용자가 *직접 수정*하면
+> Kyverno가 *즉시 원복*. namespace 운영자가 default NetworkPolicy를 손으로
+> 고치면 사라지는 것처럼 보임. 변경이 필요하면 (1) ClusterPolicy의 `data`를
+> 고치거나, (2) `synchronize: false`로 발행 후 사용자에게 owner 이전, 또는
+> (3) PolicyException으로 그 namespace를 generate 대상에서 제외.
+
 ---
 
 ## 8. verifyImages — 이미지 서명 검증
@@ -327,6 +333,10 @@ mutate:
       mutateDigest: true        # tag → digest 자동 치환
       verifyDigest: true        # digest 자체 검증
       required: true            # 서명 의무
+      imageRegistryCredentials: # private registry 자격
+        allowInsecureRegistry: false
+        secrets:
+          - regcred              # Pod의 imagePullSecrets와 동일 형식
 ```
 
 ### 8.2 Notation (Notary Project)
@@ -366,6 +376,15 @@ verifyImages:
 | SBOM attestation | CycloneDX·SPDX |
 | SLSA provenance | Build L3 검증 |
 | VEX | 영향 없음 분류 |
+
+| `verifyImages` 필드 | 의미 |
+|---|---|
+| `required: true` | 서명 없으면 거부 (false면 *서명 있을 때만 검증*) |
+| `mutateDigest: true` | manifest의 tag를 검증된 digest로 immutable 치환 — race 방지 |
+| `verifyDigest: true` | digest 자체도 검증 |
+| `imageRegistryCredentials.secrets` | private registry 인증서 — Pod의 imagePullSecrets 같은 형식 |
+| `imageRegistryCredentials.allowInsecureRegistry` | self-signed cert registry 허용 (가급적 false) |
+| `useCache` | 검증 결과 TTL 캐시 — 성능, 그러나 침해 후 회수 지연 |
 
 ---
 
@@ -609,6 +628,10 @@ K8s 1.30 GA. *kube-apiserver 자체* 정책 (CEL 기반).
 | mutate가 Pod 외 리소스를 수정 | drift, GitOps 충돌 | mutate 범위 명확 |
 | ImageValidatingPolicy + ClusterPolicy verifyImages 중복 | 평가 중복·충돌 | 새 CRD로 마이그 |
 | CEL·Rego·YAML pattern 혼용 | 코드 일관성 X | 룰 종류별 일관 |
+| `synchronize: true` generated 리소스를 사용자가 수정 | Kyverno가 즉시 원복 — "왜 변경이 사라지나" 사고 | 원본 정책 수정 또는 `synchronize: false`, PolicyException으로 제외 |
+| private registry 이미지를 `verifyImages`로 검증하면서 credential 누락 | 검증 실패로 admission 차단 | `imageRegistryCredentials.secrets` 명시 |
+| `verifyImages.useCache` 무한 신뢰 | 침해 후에도 캐시된 결과로 통과 | TTL 짧게 + 회수 절차 |
+| `required: false`로 운영 | 서명 누락 이미지가 통과 | prod는 `required: true` 의무 |
 
 ---
 
