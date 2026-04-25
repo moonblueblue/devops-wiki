@@ -61,7 +61,7 @@ tags:
 
 ### 공급망 보안
 
-- [ ] [SLSA](supply-chain/slsa.md) — Level 1~4, provenance, builder trust
+- [x] [SLSA](supply-chain/slsa.md) — Level 1~4, provenance, builder trust
 - [ ] [Sigstore](supply-chain/sigstore.md) — Rekor, Fulcio, Cosign keyless
 
 ### Policy as Code
