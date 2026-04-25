@@ -51,7 +51,7 @@ tags:
 ### 네트워크 보안 (전략)
 
 - [x] [mTLS 전략](network-security/mtls-strategy.md) — Service Mesh·직접 구현 트레이드오프
-- [ ] [Network Policy 전략](network-security/network-policy-strategy.md) — Default Deny, 계층별 정책
+- [x] [Network Policy 전략](network-security/network-policy-strategy.md) — Default Deny, 계층별 정책
 
 ### 컨테이너 보안
 
