@@ -91,7 +91,7 @@ tags:
 
 ### 조직·문화
 
-- [ ] [DevEx 메트릭](culture/devex-metrics.md) — DORA + SPACE + DevEx (Core 4)
+- [x] [DevEx 메트릭](culture/devex-metrics.md) — DORA + SPACE + DevEx (Core 4)
 
 ---
 
