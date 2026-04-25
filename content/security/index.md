@@ -55,7 +55,7 @@ tags:
 
 ### 컨테이너 보안
 
-- [ ] [이미지 서명](container-security/image-signing.md) — Cosign, Notary v2, sigstore
+- [x] [이미지 서명](container-security/image-signing.md) — Cosign, Notary v2, sigstore
 - [ ] [SBOM](container-security/sbom.md) — CycloneDX, SPDX, 생성·저장, VEX 통합
 - [ ] [런타임 보안](container-security/runtime-security.md) — Falco, Tracee, Tetragon 비교
 
