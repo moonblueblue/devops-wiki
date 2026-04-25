@@ -43,7 +43,7 @@ tags:
 ### 원칙·개념
 
 - [x] [SRE 원칙](principles/sre-principles.md) — Google SRE 원칙, Dickerson Pyramid
-- [ ] [SLI·SLO·SLA](principles/sli-slo-sla.md) — 정의와 관계, 현실 함정
+- [x] [SLI·SLO·SLA](principles/sli-slo-sla.md) — 정의와 관계, 현실 함정
 
 ### SLI·SLO·에러 버짓
 
