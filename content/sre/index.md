@@ -3,7 +3,7 @@ title: "SRE"
 sidebar_label: "SRE"
 sidebar_position: 9
 date: 2026-04-18
-last_verified: 2026-04-24
+last_verified: 2026-04-26
 tags:
   - sre
   - index
@@ -87,7 +87,7 @@ tags:
 
 ### Change Management
 
-- [ ] [Change Management (SRE 관점)](change-management/change-management.md) — 변경 위험 분류, 승인·검토, 변경 동결
+- [x] [Change Management (SRE 관점)](change-management/change-management.md) — 변경 위험 분류, 승인·검토, 변경 동결
 
 ### 조직·문화
 
