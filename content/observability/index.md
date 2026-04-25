@@ -103,7 +103,7 @@ tags:
 
 ### Synthetic 모니터링
 
-- [ ] [Synthetic 모니터링](rum-synthetic/synthetic-monitoring.md) — 경로·지역·주기, 예산
+- [x] [Synthetic 모니터링](rum-synthetic/synthetic-monitoring.md) — 경로·지역·주기, 예산
 
 ### 비용 운영
 
