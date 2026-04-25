@@ -71,7 +71,7 @@ tags:
 
 ### 카오스 엔지니어링
 
-- [ ] [카오스 엔지니어링](chaos/chaos-engineering.md) — Netflix 원칙, 가설 기반 실험, Chaos Mesh·LitmusChaos·Gremlin 비교
+- [x] [카오스 엔지니어링](chaos/chaos-engineering.md) — Netflix 원칙, 가설 기반 실험, Chaos Mesh·LitmusChaos·Gremlin 비교
 
 ### 신뢰성 설계
 
