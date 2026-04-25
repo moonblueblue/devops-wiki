@@ -46,7 +46,7 @@ tags:
 
 - [x] [Prometheus 아키텍처](prometheus/prometheus-architecture.md) — scrape, WAL, HA 전략
 - [x] [PromQL 고급](prometheus/promql-advanced.md) — rate vs increase, subquery, 함정
-- [ ] [Recording Rules](prometheus/recording-rules.md) — 집계 사전 계산, 쿼리 성능
+- [x] [Recording Rules](prometheus/recording-rules.md) — 집계 사전 계산, 쿼리 성능
 - [ ] [Remote Write](prometheus/remote-write.md) — Receiver, Agent 모드, 중복 제거
 - [ ] [Alertmanager](prometheus/alertmanager.md) — routing, silencing, grouping
 
