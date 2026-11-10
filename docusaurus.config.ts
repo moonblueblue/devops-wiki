@@ -61,6 +61,21 @@ const config: Config = {
       docsRouteBasePath: '/',
       docsDir: 'content',
       indexBlog: false,
+      // 카테고리별로 인덱스를 나눠 첫 검색 다운로드를 줄인다(7.8MB -> 최대 2.8MB, gzip).
+      // 검색창은 현재 카테고리만 찾는다. 전체 검색은 검색 페이지의 Everywhere.
+      searchContextByPaths: [
+        {label: 'Linux', path: 'linux'},
+        {label: 'Network', path: 'network'},
+        {label: 'Container', path: 'container'},
+        {label: 'Kubernetes', path: 'kubernetes'},
+        {label: 'CI/CD', path: 'cicd'},
+        {label: 'Observability', path: 'observability'},
+        {label: 'IaC', path: 'iac'},
+        {label: 'Security', path: 'security'},
+        {label: 'SRE', path: 'sre'},
+      ],
+      // 홈처럼 카테고리 밖 페이지에서는 전체를 검색한다.
+      useAllContextsWithNoSearchContext: true,
     }],
   ],
 
