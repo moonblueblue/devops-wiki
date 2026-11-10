@@ -252,7 +252,7 @@ processors:
 | `decision_cache` | 결정된 trace_id를 캐시해 **late-arriving span**에 동일 결정 적용. 미설정 시 늦게 도착한 span은 새 trace로 오인되어 메모리 폭주 |
 | `policies` | 순서 무관, 하나라도 keep이면 keep |
 
-세부 정책 종류·트레이드오프는 [샘플링 전략](sampling-strategies.md#5-tail-sampling-collector가-결정) 참조.
+세부 정책 종류·트레이드오프는 [샘플링 전략](sampling-strategies.md#4-tail-sampling--collector가-결정) 참조.
 
 ### 5.4 `transform` / `filter` (OTTL) — 데이터 가공의 메인 도구
 

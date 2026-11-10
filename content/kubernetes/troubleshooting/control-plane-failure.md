@@ -26,7 +26,7 @@ LB·인증서·시간 동기화 문제를 운영 관점으로 정리한다.
 > 연관: [etcd 트러블슈팅](./etcd-troubleshooting.md) ·
 > [K8s 에러 메시지](./k8s-error-messages.md) ·
 > [HA 클러스터 설계](../cluster-setup/ha-cluster-design.md) ·
-> [인증서 관리](../cluster-setup/certificates.md)
+> [인증서 수명](../cluster-setup/cluster-setup-methods.md)
 
 ---
 

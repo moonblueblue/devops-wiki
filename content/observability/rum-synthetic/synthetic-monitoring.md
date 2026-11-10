@@ -98,7 +98,7 @@ flowchart LR
 | **모든 가용 지역 (29~70)** | over-engineering — 비용·노이즈 |
 
 > **사용자 위치 매칭이 답**: 모든 지역에서 검사하지 마라. **실 사용자
-> 분포의 80%를 커버하는 지역만**. CDN·edge POP 검사는 별개 ([CDN](../../network/cdn.md)).
+> 분포의 80%를 커버하는 지역만**. CDN·edge POP 검사는 별개 ([CDN](../../network/lb-proxy/cdn-edge.md)).
 
 ### 3.3 주기 — 얼마나 자주
 

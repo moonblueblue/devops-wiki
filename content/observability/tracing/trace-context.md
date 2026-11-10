@@ -90,7 +90,7 @@ traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
 > **`sampled`는 결정이 아니라 힌트**. ParentBased 샘플러는 이걸 보고
 > 자식 결정을 동기화한다. **OTel Consistent Probability Sampling
 > (2025+)** 에서는 sampled bit이 1이라면 `tracestate.ot=th`도 그
-> 결정과 정합해야 한다 ([샘플링 전략](sampling-strategies.md#3-head-sampling-sdk가-결정)).
+> 결정과 정합해야 한다 ([샘플링 전략](sampling-strategies.md#3-head-sampling--sdk가-결정)).
 
 > **`random` 비트가 켜진 trace-id**는 다운스트림이 **추가 해시 없이**
 > trace_id 자체를 해시 키로 쓸 수 있게 해 준다. OTel SDK는 v1.43+
@@ -154,7 +154,7 @@ tracestate: ot=th:8;rv:1234abcdef0123
 ```
 
 자세한 인코딩 규칙·시나리오·adjusted count 역산은
-[샘플링 전략 8장](sampling-strategies.md#8-consistent-probability-sampling-2026) 참조.
+[샘플링 전략 3.7절](sampling-strategies.md#37-otel-2025-사건--consistent-probability-sampling) 참조.
 
 > **왜 중요한가**: `th`만 보면 다운스트림이 **adjusted count**를 정확히
 > 역산해 spanmetrics·RED 메트릭을 정확히 산출할 수 있다 — head
@@ -317,7 +317,7 @@ uber-trace-id: 4bf92f3577b34da6a3ce929d0e0e4736:00f067aa0ba902b7:0:1
 콜론 구분: trace-id : span-id : parent-span-id : flags.
 
 - Jaeger 자체 SDK는 **deprecated** (v1 last release 2025-12, deprecated 2026-01,
-  자세한 일정은 [Jaeger·Tempo](jaeger-tempo.md#22-v2가-v1과-다른-점) 참조)
+  자세한 일정은 [Jaeger·Tempo](jaeger-tempo.md#21-v2가-v1과-다른-점) 참조)
 - 신규는 OTel SDK + W3C 표준
 - 마이그레이션 기간엔 `OTEL_PROPAGATORS=tracecontext,baggage,jaeger`로 양립
 

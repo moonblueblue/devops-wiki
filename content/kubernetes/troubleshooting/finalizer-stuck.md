@@ -24,7 +24,7 @@ PV 백엔드, DNS 레코드)가 발생한다.
 Node), 안전한 복구 절차, 힘으로 지울 때의 위험과 후속 정리를 운영
 관점으로 정리한다.
 
-> 연관: [Pod 디버깅 §7](./pod-debugging.md#7-terminating-지연) ·
+> 연관: [Pod 디버깅 §8](./pod-debugging.md#8-terminating-지연) ·
 > [K8s 에러 메시지](./k8s-error-messages.md) ·
 > [컨트롤 플레인 장애](./control-plane-failure.md)
 

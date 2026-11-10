@@ -372,7 +372,7 @@ CI 배치:
 
 ### 5.6 Security 게이트 CI 배치
 
-[DevSecOps](../devsecops/) 카테고리가 주인공. CI 파이프라인 배치 관점:
+[CI의 DevSecOps](../devsecops/sast-sca.md) 카테고리가 주인공. CI 파이프라인 배치 관점:
 
 | 스캐너 | 스테이지 | 실패 조건 |
 |---|---|---|

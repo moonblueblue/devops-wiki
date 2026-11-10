@@ -382,7 +382,7 @@ resources:
 - 스케줄러가 `Allocatable[nvidia.com/gpu]` 기반 배치
 - MIG(A100/H100)·time-slicing은 **Device Plugin 설정**으로 세분화
 
-→ 상세는 [GPU 스케줄링](../special-workloads/) 섹션.
+→ 상세는 [GPU 스케줄링](../special-workloads/gpu-scheduling.md) 섹션.
 
 ### hugepages
 

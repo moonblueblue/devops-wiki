@@ -26,7 +26,7 @@ tags:
   AND 조합 메커니즘은 [Multi-window 알림](multi-window-alerting.md), 룰
   자동 생성은 [Sloth·Pyrra](../slo-as-code/slo-rule-generators.md), 명세
   표준은 [OpenSLO](../slo-as-code/openslo.md), SLO 개념·수학은
-  [sre/SLO](../../sre/slo.md). 이 글은 "**SLO 기반 알림의 수식과
+  [sre/SLO](../../sre/principles/sli-slo-sla.md). 이 글은 "**SLO 기반 알림의 수식과
   운영 결정**".
 - **선행**: [Multi-window 알림](multi-window-alerting.md), 기본 SLO 개념.
 
@@ -208,7 +208,7 @@ target이 너무 높으면 **모든 fluctuation이 burn**으로 보인다.
 
 > **현실 권장**: 99.9~99.95가 거의 모든 인터넷 서비스의 sweet spot.
 > 99.99%는 진짜 critical infra (auth·DB·payment), 99.999%는 보통 비현실.
-> [sre/SLO](../../sre/slo.md)의 target 결정 가이드.
+> [sre/SLO](../../sre/principles/sli-slo-sla.md)의 target 결정 가이드.
 
 ---
 

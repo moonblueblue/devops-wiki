@@ -108,7 +108,7 @@ flowchart LR
     SG --> OB
 ```
 
-- **Prometheus는 stateless** ([Agent 모드](../prometheus/remote-write.md#5-agent-모드))로
+- **Prometheus는 stateless** ([Agent 모드](../prometheus/remote-write.md#6-agent-mode--송신-전용-prometheus))로
   scrape만 하고 push.
 - **장점**: Prometheus 무상태 → 재시작·교체 단순. 글로벌 ingest path가
   하나라 멀티테넌시·전역 룰·Alert가 자연스러움.

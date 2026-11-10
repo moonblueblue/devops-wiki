@@ -150,7 +150,7 @@ L3는 **라우팅의 세계**다.
 | IS-IS | CLNS (L2 위) | L2 제어 평면 | 대규모 백본 (통신사) |
 | BGP | TCP/179 | **L7 애플리케이션** | AS 간 (EGP) · DC 패브릭 |
 
-자세한 내용: [BGP 기본](../ip-routing/bgp.md)
+자세한 내용: [BGP 기본](../ip-routing/bgp-basics.md)
 
 ### 3-4. L4 전송 계층
 
@@ -313,7 +313,7 @@ DevOps 엔지니어의 실무 감각이다.
 | 오버헤드 | 낮음 | 상대적으로 높음 |
 | 용도 | DB, gRPC, 고성능 | REST API, 마이크로서비스 |
 
-자세한 비교: [L4·L7 로드밸런서](../lb-proxy/l4-l7.md)
+자세한 비교: [L4·L7 로드밸런서](../lb-proxy/l4-l7-basics.md)
 
 ---
 

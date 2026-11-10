@@ -24,12 +24,12 @@ tags:
 > Collector로 통합하는 패턴이 주류다.
 
 - **주제 경계**: 이 글은 **관측성 응용으로서의 eBPF**를 다룬다. eBPF
-  커널 측면(verifier·맵·프로그램 종류)은 [linux/eBPF](../../linux/ebpf.md),
-  네트워크 데이터 플레인 자체는 [Cilium·Calico](../../network/cni-cilium.md),
-  Service Mesh 비교는 [Service Mesh](../../network/service-mesh.md), eBPF
+  커널 측면(verifier·맵·프로그램 종류)은 [linux/eBPF](../../linux/performance/ebpf-performance.md),
+  네트워크 데이터 플레인 자체는 [Cilium·Calico](../../network/container-k8s-network/cni-comparison.md),
+  Service Mesh 비교는 [Service Mesh](../../network/container-k8s-network/service-mesh.md), eBPF
   기반 프로파일링은 [연속 프로파일링](../profiling/continuous-profiling.md),
   자동 계측은 [OTel Operator](../cloud-native/otel-operator.md), 보안
-  활용은 [security/runtime-security](../../security/runtime-security.md).
+  활용은 [security/runtime-security](../../security/container-security/runtime-security.md).
 - **선행**: [관측성 개념](../concepts/observability-concepts.md), Linux
   network 기본.
 
@@ -47,7 +47,7 @@ tags:
 
 > **eBPF의 본질**: kernel에 **검증된 sandbox 코드**를 삽입해 hook 발생
 > 시 사용자 영역으로 이벤트를 보낸다. verifier가 통과시킨 코드만 실행 →
-> kernel 안전성 보장 (이론상). 자세한 내부는 [linux/eBPF](../../linux/ebpf.md).
+> kernel 안전성 보장 (이론상). 자세한 내부는 [linux/eBPF](../../linux/performance/ebpf-performance.md).
 
 > **언제 안 쓰는가**: 커널 4.18+ 미지원 환경, 멀티테넌트 host에서 권한
 > 분리 어려움, 디버깅 시 기존 도구(`tcpdump`)가 답이 더 빠를 때.
@@ -248,7 +248,7 @@ OTel SIG가 진행 중인 **재컴파일 없이 OTel SDK 효과**를 주는 도�
 | 차이점 (Falco 비교) | Falco는 탐지·알림 중심 (modern_ebpf driver는 커널측 처리). Tetragon은 **탐지 + enforce** (SIGKILL, override return code) 가능, K8s identity-aware |
 | 출력 | flow와 같은 JSON event, OTel·SIEM 연계 |
 
-자세히는 [security/runtime-security](../../security/runtime-security.md).
+자세히는 [security/runtime-security](../../security/container-security/runtime-security.md).
 
 ---
 

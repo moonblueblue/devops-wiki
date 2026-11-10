@@ -213,7 +213,7 @@ v1.33~v1.35 사용 시 `SELinuxMount`·`SELinuxMountReadWriteOncePod`·
 
 > Generic Ephemeral Volume(PVC 기반, `spec.volumes[].ephemeral`)과는 **다른
 > 개념**. Generic Ephemeral은 PVC를 자동 생성하는 편의 기능이고 RBAC가 정상
-> 적용된다. 상세는 [PV·PVC](./pv-pvc.md#pvc-핵심-필드)의 Generic Ephemeral
+> 적용된다. 상세는 [PV·PVC](./pv-pvc.md#4-pvc-핵심-필드)의 Generic Ephemeral
 > Volume 참고.
 
 ---

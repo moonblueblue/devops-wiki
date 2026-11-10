@@ -17,8 +17,8 @@ const config: Config = {
   organizationName: 'moonblueblue',
   projectName: 'devops-wiki',
 
-  onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
 
   i18n: {
     defaultLocale: 'ko',
@@ -45,6 +45,10 @@ const config: Config = {
   markdown: {
     mermaid: true,
     format: 'md',
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+      onBrokenMarkdownImages: 'throw',
+    },
   },
 
   themes: [
@@ -55,6 +59,8 @@ const config: Config = {
       highlightSearchTermsOnTargetPage: true,
       searchBarPosition: 'right',
       docsRouteBasePath: '/',
+      docsDir: 'content',
+      indexBlog: false,
     }],
   ],
 

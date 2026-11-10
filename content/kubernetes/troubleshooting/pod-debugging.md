@@ -29,7 +29,7 @@ CrashLoopBackOff인지, OOMKilled인지, 이미지 풀 실패인지 — 상태 �
 > [K8s 에러 메시지](./k8s-error-messages.md) ·
 > [Finalizer Stuck](./finalizer-stuck.md)
 > 선행 개념: [Pod 라이프사이클](../workloads/pod-lifecycle.md) ·
-> [스케줄러](../scheduling/scheduler.md)
+> [스케줄러](../architecture/scheduler.md)
 
 ---
 

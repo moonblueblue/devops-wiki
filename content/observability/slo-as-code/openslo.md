@@ -21,7 +21,7 @@ tags:
 > SLO를 선언적으로 표현하고, 각 도구는 OpenSLO를 자기 형식으로 변환·
 > 검증한다. 1.0 stable, v2alpha 제안 중.
 
-- **주제 경계**: SLO **수학·개념**은 [sre/SLO](../../sre/slo.md), 룰
+- **주제 경계**: SLO **수학·개념**은 [sre/SLO](../../sre/principles/sli-slo-sla.md), 룰
   생성기 자체 비교는 [Sloth·Pyrra](slo-rule-generators.md), 알림은
   [SLO 알림](../alerting/slo-alerting.md). 이 글은 **표준 명세**만.
 - **선행**: [Sloth·Pyrra](slo-rule-generators.md) — 운영 도구에 익숙해

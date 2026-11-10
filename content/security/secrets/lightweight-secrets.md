@@ -430,7 +430,7 @@ helm secrets upgrade --install app ./chart \
 
 Sealed Secrets·SOPS는 *Git에 안전*하게 둘 뿐, 결국 controller/플러그인이
 *K8s `Secret`*을 만들면 etcd에 base64 평문 저장. **둘 다 etcd encryption-at-rest
-(KMS provider v2)와 짝**. 자세한 패턴은 [Kubernetes — etcd 암호화](../../kubernetes/security/encryption-at-rest.md)
+(KMS provider v2)와 짝**. 자세한 패턴은 [Kubernetes — etcd 암호화](../../kubernetes/security/secret-encryption.md)
 참조.
 
 | 보호 계층 | 도구 | 위협 |

@@ -230,7 +230,7 @@ admission webhook)은 → `security/policy/`.
 ### 4.1 `terraform test` (TF 1.6+ / OpenTofu 1.6+)
 
 GA된 native 테스트 프레임워크. 상세 문법은 [Terraform 모듈 §7.2
-](../terraform/terraform-modules.md#72-terraform-test-tf-16-opentofu-16).
+](../terraform/terraform-modules.md#72-terraform-test-tf-16--opentofu-16).
 
 ```hcl
 # tests/basic.tftest.hcl

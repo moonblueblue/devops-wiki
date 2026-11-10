@@ -22,8 +22,8 @@ tags:
 > 알림과 error budget 메트릭이 자동 생성된다. 두 도구는 같은 문제를 다른
 > 방식으로 푼다.
 
-- **주제 경계**: SLO **수학·개념** 자체는 [sre/SLO](../../sre/slo.md)
-  ·[sre/Error Budget](../../sre/error-budget.md), 알림 룰 자체는
+- **주제 경계**: SLO **수학·개념** 자체는 [sre/SLO](../../sre/principles/sli-slo-sla.md)
+  ·[sre/Error Budget](../../sre/slo/error-budget-policy.md), 알림 룰 자체는
   [SLO 알림](../alerting/slo-alerting.md)·[Multi-window 알림](../alerting/multi-window-alerting.md),
   표준 명세는 [OpenSLO](openslo.md), 알림 라우팅은
   [Alertmanager](../prometheus/alertmanager.md)·[Grafana OnCall](../alerting/grafana-oncall.md).

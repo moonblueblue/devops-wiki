@@ -272,7 +272,7 @@ sequenceDiagram
 - 운영 인력이 부족하거나 HA·백업을 벤더에 맡기고 싶음 → 관리형
 - 엣지·CI·개발환경 → 경량 배포
 
-→ 심화: [클러스터 구축](../cluster-setup/)
+→ 심화: [클러스터 구축](../cluster-setup/cluster-setup-methods.md)
 
 ---
 

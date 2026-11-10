@@ -1,60 +1,50 @@
 # Moon Blue's DevOps - Wiki
 
-> **이 위키는 항상 최신 상태를 유지한다.**
-> 글 작성·업데이트 시 글로벌 리서치를 통해
-> 최신 버전·동향을 확인하고 기존 글과 비교하여 반영한다.
+DevOps 엔지니어를 위한 한국어 기술 위키.
+Obsidian 으로 집필하고 Claude 로 리서치·검수하며, Docusaurus 로 GitHub Pages 에 배포한다.
 
-Obsidian + LLM(Claude)으로 운영하는 DevOps 테크 위키.
-LLM이 웹 리서치로 자료를 수집하고,
-실무 수준의 한국어 위키 글로 정리하여 Quartz로 퍼블리싱한다.
+- 사이트: https://moonblueblue.github.io/devops-wiki/
+- 운영 규칙: [CLAUDE.md](./CLAUDE.md)
+- 레퍼런스 우선순위: [REFERENCES.md](./REFERENCES.md)
 
-## 디렉토리 구조
+## 카테고리 (9개, 3-티어)
 
+| # | 카테고리 | 티어 | 범위 |
+|:-:|---|:-:|---|
+| 01 | `linux/` | 서브 | 커널, systemd, 성능, 보안, 스토리지 |
+| 02 | `network/` | 서브 | TCP/IP, DNS, TLS, 라우팅, LB |
+| 03 | `container/` | 서브 | Docker, OCI, BuildKit, 런타임 |
+| 04 | `kubernetes/` | 메인 | 아키텍처, 리소스, 스케줄링, 운영 |
+| 05 | `cicd/` | 메인 | GitHub Actions, Jenkins, ArgoCD, Flux (GitOps 포함) |
+| 06 | `observability/` | 메인 | 메트릭, 로그, 트레이스, SLO 도구 |
+| 07 | `iac/` | 성장 | Terraform, Ansible, Crossplane |
+| 08 | `security/` | 성장 | DevSecOps, 공급망, Zero Trust |
+| 09 | `sre/` | 성장 | SLO, 포스트모템, 런북, 카오스 |
+
+메인은 "빠짐없이", 서브·성장은 "필수만" 다룬다. 각 카테고리의 `index.md` 가 학습 로드맵이다.
+
+## 디렉터리
+
+| 경로 | 내용 |
+|---|---|
+| `content/` | 위키 글 (Obsidian vault, Docusaurus docs 루트) |
+| `src/css/custom.css` | 사이트 스타일 |
+| `static/img/` | 로고·파비콘 |
+| `docusaurus.config.ts`, `sidebars.ts` | 사이트 설정, 사이드바(디렉터리 자동 생성) |
+| `.github/workflows/deploy.yml` | `main` 푸시 시 GitHub Pages 배포 |
+
+## 로컬 실행
+
+Node 20 이상이 필요하다.
+
+```bash
+npm ci && npm start
 ```
-devops-wiki/
-├── content/                 # 최종 발행 글 (Obsidian vault)
-│   ├── index.md             # 메인 페이지
-│   ├── linux/               # 시스템 관리, 성능분석
-│   ├── network/             # DNS, 로드밸런서, VPC
-│   ├── container/           # Docker, 이미지 빌드, 런타임
-│   ├── kubernetes/          # K8s 운영, 클러스터 관리
-│   ├── iac/                 # Terraform, Ansible, Pulumi
-│   ├── cicd/                # Jenkins, GitHub Actions
-│   ├── gitops/              # ArgoCD, Flux, Helm
-│   ├── observability/       # Prometheus, Grafana, ELK
-│   ├── security/            # DevSecOps, 시크릿, 공급망 보안
-│   └── sre/                 # 장애 대응, SLI/SLO
-├── .github/                 # GitHub Actions, PR 템플릿
-├── CLAUDE.md                # LLM 운영 규칙
-└── package.json             # Quartz 의존성
-```
+
+배포 전 확인은 `npm run build` 로 한다. 깨진 링크가 있으면 빌드가 실패한다.
 
 ## 운영 흐름
 
-1. **리서치 & 작성** — 웹 리서치로 최신 자료를 조사하여 `content/`에 직접 작성 (출처는 글 내 기록)
-2. **발행 (publish)** — feature 브랜치 → PR → 검수 → merge
-
-## 카테고리 (로드맵 순서)
-
-| 순서 | 카테고리 | 범위 |
-|:---:|---------|------|
-| 1 | linux | 시스템 관리, 성능분석, 셸 스크립트, systemd |
-| 2 | network | DNS, HTTP, 로드밸런서, VPC, CNI |
-| 3 | container | Docker, 이미지 빌드/최적화, 런타임, 레지스트리 |
-| 4 | kubernetes | API 리소스, 클러스터 관리, 업그레이드, 트러블슈팅 |
-| 5 | iac | Terraform, Ansible, Pulumi |
-| 6 | cicd | Jenkins, GitHub Actions, 파이프라인, 테스트 자동화 |
-| 7 | gitops | ArgoCD, Flux, Kustomize, Helm |
-| 8 | observability | Prometheus, Grafana, ELK, OpenTelemetry |
-| 9 | security | DevSecOps, IAM, 시크릿, SBOM, 공급망 보안 |
-| 10 | sre | 장애 대응, SLI/SLO, 카오스 엔지니어링 |
-
-## 레퍼런스
-
-- [Kubernetes Docs](https://kubernetes.io/docs/)
-- [Docker Docs](https://docs.docker.com/)
-- [Terraform Docs](https://developer.hashicorp.com/terraform)
-- [Prometheus Docs](https://prometheus.io/docs/)
-- [ArgoCD Docs](https://argo-cd.readthedocs.io/)
-- [CNCF Landscape](https://landscape.cncf.io/)
-- [roadmap.sh/devops](https://roadmap.sh/devops)
+1. 공식 문서·릴리스 노트를 리서치해 `content/` 에 작성한다. 출처는 글 하단 `## 참고 자료` 에 확인 날짜와 함께 적는다.
+2. `.claude/agents/reviewer.md` 기준으로 검수한다.
+3. `main` 에 직접 커밋·푸시하면 GitHub Actions 가 배포한다.
