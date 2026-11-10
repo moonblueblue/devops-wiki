@@ -143,6 +143,14 @@
 }
 
 /* ----- 4. Main Content Typography ----- */
+/* 한국어는 어절(띄어쓰기) 단위로만 줄을 바꾼다. 기본값은 글자 단위라
+   "여부"가 "여 / 부"로 갈린다. 띄어쓰기 없는 긴 토큰(URL·식별자)만
+   넘칠 때 예외로 끊는다. */
+body {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 .markdown {
   line-height: 1.8;
 }
@@ -237,6 +245,17 @@ table tbody tr:hover {
 
 [data-theme='dark'] table tbody tr:hover {
   background: color-mix(in srgb, var(--ifm-color-primary) 6%, transparent);
+}
+
+/* 좁은 화면에서는 넓은 표가 페이지 전체를 밀지 않고 표 안에서만
+   가로 스크롤되게 한다 (Docusaurus 기본 동작으로 되돌림). */
+@media (max-width: 996px) {
+  table {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 /* ----- 6. Code Blocks ----- */
